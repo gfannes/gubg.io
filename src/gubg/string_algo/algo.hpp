@@ -1,14 +1,14 @@
-#ifndef HEADER_gubg_string_hpp_ALREADY_INCLUDED
-#define HEADER_gubg_string_hpp_ALREADY_INCLUDED
+#ifndef HEADER_gubg_string_algo_hpp_ALREADY_INCLUDED
+#define HEADER_gubg_string_algo_hpp_ALREADY_INCLUDED
 
 #include "gubg/OnlyOnce.hpp"
 #include <sstream>
 #include <cctype>
 
-namespace gubg { namespace string {
+namespace gubg { namespace string_algo {
 
 	template <typename String>
-		size_t nrLeading(const char ch, const String &str)
+		size_t nr_leading(const char ch, const String &str)
 		{
 			for (auto it = str.begin(); it != str.end(); ++it)
 				if (ch != *it)
@@ -16,7 +16,7 @@ namespace gubg { namespace string {
 			return str.size();
 		}
 	template <typename String>
-		size_t nrTrailing(const char ch, const String &str)
+		size_t nr_trailing(const char ch, const String &str)
 		{
 			for (auto it = str.rbegin(); it != str.rend(); ++it)
 				if (ch != *it)
@@ -58,7 +58,7 @@ namespace gubg { namespace string {
 			return parts;
 		}
 	template <template <typename T, typename Allocator> class Container, typename Allocator = std::allocator<std::string>>
-		Container<std::string, Allocator> splitLines(const std::string &str)
+		Container<std::string, Allocator> split_lines(const std::string &str)
 		{
 			Container<std::string, Allocator> parts;
 			const auto s = str.size();
