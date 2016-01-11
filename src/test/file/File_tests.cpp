@@ -1,10 +1,8 @@
-#include "catch/catch.hpp"
+#include "catch.hpp"
 #include "gubg/file/File.hpp"
 using namespace gubg::file;
 using namespace std;
 
-#define GUBG_MODULE "test"
-#include "gubg/log/begin.hpp"
 TEST_CASE("Ctor", "[file]")
 {
     SECTION("Default")
@@ -86,4 +84,3 @@ TEST_CASE("setExtension", "[file]")
     f.setExtension("obj2");
     REQUIRE(f.name() == "a/b/c.obj2");
 }
-#include "gubg/log/end.hpp"

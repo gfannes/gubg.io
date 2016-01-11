@@ -17,6 +17,9 @@ namespace gubg { namespace hash { namespace md5 {
 		Hash(): raw{} {}
 
 		Hash &operator^=(const Hash &);
+
+        bool operator==(const Hash &rhs) const {return raw == rhs.raw;}
+        bool operator!=(const Hash &rhs) const {return !operator==(rhs);}
 	};
 
 	class Stream

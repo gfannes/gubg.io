@@ -27,6 +27,10 @@ using namespace gubg::file;
 using namespace std;
 using std::chrono::milliseconds;
 
+namespace  { 
+    const auto logns = "file::Descriptor";
+} 
+
 namespace gubg { namespace file { 
     const char *to_hr(EventType et)
     {
@@ -136,7 +140,7 @@ struct Descriptor::Pimpl: public enable_shared_from_this<Pimpl>
     }
     void clear()
     {
-        S();
+        S(logns);
         if (desc != InvalidDesc)
         {
 #ifdef GUBG_API_LINUX
@@ -169,7 +173,7 @@ struct Descriptor::Pimpl: public enable_shared_from_this<Pimpl>
     }
     ReturnCode selectNonBlock(EventType &et, AccessMode am)
     {
-        MSS_BEGIN(ReturnCode, STREAM(to_hr(role), to_hr(type), desc));
+        MSS_BEGIN(ReturnCode);
         switch (type)
         {
             case Type::File:
@@ -343,7 +347,7 @@ size_t Descriptor::id() const
 }
 Descriptor Descriptor::listen(unsigned short port, const string &ip)
 {
-    S();
+    S(logns);
 
     struct addrinfo hints;
     struct addrinfo *servinfo = 0;
@@ -407,7 +411,7 @@ Descriptor Descriptor::std_in()
 }
 Descriptor Descriptor::connect(const string &ip, unsigned short port)
 {
-    S();
+    S(logns);
 
     struct addrinfo hints;
     struct addrinfo *servinfo = 0;
@@ -611,7 +615,7 @@ namespace
             MSS(gubg::mss::on_fail(maxDesc != Descriptor::InvalidDesc, ReturnCode::InvalidMaxDesc));
 
             {
-                S();L("Waiting for ::select() to return " << STREAM(maxDesc));
+                S(logns);L("Waiting for ::select() to return " << STREAM(maxDesc));
                 const auto ret = ::select(maxDesc+1, &rs, &ws, 0, pto);
                 L("::select() returned " << ret);
                 MSS(gubg::mss::on_fail(ret != -1, ReturnCode::FailedToSelect));
@@ -665,7 +669,7 @@ namespace
     template <typename Set>
         void computeMinMaxDesc_(int &minDesc, int &maxDesc, const Set &r, const Set &w)
         {
-            S();
+            S(logns);
             minDesc = maxDesc = Descriptor::InvalidDesc;
             gubg::OnlyOnce setMinDesc;
             {
@@ -705,14 +709,14 @@ ReturnCode Select::process_(milliseconds *timeout)
 
     if (minDesc != Descriptor::InvalidDesc)
     {
-        S();L("All descriptors are selectable");
+        S(logns);L("All descriptors are selectable");
         //We can use normal ::select()
         if (maxDesc != Descriptor::InvalidDesc)
             MSS(select_(*this, maxDesc, read_set_, write_set_, timeout));
     }
     else
     {
-        S();L("Not all descriptors are selectable");
+        S(logns);L("Not all descriptors are selectable");
         //We have to pauze ::select() from time to time to give non-select()-able non-blocking select-lookalikes a chance
         auto timeStep = milliseconds(500);
         if (timeout and *timeout < timeStep)
@@ -720,7 +724,7 @@ ReturnCode Select::process_(milliseconds *timeout)
         L(STREAM(timeout->count(), timeStep.count()));
         while (!timeout || (*timeout > milliseconds(0) and *timeout >= timeStep))
         {
-            S();L("Processing " << timeStep.count() << " ms");
+            S(logns);L("Processing " << timeStep.count() << " ms");
             //Do non-blocking select on those that cannot be selected
             auto lReadSet = read_set_;
             for (auto p: lReadSet)

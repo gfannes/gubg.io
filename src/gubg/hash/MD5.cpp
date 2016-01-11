@@ -105,6 +105,8 @@ leftrotate (x, c)
 
 namespace 
 {
+    const char * const logns = "hash::MD5";
+
     typedef std::uint32_t Word;
     typedef std::array<Word, 4> HashWords;
     typedef HashWords State;
@@ -189,13 +191,13 @@ namespace
         template <RoundE R>
             void round_()
             {
-                S(); L(STREAM(to_hex(state_)));
+                S(logns); L(STREAM(to_hex(state_)));
                 assert(words_);
                 typedef Traits<R> Round;
                 uint32_t cachedB;
                 for (int oper = 0; oper < 16; ++oper)
                 {
-                    S(); L(STREAM(oper, to_hex(state_)));
+                    S(logns); L(STREAM(oper, to_hex(state_)));
                     Round::nonLinearFunction(state_);
                     state_[A] += words_[Round::g[oper]];
                     state_[A] += Round::k[oper];
@@ -210,7 +212,7 @@ namespace
 
         void process(const Word *words)
         {
-            S(); L(STREAM(to_hex(hash_)));
+            S(logns); L(STREAM(to_hex(hash_)));
 
             assert(words);
             words_ = words;

@@ -39,6 +39,8 @@ namespace :ut do
     end
     task :test => :setup do
         ut.build
-        ut.run('-a -d yes')
+        options = %w[-d yes -a]
+        options << '[ut]'
+        ut.run(options)
     end
 end

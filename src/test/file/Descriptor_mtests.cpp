@@ -1,17 +1,19 @@
+#include "catch.hpp"
 #include "gubg/file/Descriptor.hpp"
-#include "gubg/Testing.hpp"
+#include <thread>
 using namespace gubg::file;
+using namespace gubg::mss;
 
-#define GUBG_MODULE_ "test"
-#include "gubg/log/begin.hpp"
 namespace 
 {
+    auto logns = "test";
+
     class MySelect: public Select
     {
         public:
             virtual void select_ready(Descriptor d, EventType et)
             {
-                S();L(d << " is ready for some action: " << to_hr(et));
+                S(logns);L(d << " is ready for some action: " << to_hr(et));
                 switch (et)
                 {
                     case EventType::Open:
@@ -33,66 +35,55 @@ namespace
         private:
     };
 }
-int main()
+TEST_CASE("file::Descriptor mtests", "[mt]")
 {
-    TEST_TAG(main);
-    if (false)
-    {
-        TEST_TAG(file);
         auto d = Descriptor::listen(File("/dev/ttyACM0"), AccessMode::ReadWrite);
-        TEST_TRUE(d.valid());
+        REQUIRE(d.valid());
         MySelect s;
         s.add(d, AccessMode::Read);
         s.process(std::chrono::seconds(10));
         Descriptor c;
         d.accept(c);
-        TEST_TRUE(c.valid());
+        REQUIRE(c.valid());
         s.process(std::chrono::seconds(10));
-    }
-    if (false)
-    {
-        TEST_TAG(file);
-
-        auto std_in = Descriptor::std_in();
-        TEST_TRUE(std_in.valid());
-
-        MySelect s;
-        s.add(std_in, AccessMode::Read);
-        s.process(std::chrono::seconds(10));
-    }
-    if (false)
-    {
-        TEST_TAG(socket);
-        auto d = Descriptor::listen(1234);
-        TEST_TRUE(d.valid());
-        MySelect s;
-        s.add(d, AccessMode::Read);
-        for (int i = 0; i < 10; ++i)
-        {
-            S();L(i);
-            s.process(std::chrono::seconds(60));
-        }
-    }
-	if (true)
-	{
-		TEST_TAG(connect);
-		for (int i = 0; i < 10; ++i)
-		{
-			auto d = Descriptor::connect("192.168.205.123", 1234);
-			TEST_TRUE(d.valid());
-
-			const std::string msg(1024, '!');
-			size_t s = 0;
-			TEST_OK(d.write(s, msg.substr(s)));
-			while (false and s < msg.size())
-			{
-				size_t tmp;
-				TEST_OK(d.write(tmp, msg.substr(s)));
-				s += tmp;
-			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
-		}
-	}
-    return 0;
 }
-#include "gubg/log/end.hpp"
+TEST_CASE("file::Descriptor file", "[mt]")
+{
+    auto std_in = Descriptor::std_in();
+    REQUIRE(std_in.valid());
+
+    MySelect s;
+    s.add(std_in, AccessMode::Read);
+    s.process(std::chrono::seconds(10));
+}
+TEST_CASE("file::Descriptor socket", "[mt]")
+{
+    auto d = Descriptor::listen(1234);
+    REQUIRE(d.valid());
+    MySelect s;
+    s.add(d, AccessMode::Read);
+    for (int i = 0; i < 10; ++i)
+    {
+        S(logns);L(i);
+        s.process(std::chrono::seconds(60));
+    }
+}
+TEST_CASE("file::Descriptor connect", "[mt]")
+{
+    for (int i = 0; i < 10; ++i)
+    {
+        auto d = Descriptor::connect("192.168.205.123", 1234);
+        REQUIRE(d.valid());
+
+        const std::string msg(1024, '!');
+        size_t s = 0;
+        REQUIRE(is_ok(d.write(s, msg.substr(s))));
+        while (false and s < msg.size())
+        {
+            size_t tmp;
+            REQUIRE(is_ok(d.write(tmp, msg.substr(s))));
+            s += tmp;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }
+}

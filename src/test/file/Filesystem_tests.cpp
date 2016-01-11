@@ -1,15 +1,15 @@
-#include "catch/catch.hpp"
+#include "catch.hpp"
 #include "gubg/file/Filesystem.hpp"
 using namespace gubg::file;
+using namespace gubg::mss;
 using namespace std;
 
-#define GUBG_MODULE "test"
-#include "gubg/log/begin.hpp"
 namespace 
 {
+    auto logns = "test";
     bool countNrFiles(size_t &count, const File &f)
     {
-        MSS_BEGIN(bool, f);
+        MSS_BEGIN(bool);
         //L("(" << f.type() << ") " << f.name());
         ++count;
         vector<File> files;
@@ -23,11 +23,11 @@ namespace
 
 TEST_CASE("FilesystemTests", "[ut]")
 {
-    S();
+    S(logns);
     SECTION("resolve")
     {
         File file(".");
-        REQUIRE(MSS_IS_OK(resolve(file)));
+        REQUIRE(is_ok(resolve(file)));
         L(file);
     }
     SECTION("getcwd")
@@ -40,10 +40,10 @@ TEST_CASE("FilesystemTests", "[ut]")
         {
             const File f(__FILE__);
             size_t s;
-            REQUIRE(MSS_IS_OK(size(s, f)));
+            REQUIRE(is_ok(size(s, f)));
             L("File size for " << f.name() << ": " << s << " bytes");
             string content;
-            REQUIRE(MSS_IS_OK(read(content, f)));
+            REQUIRE(is_ok(read(content, f)));
             L(content);
         }
 #if 0
@@ -53,7 +53,7 @@ TEST_CASE("FilesystemTests", "[ut]")
             const File home("/home/gfannes");
             const File gubg("/home/gfannes/gubg");
             vector<File> files;
-            REQUIRE(MSS_IS_OK(read(files, home)));
+            REQUIRE(is_ok(read(files, home)));
             L("I found " << files.size() << " files in " << home.name());
             for (auto f: files)
                 cout << f.name() << "(" << f.type() << "), ";
@@ -90,30 +90,29 @@ TEST_CASE("FilesystemTests", "[ut]")
     SECTION("remove")
     {
         File file("remove_me.txt");
-        REQUIRE(MSS_IS_OK(write("abc", file)));
-        REQUIRE(MSS_IS_OK(remove(file)));
-        REQUIRE(!MSS_IS_OK(remove(file)));
+        REQUIRE(is_ok(write("abc", file)));
+        REQUIRE(is_ok(remove(file)));
+        REQUIRE(!is_ok(remove(file)));
     }
     SECTION("copy")
     {
         File file("remove_me.txt");
-        REQUIRE(MSS_IS_OK(write("abc", file)));
+        REQUIRE(is_ok(write("abc", file)));
         File file2("remove_me_2.txt");
-        REQUIRE(MSS_IS_OK(copy(file, file2)));
-        REQUIRE(MSS_IS_OK(remove(file)));
-        REQUIRE(MSS_IS_OK(remove(file2)));
+        REQUIRE(is_ok(copy(file, file2)));
+        REQUIRE(is_ok(remove(file)));
+        REQUIRE(is_ok(remove(file2)));
     }
     SECTION("mkdir")
     {
         File dir("test_dir/aaa");
         if (isDirectory(dir))
         {
-            REQUIRE(MSS_IS_OK(remove(dir)));
+            REQUIRE(is_ok(remove(dir)));
         }
         REQUIRE(!isDirectory(dir));
-        REQUIRE(MSS_IS_OK(mkdir(dir)));
+        REQUIRE(is_ok(mkdir(dir)));
         REQUIRE(isDirectory(dir));
         //remove(dir);
     }
 }
-#include "gubg/log/end.hpp"

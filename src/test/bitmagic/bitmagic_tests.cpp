@@ -4,9 +4,6 @@ using namespace gubg::bitmagic;
 
 TEST_CASE("bitmagic tests", "[ut]")
 {
-}
-int main()
-{
     SECTION("rotateLeft")
     {
         REQUIRE(0x12345678 == rotateLeft(0x12345678, 0));

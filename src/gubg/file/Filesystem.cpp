@@ -37,7 +37,7 @@ ReturnCode gubg::file::size(size_t &fileSize, const File &file)
 
 ReturnCode gubg::file::read(string &content, const File &file)
 {
-    MSS_BEGIN(ReturnCode, "filename: [" << file.name() << "]");
+    MSS_BEGIN(ReturnCode);
     MSS(on_fail(File::Unknown == file.type() || File::Regular ==  file.type(), ReturnCode::ExpectedRegular));
     ifstream fi(file.name(), ios_base::in | ios_base::binary | ios_base::ate);
     MSS(on_fail(bool(fi), ReturnCode::CouldNotOpenFile));
@@ -83,7 +83,7 @@ int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
 #endif
 ReturnCode gubg::file::read(std::vector<File> &files, const File &file)
 {
-    MSS_BEGIN(ReturnCode, file.name());
+    MSS_BEGIN(ReturnCode);
     MSS(on_fail(File::Unknown == file.type() || File::Directory ==  file.type(), ReturnCode::ExpectedDirectory));
 #ifdef GUBG_API_POSIX
     //Open the directory in a RAII
@@ -312,7 +312,7 @@ namespace  {
 } 
 ReturnCode gubg::file::mkdir(const File &dir)
 {
-    MSS_BEGIN(ReturnCode, dir);
+    MSS_BEGIN(ReturnCode);
     MSS(mkdir_recursive_(dir));
     MSS_END();
 }

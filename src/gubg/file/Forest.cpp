@@ -10,6 +10,7 @@ using namespace std;
 //Tree
 namespace 
 {
+    const char * const logns = "file::Forest";
     struct FileAdder
     {
         Tree &tree;
@@ -110,10 +111,10 @@ ReturnCode Forest::resolve(File &resolved, File &root, const File &partial, cons
 {
     assert(invariants_());
 
-	S();L(STREAM(partial, overlap));
+	S(logns);L(STREAM(partial, overlap));
     for (auto tree: trees_)
     {
-		S();L(STREAM(tree->root()));
+		S(logns);L(STREAM(tree->root()));
         File wanted = tree->root();
         size_t ol = overlap;
         while (ol > 0)
