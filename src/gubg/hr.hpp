@@ -8,13 +8,18 @@
 #include <tuple>
 #include <set>
 
+#ifdef CHR
+#error CHR already defined
+#endif
+#define CHR(name) "{" #name ":" << gubg::hr(name) << "}"
+
 namespace gubg { 
 
-    std::string hr(const double &d)
+    inline std::string hr(const double &d)
     {
         return std::to_string(d);
     }
-    std::string hr(const std::string &str)
+    inline std::string hr(const std::string &str)
     {
         std::ostringstream oss;
         oss << "\"" << str << "\"";
