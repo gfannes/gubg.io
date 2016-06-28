@@ -24,13 +24,13 @@ namespace gubg { namespace xml {
 
                     MSS(mss::on_fail(!str.empty(), ReturnCode::XMLEmpty));
                     str_ = str;
-                    while (str_.popCharIf('\n') || str_.popCharBackIf('\n') || str_.popCharIf('\r') || str_.popCharBackIf('\r')){}
+                    while (str_.pop_if('\n') || str_.pop_back_if('\n') || str_.pop_if('\r') || str_.pop_back_if('\r')){}
                     path_.clear();
 
                     switch (const auto rc = readVersion_())
                     {
                         case ReturnCode::OK:
-                            while (str_.popCharIf('\n') || str_.popCharBackIf('\n') || str_.popCharIf('\r') || str_.popCharBackIf('\r')){}
+                            while (str_.pop_if('\n') || str_.pop_back_if('\n') || str_.pop_if('\r') || str_.pop_back_if('\r')){}
                             break;
                         case ReturnCode::NoVersionFound:
                             break;
@@ -42,7 +42,7 @@ namespace gubg { namespace xml {
                     while (!str_.empty())
                     {
                         Strange text;
-                        MSS(str_.popTo(text, '<'));
+                        MSS(str_.pop_to(text, '<'));
                         if (!text.empty())
                         {
                             L(STREAM(text));
@@ -118,54 +118,54 @@ namespace gubg { namespace xml {
                 ReturnCode readVersion_()
                 {
                     MSS_BEGIN(ReturnCode);
-                    MSS_Q(mss::on_fail(str_.popStringIf("<?xml"), ReturnCode::NoVersionFound));
-                    while (str_.popCharIf(' ')){}
-                    MSS(str_.popUntil(version_, "?>"));
+                    MSS_Q(mss::on_fail(str_.pop_if("<?xml"), ReturnCode::NoVersionFound));
+                    while (str_.pop_if(' ')){}
+                    MSS(str_.pop_until(version_, "?>"));
                     while (!version_.empty() and version_[version_.size()-1] == ' '){version_.resize(version_.size()-1);}
                     MSS_END();
                 }
                 ReturnCode readComment_(Strange &comment)
                 {
                     MSS_BEGIN(ReturnCode);
-                    MSS_Q(str_.popStringIf("<!--"));
-                    MSS(str_.popUntil(comment, "-->"));
+                    MSS_Q(str_.pop_if("<!--"));
+                    MSS(str_.pop_until(comment, "-->"));
                     MSS_END();
                 }
                 ReturnCode readCDATA_(Strange &cdata)
                 {
                     MSS_BEGIN(ReturnCode);
-                    MSS_Q(str_.popStringIf("<![CDATA["));
-                    MSS(str_.popUntil(cdata, "]]>"));
+                    MSS_Q(str_.pop_if("<![CDATA["));
+                    MSS(str_.pop_until(cdata, "]]>"));
                     MSS_END();
                 }
                 ReturnCode readTag_(Strange &tag, Strange &attr, Flags &flags)
                 {
                     MSS_BEGIN(ReturnCode);
-                    MSS(str_.popCharIf('<'));
+                    MSS(str_.pop_if('<'));
                     Strange all;
-                    MSS(str_.popUntil(all, '>'));
+                    MSS(str_.pop_until(all, '>'));
 
                     attr.clear();
-                    if (all.popCharIf('/'))
+                    if (all.pop_if('/'))
                     {
                         flags = Close;
-                        all.popAll(tag);
+                        all.pop_all(tag);
                     }
                     else
                     {
                         flags = Open;
-                        if (!all.popUntil(tag, ' '))
+                        if (!all.pop_until(tag, ' '))
                         {
                             //no attributes
-                            all.popAll(tag);
-                            if (tag.popCharBackIf('/'))
+                            all.pop_all(tag);
+                            if (tag.pop_back_if('/'))
                                 flags |= Close;
                         }
                         else
                         {
                             //attributes
-                            all.popAll(attr);
-                            if (attr.popCharBackIf('/'))
+                            all.pop_all(attr);
+                            if (attr.pop_back_if('/'))
                                 flags |= Close;
                         }
                     }
@@ -175,14 +175,14 @@ namespace gubg { namespace xml {
                 {
                     MSS_BEGIN(ReturnCode);
                     attributes.clear();
-                    while (attr.popCharIf(' ')){}
+                    while (attr.pop_if(' ')){}
                     while (!attr.empty())
                     {
                         Strange k, v;
-                        MSS(attr.popUntil(k, '='));
-                        while (attr.popCharIf(' ')){}
-                        MSS(attr.popCharIf('"'));
-                        MSS(attr.popUntil(v, '"'));
+                        MSS(attr.pop_until(k, '='));
+                        while (attr.pop_if(' ')){}
+                        MSS(attr.pop_if('"'));
+                        MSS(attr.pop_until(v, '"'));
                         std::string kk, vv;
                         L(STREAM(k.str(), v.str()));
                         MSS(decode(kk, k.str()));
@@ -190,7 +190,7 @@ namespace gubg { namespace xml {
                         //insert().second returns false if insertion failed (i.e., the attribute was already present)
                         //XML does not allow duplicate attribute names
                         MSS(mss::on_fail(attributes.insert(std::make_pair(kk, vv)).second, ReturnCode::DuplicateAttributeName));
-                        while (attr.popCharIf(' ')){}
+                        while (attr.pop_if(' ')){}
                     }
                     MSS_END();
                 }

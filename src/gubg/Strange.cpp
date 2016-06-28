@@ -48,29 +48,29 @@ namespace gubg {
 
     bool Strange::strip(char ch)
     {
-        if (!popCharIf(ch))
+        if (!pop_if(ch))
             return false;
-        while (popCharIf(ch)){}
+        while (pop_if(ch)){}
         return true;
     }
 
-	bool Strange::popAll(Strange &res)
+	bool Strange::pop_all(Strange &res)
 	{
 		assert(invariants_());
 		res = *this;
 		clear();
         return !res.empty();
 	}
-	bool Strange::popAll(std::string &res)
+	bool Strange::pop_all(std::string &res)
 	{
 		assert(invariants_());
 		Strange s;
-		popAll(s);
+		pop_all(s);
 		res = s.str();
         return !res.empty();
 	}
 	//Does not pop ch
-	bool Strange::popTo(Strange &res, const char ch)
+	bool Strange::pop_to(Strange &res, const char ch)
 	{
 		assert(invariants_());
 		if (empty())
@@ -84,7 +84,7 @@ namespace gubg {
 		return true;
 	}
 	//Does not pop str
-	bool Strange::popTo(Strange &res, const std::string &str)
+	bool Strange::pop_to(Strange &res, const std::string &str)
 	{
 		assert(invariants_());
 		if (str.empty())
@@ -109,7 +109,7 @@ namespace gubg {
 		*this = sp;
 		return false;
 	}
-	bool Strange::diffTo(const Strange &strange)
+	bool Strange::diff_to(const Strange &strange)
 	{
         if (empty())
             //Already at the end
@@ -124,7 +124,7 @@ namespace gubg {
         return true;
 	}
 	//Pops ch too, set inclusive to true if you want ch to be included in res
-	bool Strange::popUntil(Strange &res, const char ch, bool inclusive)
+	bool Strange::pop_until(Strange &res, const char ch, bool inclusive)
 	{
 		assert(invariants_());
 		if (empty())
@@ -140,15 +140,15 @@ namespace gubg {
 
 		return false;
 	}
-	bool Strange::popUntil(std::string &res, const char ch, bool inclusive)
+	bool Strange::pop_until(std::string &res, const char ch, bool inclusive)
 	{
 		Strange s;
-		if (!popUntil(s, ch, inclusive))
+		if (!pop_until(s, ch, inclusive))
 			return false;
 		res = s.str();
 		return true;
 	}
-	bool Strange::popUntil(Strange &res, const std::string &str, bool inclusive)
+	bool Strange::pop_until(Strange &res, const std::string &str, bool inclusive)
 	{
 		assert(invariants_());
 		if (str.empty())
@@ -173,10 +173,10 @@ namespace gubg {
 			}
 		return false;
 	}
-	bool Strange::popUntil(std::string &res, const std::string &str, bool inclusive)
+	bool Strange::pop_until(std::string &res, const std::string &str, bool inclusive)
 	{
 		Strange s;
-		if (!popUntil(s, str, inclusive))
+		if (!pop_until(s, str, inclusive))
 			return false;
 		res = s.str();
 		return true;
@@ -206,7 +206,7 @@ namespace gubg {
 		return true;
 	}
 
-	bool Strange::popCharIf(const char ch)
+	bool Strange::pop_if(const char ch)
 	{
 		assert(invariants_());
 		if (empty())
@@ -216,7 +216,7 @@ namespace gubg {
 		forward_(1);
 		return true;
 	}
-	bool Strange::popCharBackIf(const char ch)
+	bool Strange::pop_back_if(const char ch)
 	{
 		assert(invariants_());
 		if (empty())
@@ -226,7 +226,7 @@ namespace gubg {
 		shrink_(1);
 		return true;
 	}
-	bool Strange::popFront()
+	bool Strange::pop_front()
 	{
 		assert(invariants_());
 		if (empty())
@@ -234,7 +234,7 @@ namespace gubg {
 		forward_(1);
 		return true;
 	}
-	bool Strange::popBack()
+	bool Strange::pop_back()
 	{
 		assert(invariants_());
 		if (empty())
@@ -242,7 +242,7 @@ namespace gubg {
 		shrink_(1);
 		return true;
 	}
-	bool Strange::popChar(char &ch)
+	bool Strange::pop_char(char &ch)
 	{
 		assert(invariants_());
 		if (empty())
@@ -252,7 +252,7 @@ namespace gubg {
 		return true;
 	}
 
-    bool Strange::popString(std::string &str, size_t nr)
+    bool Strange::pop_string(std::string &str, size_t nr)
     {
         assert(invariants_());
         if (l_ < nr)
@@ -261,7 +261,7 @@ namespace gubg {
         forward_(nr);
         return true;
     }
-    bool Strange::popStringIf(const std::string &str)
+    bool Strange::pop_if(const std::string &str)
     {
         assert(invariants_());
         const auto s = str.size();
@@ -273,7 +273,7 @@ namespace gubg {
         return true;
     }
 
-    bool Strange::popLine(Strange &line)
+    bool Strange::pop_line(Strange &line)
     {
         S("");
         assert(invariants_());
@@ -329,7 +329,7 @@ namespace gubg {
     }
 
     template <typename T>
-        bool Strange::popLSB_(T &v)
+        bool Strange::pop_lsb_(T &v)
         {
             assert(invariants_());
             if (l_ < sizeof(v))
@@ -344,17 +344,17 @@ namespace gubg {
             forward_(sizeof(v));
             return true;
         }
-    bool Strange::popLSB(std::uint8_t &v)  { return popLSB_(v); }
-    bool Strange::popLSB(std::uint16_t &v) { return popLSB_(v); }
-    bool Strange::popLSB(std::uint32_t &v) { return popLSB_(v); }
-    bool Strange::popLSB(std::uint64_t &v) { return popLSB_(v); }
-    bool Strange::popLSB(std::int8_t &v)   { return popLSB_(v); }
-    bool Strange::popLSB(std::int16_t &v)  { return popLSB_(v); }
-    bool Strange::popLSB(std::int32_t &v)  { return popLSB_(v); }
-    bool Strange::popLSB(std::int64_t &v)  { return popLSB_(v); }
+    bool Strange::pop_lsb(std::uint8_t &v)  { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::uint16_t &v) { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::uint32_t &v) { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::uint64_t &v) { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::int8_t &v)   { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::int16_t &v)  { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::int32_t &v)  { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::int64_t &v)  { return pop_lsb_(v); }
 
     template <typename T>
-        bool Strange::popMSB_(T &v)
+        bool Strange::pop_msb_(T &v)
         {
             assert(invariants_());
             if (l_ < sizeof(v))
@@ -368,23 +368,23 @@ namespace gubg {
             forward_(sizeof(v));
             return true;
         }
-    bool Strange::popMSB(std::uint8_t &v)  { return popMSB_(v); }
-    bool Strange::popMSB(std::uint16_t &v) { return popMSB_(v); }
-    bool Strange::popMSB(std::uint32_t &v) { return popMSB_(v); }
-    bool Strange::popMSB(std::uint64_t &v) { return popMSB_(v); }
-    bool Strange::popMSB(std::int8_t &v)   { return popMSB_(v); }
-    bool Strange::popMSB(std::int16_t &v)  { return popMSB_(v); }
-    bool Strange::popMSB(std::int32_t &v)  { return popMSB_(v); }
-    bool Strange::popMSB(std::int64_t &v)  { return popMSB_(v); }
+    bool Strange::pop_msb(std::uint8_t &v)  { return pop_msb_(v); }
+    bool Strange::pop_msb(std::uint16_t &v) { return pop_msb_(v); }
+    bool Strange::pop_msb(std::uint32_t &v) { return pop_msb_(v); }
+    bool Strange::pop_msb(std::uint64_t &v) { return pop_msb_(v); }
+    bool Strange::pop_msb(std::int8_t &v)   { return pop_msb_(v); }
+    bool Strange::pop_msb(std::int16_t &v)  { return pop_msb_(v); }
+    bool Strange::pop_msb(std::int32_t &v)  { return pop_msb_(v); }
+    bool Strange::pop_msb(std::int64_t &v)  { return pop_msb_(v); }
 
-    bool Strange::popCount(size_t nr)
+    bool Strange::pop_count(size_t nr)
     {
         if (l_ < nr)
             return false;
         forward_(nr);
         return true;
     }
-    bool Strange::popCount(Strange &res, size_t nr)
+    bool Strange::pop_count(Strange &res, size_t nr)
     {
         if (l_ < nr)
             return false;
@@ -394,7 +394,7 @@ namespace gubg {
         return true;
     }
 
-    bool Strange::popRaw(char *dst, size_t nr)
+    bool Strange::pop_raw(char *dst, size_t nr)
     {
         if (!dst)
             return false;
@@ -408,7 +408,7 @@ namespace gubg {
     void Strange::ltrim(const char ch)
     {
         while (!empty() && ch == front())
-            popFront();
+            pop_front();
     }
 
     //Privates

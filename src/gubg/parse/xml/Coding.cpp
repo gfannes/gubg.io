@@ -61,40 +61,40 @@ namespace gubg { namespace xml {
             char ch;
             while (!strange.empty())
             {
-                if (strange.popCharIf('&'))
+                if (strange.pop_if('&'))
                 {
                     if (false) {}
-                    else if (strange.popStringIf("quot;"))
+                    else if (strange.pop_if("quot;"))
                     {
                         MSS(rawSize >= 5);
                         rawSize -= 5;
                     }
-                    else if (strange.popStringIf("lt;"))
+                    else if (strange.pop_if("lt;"))
                     {
                         MSS(rawSize >= 3);
                         rawSize -= 3;
                     }
-                    else if (strange.popStringIf("gt;"))
+                    else if (strange.pop_if("gt;"))
                     {
                         MSS(rawSize >= 3);
                         rawSize -= 3;
                     }
-                    else if (strange.popStringIf("amp;"))
+                    else if (strange.pop_if("amp;"))
                     {
                         MSS(rawSize >= 4);
                         rawSize -= 4;
                     }
-                    else if (strange.popStringIf("apos;"))
+                    else if (strange.pop_if("apos;"))
                     {
                         MSS(rawSize >= 5);
                         rawSize -= 5;
                     }
-                    else if (strange.popStringIf("#xa;") || strange.popStringIf("#xA;") || strange.popStringIf("#xd;") || strange.popStringIf("#xD;"))
+                    else if (strange.pop_if("#xa;") || strange.pop_if("#xA;") || strange.pop_if("#xd;") || strange.pop_if("#xD;"))
                     {
                         MSS(rawSize >= 4);
                         rawSize -= 4;
                     }
-                    else if (strange.popStringIf("#x2018;") || strange.popStringIf("#x2019;") || strange.popStringIf("#x2026;") || strange.popStringIf("#x201c;") || strange.popStringIf("#x201d;"))
+                    else if (strange.pop_if("#x2018;") || strange.pop_if("#x2019;") || strange.pop_if("#x2026;") || strange.pop_if("#x201c;") || strange.pop_if("#x201d;"))
                     {
                         MSS(rawSize >= 7);
                         rawSize -= 7;
@@ -104,7 +104,7 @@ namespace gubg { namespace xml {
                 }
                 else
                 {
-                    const auto ret = strange.popChar(ch);
+                    const auto ret = strange.pop_char(ch);
                     assert(ret);
                     switch (qs)
                     {
@@ -130,28 +130,28 @@ namespace gubg { namespace xml {
             gubg::Strange strange(enc);
             while (!strange.empty())
             {
-                if (strange.popCharIf('&'))
+                if (strange.pop_if('&'))
                 {
                     if (false) {}
-                    else if (strange.popStringIf("quot;") || strange.popStringIf("#x201c;") || strange.popStringIf("#x201d;"))
+                    else if (strange.pop_if("quot;") || strange.pop_if("#x201c;") || strange.pop_if("#x201d;"))
                         *dst++ = '"';
-                    else if (strange.popStringIf("lt;"))
+                    else if (strange.pop_if("lt;"))
                         *dst++ = '<';
-                    else if (strange.popStringIf("gt;"))
+                    else if (strange.pop_if("gt;"))
                         *dst++ = '>';
-                    else if (strange.popStringIf("amp;"))
+                    else if (strange.pop_if("amp;"))
                         *dst++ = '&';
-                    else if (strange.popStringIf("apos;"))
+                    else if (strange.pop_if("apos;"))
                         *dst++ = '\'';
-                    else if (strange.popStringIf("#xa;") || strange.popStringIf("#xA;"))
+                    else if (strange.pop_if("#xa;") || strange.pop_if("#xA;"))
                         *dst++ = '\n';
-                    else if (strange.popStringIf("#xd;") || strange.popStringIf("#xD;"))
+                    else if (strange.pop_if("#xd;") || strange.pop_if("#xD;"))
                         *dst++ = '\r';
-                    else if (strange.popStringIf("#x2018;"))
+                    else if (strange.pop_if("#x2018;"))
                         *dst++ = '\'';
-                    else if (strange.popStringIf("#x2019;"))
+                    else if (strange.pop_if("#x2019;"))
                         *dst++ = '\'';
-                    else if (strange.popStringIf("#x2026;"))
+                    else if (strange.pop_if("#x2026;"))
                         //Elipsis
                         *dst++ = '.';
                     else
@@ -162,7 +162,7 @@ namespace gubg { namespace xml {
                 }
                 else
                 {
-                    strange.popChar(ch);
+                    strange.pop_char(ch);
                     *dst++ = ch;
                 }
             }

@@ -54,6 +54,7 @@ namespace gubg { namespace xml { namespace builder {
                 {
                     closeAttributes_();
                     os_ << t;
+                    did_stream_ = true;
                     return *this;
                 }
             ~Tag()
@@ -72,7 +73,8 @@ namespace gubg { namespace xml { namespace builder {
                         }
                         break;
                     case Elements:
-                        os_ << std::endl << std::string(2*indent_, ' ');
+                        if (!did_stream_)
+                            os_ << std::endl << std::string(2*indent_, ' ');
                         os_ << "</" << name_ << ">";
                         break;
                 }
@@ -94,6 +96,7 @@ namespace gubg { namespace xml { namespace builder {
             const size_t indent_;
             enum State {Attributes, Elements, Closed};
             State state_;
+            bool did_stream_ = false;
             CloseType closeType_;
     };
     class Header

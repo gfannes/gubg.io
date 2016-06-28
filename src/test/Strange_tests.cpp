@@ -87,292 +87,292 @@ TEST_CASE("creation from std::string == abc", "[strange]")
 		r.clear();
 		REQUIRE(r.empty());
 	}
-	SECTION("popAll() into Strange")
+	SECTION("pop_all() into Strange")
 	{
 		Strange rr;
 		REQUIRE(!r.empty());
-		r.popAll(rr);
+		r.pop_all(rr);
 		REQUIRE(r.empty());
 		REQUIRE(!rr.empty());
 	}
-	SECTION("popAll() into std::string")
+	SECTION("pop_all() into std::string")
 	{
 		std::string ss;
 		REQUIRE(!r.empty());
-		r.popAll(ss);
+		r.pop_all(ss);
 		REQUIRE(r.empty());
 		REQUIRE(!ss.empty());
 	}
-	SECTION("popTo()")
+	SECTION("pop_to()")
 	{
 		Strange rr;
 		SECTION("a")
 		{
-			REQUIRE(r.popTo(rr, 'a'));
+			REQUIRE(r.pop_to(rr, 'a'));
 			REQUIRE(rr.empty());
 			REQUIRE(r.str() == "abc");
 		}
 		SECTION("b")
 		{
-			REQUIRE(r.popTo(rr, 'b'));
+			REQUIRE(r.pop_to(rr, 'b'));
 			REQUIRE(rr.str() == "a");
 			REQUIRE(r.str() == "bc");
 		}
 		SECTION("c")
 		{
-			REQUIRE(r.popTo(rr, 'c'));
+			REQUIRE(r.pop_to(rr, 'c'));
 			REQUIRE(rr.str() == "ab");
 			REQUIRE(r.str() == "c");
 		}
 		SECTION("e")
 		{
-			REQUIRE(!r.popTo(rr, 'e'));
+			REQUIRE(!r.pop_to(rr, 'e'));
 			REQUIRE(rr.empty());
 			REQUIRE(r.str() == "abc");
 		}
 		SECTION("bc")
 		{
-			REQUIRE(r.popTo(rr, "bc"));
+			REQUIRE(r.pop_to(rr, "bc"));
 			REQUIRE(rr.str() == "a");
 			REQUIRE(r.str() == "bc");
 		}
 	}
-    SECTION("diffTo() with strange")
+    SECTION("diff_to() with strange")
     {
         Strange sp = r;
         SECTION("when r is not changed, sp should diff to empty")
         {
-            REQUIRE(sp.diffTo(r));
+            REQUIRE(sp.diff_to(r));
             REQUIRE(sp.empty());
         }
         SECTION("when r has one char popped, sp should diff to that char")
         {
-            r.popFront();
-            REQUIRE(sp.diffTo(r));
+            r.pop_front();
+            REQUIRE(sp.diff_to(r));
             REQUIRE(sp.str() == "a");
         }
         SECTION("when r is empty, sp should not be changed: we assume r just ran out")
         {
             r.clear();
-            REQUIRE(sp.diffTo(r));
+            REQUIRE(sp.diff_to(r));
             REQUIRE(sp.str() == "abc");
         }
         SECTION("when sp is empty, we expect failure")
         {
             sp.clear();
-            REQUIRE(!sp.diffTo(r));
+            REQUIRE(!sp.diff_to(r));
         }
         SECTION("is sp was popped, we expect a failure")
         {
-            sp.popFront();
-            REQUIRE(!sp.diffTo(r));
+            sp.pop_front();
+            REQUIRE(!sp.diff_to(r));
         }
         SECTION("the end of r is not checked")
         {
-            r.popBack();
-            REQUIRE(sp.diffTo(r));
+            r.pop_back();
+            REQUIRE(sp.diff_to(r));
             REQUIRE(sp.empty());
         }
         SECTION("the end of sp is not checked")
         {
-            sp.popBack();
-            sp.popBack();
-            r.popFront();
-            r.popFront();
+            sp.pop_back();
+            sp.pop_back();
+            r.pop_front();
+            r.pop_front();
             REQUIRE(sp.str() == "a");
-            REQUIRE(sp.diffTo(r));
+            REQUIRE(sp.diff_to(r));
             REQUIRE(sp.str() == "ab");
         }
     }
-	SECTION("popUntil() exclusive")
+	SECTION("pop_until() exclusive")
 	{
 		Strange rr;
 		SECTION("a")
 		{
-			REQUIRE(r.popUntil(rr, 'a'));
+			REQUIRE(r.pop_until(rr, 'a'));
 			REQUIRE(rr.empty());
 			REQUIRE(r.str() == "bc");
 		}
 		SECTION("b")
 		{
-			REQUIRE(r.popUntil(rr, 'b'));
+			REQUIRE(r.pop_until(rr, 'b'));
 			REQUIRE(rr.str() == "a");
 			REQUIRE(r.str() == "c");
 		}
 		SECTION("c")
 		{
-			REQUIRE(r.popUntil(rr, 'c'));
+			REQUIRE(r.pop_until(rr, 'c'));
 			REQUIRE(rr.str() == "ab");
 			REQUIRE(r.str() == "");
 		}
 		SECTION("e")
 		{
-			REQUIRE(!r.popUntil(rr, 'e'));
+			REQUIRE(!r.pop_until(rr, 'e'));
 			REQUIRE(rr.empty());
 			REQUIRE(r.str() == "abc");
 		}
 		SECTION("ab")
 		{
-			REQUIRE(r.popUntil(rr, "ab"));
+			REQUIRE(r.pop_until(rr, "ab"));
 			REQUIRE(rr.str() == "");
 			REQUIRE(r.str() == "c");
 		}
 		SECTION("bc")
 		{
-			REQUIRE(r.popUntil(rr, "bc"));
+			REQUIRE(r.pop_until(rr, "bc"));
 			REQUIRE(rr.str() == "a");
 			REQUIRE(r.str() == "");
 		}
 		SECTION("BC")
 		{
-			REQUIRE(!r.popUntil(rr, "BC"));
+			REQUIRE(!r.pop_until(rr, "BC"));
 			REQUIRE(rr.str() == "");
 			REQUIRE(r.str() == "abc");
 		}
 	}
-	SECTION("popUntil() inclusive")
+	SECTION("pop_until() inclusive")
 	{
 		Strange rr;
 		SECTION("a")
 		{
-			REQUIRE(r.popUntil(rr, 'a', true));
+			REQUIRE(r.pop_until(rr, 'a', true));
 			REQUIRE(rr.str() == "a");
 			REQUIRE(r.str() == "bc");
 		}
 		SECTION("b")
 		{
-			REQUIRE(r.popUntil(rr, 'b', true));
+			REQUIRE(r.pop_until(rr, 'b', true));
 			REQUIRE(rr.str() == "ab");
 			REQUIRE(r.str() == "c");
 		}
 		SECTION("c")
 		{
-			REQUIRE(r.popUntil(rr, 'c', true));
+			REQUIRE(r.pop_until(rr, 'c', true));
 			REQUIRE(rr.str() == "abc");
 			REQUIRE(r.str() == "");
 		}
 		SECTION("e")
 		{
-			REQUIRE(!r.popUntil(rr, 'e', true));
+			REQUIRE(!r.pop_until(rr, 'e', true));
 			REQUIRE(rr.empty());
 			REQUIRE(r.str() == "abc");
 		}
 		SECTION("ab")
 		{
-			REQUIRE(r.popUntil(rr, "ab", true));
+			REQUIRE(r.pop_until(rr, "ab", true));
 			REQUIRE(rr.str() == "ab");
 			REQUIRE(r.str() == "c");
 		}
 		SECTION("bc")
 		{
-			REQUIRE(r.popUntil(rr, "bc", true));
+			REQUIRE(r.pop_until(rr, "bc", true));
 			REQUIRE(rr.str() == "abc");
 			REQUIRE(r.str() == "");
 		}
 		SECTION("BC")
 		{
-			REQUIRE(!r.popUntil(rr, "BC", true));
+			REQUIRE(!r.pop_until(rr, "BC", true));
 			REQUIRE(rr.str() == "");
 			REQUIRE(r.str() == "abc");
 		}
 	}
-	SECTION("popCharIf")
+	SECTION("pop_if")
 	{
-		REQUIRE(!r.popCharIf('b'));
-		REQUIRE(r.popCharIf('a'));
-		REQUIRE(r.popCharIf('b'));
-		REQUIRE(r.popCharIf('c'));
-		REQUIRE(!r.popCharIf('e'));
+		REQUIRE(!r.pop_if('b'));
+		REQUIRE(r.pop_if('a'));
+		REQUIRE(r.pop_if('b'));
+		REQUIRE(r.pop_if('c'));
+		REQUIRE(!r.pop_if('e'));
 	}
-	SECTION("popCharBackIf")
+	SECTION("pop_back_if")
 	{
-		REQUIRE(!r.popCharBackIf('b'));
-		REQUIRE(r.popCharBackIf('c'));
-		REQUIRE(r.popCharBackIf('b'));
-		REQUIRE(r.popCharBackIf('a'));
-		REQUIRE(!r.popCharBackIf('e'));
+		REQUIRE(!r.pop_back_if('b'));
+		REQUIRE(r.pop_back_if('c'));
+		REQUIRE(r.pop_back_if('b'));
+		REQUIRE(r.pop_back_if('a'));
+		REQUIRE(!r.pop_back_if('e'));
 	}
-	SECTION("popFront")
+	SECTION("pop_front")
 	{
-		REQUIRE(r.popFront());
+		REQUIRE(r.pop_front());
         REQUIRE(r.front() == 'b');
-		REQUIRE(r.popFront());
+		REQUIRE(r.pop_front());
         REQUIRE(r.front() == 'c');
-		REQUIRE(r.popFront());
+		REQUIRE(r.pop_front());
         REQUIRE(r.empty());
-		REQUIRE(!r.popFront());
+		REQUIRE(!r.pop_front());
 	}
-	SECTION("popBack")
+	SECTION("pop_back")
 	{
-		REQUIRE(r.popBack());
+		REQUIRE(r.pop_back());
         REQUIRE(r.back() == 'b');
-		REQUIRE(r.popBack());
+		REQUIRE(r.pop_back());
         REQUIRE(r.back() == 'a');
-		REQUIRE(r.popBack());
+		REQUIRE(r.pop_back());
         REQUIRE(r.empty());
-		REQUIRE(!r.popBack());
+		REQUIRE(!r.pop_back());
 	}
-	SECTION("popChar")
+	SECTION("pop_char")
 	{
 		char ch;
-		REQUIRE(r.popChar(ch));
+		REQUIRE(r.pop_char(ch));
 		REQUIRE('a' == ch);
-		REQUIRE(r.popChar(ch));
+		REQUIRE(r.pop_char(ch));
 		REQUIRE('b' == ch);
-		REQUIRE(r.popChar(ch));
+		REQUIRE(r.pop_char(ch));
 		REQUIRE('c' == ch);
-		REQUIRE(!r.popChar(ch));
+		REQUIRE(!r.pop_char(ch));
 	}
-	SECTION("popString")
+	SECTION("pop_string")
 	{
 		SECTION("")
 		{
-			REQUIRE(r.popStringIf(""));
+			REQUIRE(r.pop_if(""));
 			REQUIRE(r.str() == "abc");
 		}
 		SECTION("a")
 		{
-			REQUIRE(r.popStringIf("a"));
+			REQUIRE(r.pop_if("a"));
 			REQUIRE(r.str() == "bc");
 		}
 		SECTION("abc")
 		{
-			REQUIRE(r.popStringIf("abc"));
+			REQUIRE(r.pop_if("abc"));
 			REQUIRE(r.str() == "");
 		}
 		SECTION("A")
 		{
-			REQUIRE(!r.popStringIf("A"));
+			REQUIRE(!r.pop_if("A"));
 			REQUIRE(r.str() == "abc");
 		}
 	}
-	SECTION("popLine")
+	SECTION("pop_line")
 	{
 		Strange line;
 		SECTION("abc")
 		{
-			REQUIRE(r.popLine(line));
+			REQUIRE(r.pop_line(line));
 			REQUIRE(line.str() == "abc");
 			REQUIRE(r.empty());
-			REQUIRE(!r.popLine(line));
+			REQUIRE(!r.pop_line(line));
 		}
 		SECTION("abc\n")
 		{
 			std::string str = "abc\n";
 			r = str;
-			REQUIRE(r.popLine(line));
+			REQUIRE(r.pop_line(line));
 			REQUIRE(line.str() == "abc");
 			REQUIRE(r.empty());
-			REQUIRE(!r.popLine(line));
+			REQUIRE(!r.pop_line(line));
 		}
 		SECTION("abc\ndef")
 		{
 			std::string str = "abc\ndef";
 			r = str;
-			REQUIRE(r.popLine(line));
+			REQUIRE(r.pop_line(line));
 			REQUIRE(line.str() == "abc");
 			REQUIRE(!r.empty());
-			REQUIRE(r.popLine(line));
+			REQUIRE(r.pop_line(line));
 			REQUIRE(line.str() == "def");
 		}
 	}

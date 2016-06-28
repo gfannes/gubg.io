@@ -32,20 +32,20 @@ namespace gubg {
             bool strip(char ch);
 
             //Return true if !res.empty()
-            bool popAll(Strange &res);
-            bool popAll(std::string &res);
+            bool pop_all(Strange &res);
+            bool pop_all(std::string &res);
 
             //Does not pop ch or str
-            bool popTo(Strange &res, const char ch);
-            bool popTo(Strange &res, const std::string &str);
+            bool pop_to(Strange &res, const char ch);
+            bool pop_to(Strange &res, const std::string &str);
             //Pops ch too, set inclusive to true if you want ch to be included in res
-            bool popUntil(Strange &res, const char ch, bool inclusive = false);
-            bool popUntil(std::string &res, const char ch, bool inclusive = false);
-            bool popUntil(Strange &res, const std::string &str, bool inclusive = false);
-            bool popUntil(std::string &res, const std::string &str, bool inclusive = false);
+            bool pop_until(Strange &res, const char ch, bool inclusive = false);
+            bool pop_until(std::string &res, const char ch, bool inclusive = false);
+            bool pop_until(Strange &res, const std::string &str, bool inclusive = false);
+            bool pop_until(std::string &res, const std::string &str, bool inclusive = false);
 
             //this and strange are assumed to be related and have the same end
-            bool diffTo(const Strange &strange);
+            bool diff_to(const Strange &strange);
 
             bool popDecimal(long &res);
             template <typename Int>
@@ -59,47 +59,47 @@ namespace gubg {
                 }
             bool popFloat(double &res);
 
-            bool popCharIf(const char ch);
-            bool popCharBackIf(const char ch);
-            bool popFront();
-            bool popBack();
-            bool popChar(char &ch);
+            bool pop_if(const char ch);
+            bool pop_back_if(const char ch);
+            bool pop_front();
+            bool pop_back();
+            bool pop_char(char &ch);
 
-            bool popString(std::string &, size_t nr);
-            bool popStringIf(const std::string &);
+            bool pop_string(std::string &, size_t nr);
+            bool pop_if(const std::string &);
 
-            bool popLine(Strange &line);
+            bool pop_line(Strange &line);
 
             void ltrim(const char ch);
 
-            bool popLSB(std::uint8_t &);
-            bool popLSB(std::uint16_t &);
-            bool popLSB(std::uint32_t &);
-            bool popLSB(std::uint64_t &);
-            bool popLSB(std::int8_t &);
-            bool popLSB(std::int16_t &);
-            bool popLSB(std::int32_t &);
-            bool popLSB(std::int64_t &);
+            bool pop_lsb(std::uint8_t &);
+            bool pop_lsb(std::uint16_t &);
+            bool pop_lsb(std::uint32_t &);
+            bool pop_lsb(std::uint64_t &);
+            bool pop_lsb(std::int8_t &);
+            bool pop_lsb(std::int16_t &);
+            bool pop_lsb(std::int32_t &);
+            bool pop_lsb(std::int64_t &);
 
-            bool popMSB(std::uint8_t &);
-            bool popMSB(std::uint16_t &);
-            bool popMSB(std::uint32_t &);
-            bool popMSB(std::uint64_t &);
-            bool popMSB(std::int8_t &);
-            bool popMSB(std::int16_t &);
-            bool popMSB(std::int32_t &);
-            bool popMSB(std::int64_t &);
+            bool pop_msb(std::uint8_t &);
+            bool pop_msb(std::uint16_t &);
+            bool pop_msb(std::uint32_t &);
+            bool pop_msb(std::uint64_t &);
+            bool pop_msb(std::int8_t &);
+            bool pop_msb(std::int16_t &);
+            bool pop_msb(std::int32_t &);
+            bool pop_msb(std::int64_t &);
 
-            bool popCount(size_t nr);
-            bool popCount(Strange &, size_t nr);
+            bool pop_count(size_t nr);
+            bool pop_count(Strange &, size_t nr);
 
-            bool popRaw(char *dst, size_t nr);
+            bool pop_raw(char *dst, size_t nr);
 
         private:
             template <typename T>
-                bool popLSB_(T &);
+                bool pop_lsb_(T &);
             template <typename T>
-                bool popMSB_(T &);
+                bool pop_msb_(T &);
             bool invariants_() const;
             void forward_(const size_t nr);
             void shrink_(const size_t nr);
