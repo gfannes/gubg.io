@@ -53,6 +53,59 @@ namespace gubg {
         while (pop_if(ch)){}
         return true;
     }
+    bool Strange::strip(const std::string &chars)
+    {
+        if (empty())
+            return false;
+        if (chars.find(front()) == std::string::npos)
+            return false;
+        for (pop_front(); !empty(); pop_front())
+        {
+            if (chars.find(front()) == std::string::npos)
+                break;
+        }
+        return true;
+    }
+
+    bool Strange::pop_bracket(Strange &res, const std::string &oc)
+    {
+        if (oc.size() != 2)
+            return false;
+        const auto o = oc[0];
+        const auto c = oc[1];
+        if (!pop_if(o))
+            return false;
+        Strange sp = *this;
+        for (unsigned int level = 1; !empty(); pop_front())
+        {
+            const auto ch = front();
+            if (ch == o)
+            {
+                ++level;
+            }
+            else if (ch == c)
+            {
+                --level;
+                if (level == 0)
+                {
+                    res.s_ = sp.s_;
+                    res.l_ = s_-res.s_;
+                    pop_front();
+                    return true;
+                }
+            }
+        }
+        *this = sp;
+        return false;
+    }
+    bool Strange::pop_bracket(std::string &res, const std::string &oc)
+    {
+        Strange strange;
+        if (!pop_bracket(strange, oc))
+            return false;
+        strange.pop_all(res);
+        return true;
+    }
 
 	bool Strange::pop_all(Strange &res)
 	{

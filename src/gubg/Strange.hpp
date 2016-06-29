@@ -30,6 +30,7 @@ namespace gubg {
             bool contains(char ch) const;
 
             bool strip(char ch);
+            bool strip(const std::string &chars);
 
             //Return true if !res.empty()
             bool pop_all(Strange &res);
@@ -43,6 +44,9 @@ namespace gubg {
             bool pop_until(std::string &res, const char ch, bool inclusive = false);
             bool pop_until(Strange &res, const std::string &str, bool inclusive = false);
             bool pop_until(std::string &res, const std::string &str, bool inclusive = false);
+
+            bool pop_bracket(Strange &res, const std::string &oc);
+            bool pop_bracket(std::string &res, const std::string &oc);
 
             //this and strange are assumed to be related and have the same end
             bool diff_to(const Strange &strange);
