@@ -45,16 +45,10 @@ namespace gubg { namespace parse { namespace tree {
                         default: MSS(rc); break;
                     }
 
-                    Attributes attr;
-                    switch (const auto rc = pop_attr_(attr))
-                    {
-                        case ReturnCode::OK:
-                        case ReturnCode::NotFound:
-                            break;
-                        default: MSS(rc); break;
-                    }
+                    Attributes attrs;
+                    MSS(pop_attrs_(attrs));
 
-                    receiver_().parser_open(name, attr);
+                    receiver_().parser_open(name, attrs);
 
                     pop_whitespace_();
                     if (content_.pop_if('{'))
@@ -90,25 +84,18 @@ namespace gubg { namespace parse { namespace tree {
                     L(C(name));
                     MSS_END();
                 }
-                ReturnCode pop_attr_(Attributes &attr)
+                ReturnCode pop_attrs_(Attributes &attrs)
                 {
                     MSS_BEGIN(ReturnCode, logns);
-                    pop_whitespace_();
-                    if (content_.empty() || content_.front() != '[')
+                    gubg::Strange attr;
+                    while ((pop_whitespace_(), content_.pop_bracket(attr, "[]")))
                     {
-                        MSS_Q(ReturnCode::NotFound);
-                    }
-                    gubg::Strange attrs;
-                    MSS(content_.pop_bracket(attrs, "[]"));
-                    gubg::Strange pair;
-                    std::string key, value;
-                    while (attrs.pop_until(pair, ';') || attrs.pop_all(pair))
-                    {
-                        pop_whitespace_(pair);
-                        MSS(pair.pop_until(key, ':'));
-                        MSS(pair.pop_all(value));
+                        std::string key, value;
+                        pop_whitespace_(attr);
+                        MSS(attr.pop_until(key, ':'));
+                        MSS(attr.pop_all(value));
                         L(C(key)C(value));
-                        attr[key] = value;
+                        attrs[key] = value;
                     }
                     MSS_END();
                 }
