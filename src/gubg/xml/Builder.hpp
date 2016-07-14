@@ -10,20 +10,22 @@ namespace gubg { namespace xml { namespace builder {
     class Tag
     {
         public:
-            Tag(std::ostream &os, const std::string &name, CloseType closeType = ShortClose, const size_t indent = 0)
-                :os_(os), name_(name), indent_(indent), state_(Attributes), closeType_(closeType)
+            Tag(std::ostream &os, const std::string &name, CloseType close_type = ShortClose, const size_t indent = 0)
+                :os_(os), name_(name), indent_(indent), state_(Attributes), close_type_(close_type)
             {
                 if (indent_)
                     os_ << std::string(2*indent_, ' ');
                 os_ << "<" << name_;
             }
-            Tag(const Tag &&rhs):
+            Tag(Tag &&rhs):
                 os_(rhs.os_),
                 name_(std::move(rhs.name_)),
                 indent_(rhs.indent_),
                 state_(rhs.state_),
-                closeType_(rhs.closeType_)
+                did_stream_(rhs.did_stream_),
+                close_type_(rhs.close_type_)
         {
+            rhs.state_ = State::Dead;
         }
             template <typename Name>
                 Tag &attr(const Name &name, const std::string &value)
@@ -45,14 +47,14 @@ namespace gubg { namespace xml { namespace builder {
                 }
             Tag tag(const std::string &name)
             {
-                closeAttributes_();
+                close_attributes_();
                 os_ << std::endl;
-                return Tag(os_, name, closeType_, indent_+1);
+                return Tag(os_, name, close_type_, indent_+1);
             }
             template <typename T>
                 Tag &operator<<(const T &t)
                 {
-                    closeAttributes_();
+                    close_attributes_();
                     os_ << t;
                     did_stream_ = true;
                     return *this;
@@ -62,7 +64,7 @@ namespace gubg { namespace xml { namespace builder {
                 switch (state_)
                 {
                     case Attributes:
-                        switch (closeType_)
+                        switch (close_type_)
                         {
                             case ShortClose:
                                 os_ << "/>";
@@ -83,7 +85,7 @@ namespace gubg { namespace xml { namespace builder {
         private:
             Tag(const Tag &);
 
-            void closeAttributes_()
+            void close_attributes_()
             {
                 if (state_ != Attributes)
                     return;
@@ -94,10 +96,10 @@ namespace gubg { namespace xml { namespace builder {
             std::ostream &os_;
             const std::string name_;
             const size_t indent_;
-            enum State {Attributes, Elements, Closed};
+            enum State {Attributes, Elements, Closed, Dead};
             State state_;
             bool did_stream_ = false;
-            CloseType closeType_;
+            CloseType close_type_;
     };
     class Header
     {
