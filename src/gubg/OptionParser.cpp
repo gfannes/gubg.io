@@ -6,7 +6,7 @@ using namespace std;
 OptionParser::OptionParser(const string &caption):
     caption_(caption){}
 
-OptionParser::Args OptionParser::createArgs(int argc, char **argv)
+OptionParser::Args OptionParser::create_args(int argc, const char **argv)
 {
 	Args args;
 	if (argv)
@@ -34,9 +34,9 @@ OptionParser::ReturnCode OptionParser::parse(Args &args, bool stripExe)
 
         VoidCallbacks::const_iterator itVoid;
         StringCallbacks::const_iterator itString;
-        if ((itVoid = switchCallbacks_.find(arg)) != switchCallbacks_.end())
+        if ((itVoid = switch_callbacks_.find(arg)) != switch_callbacks_.end())
             (itVoid->second)();
-        else if ((itString = mandatoryCallbacks_.find(arg)) != mandatoryCallbacks_.end())
+        else if ((itString = mandatory_callbacks_.find(arg)) != mandatory_callbacks_.end())
         {
             if (args.empty())
             {
@@ -46,7 +46,7 @@ OptionParser::ReturnCode OptionParser::parse(Args &args, bool stripExe)
             (itString->second)(args.front());
             args.pop_front();
         }
-        else if ((itString = optionalCallbacks_.find(arg)) != optionalCallbacks_.end())
+        else if ((itString = optional_callbacks_.find(arg)) != optional_callbacks_.end())
         {
             if (args.empty() || args.front().empty() || '-' == args.front()[0])
                 (itString->second)("");
@@ -65,7 +65,7 @@ OptionParser::ReturnCode OptionParser::parse(Args &args, bool stripExe)
     MSS_END();
 }
 
-void OptionParser::addHelpLine_(const string &shortHand, const string &longHand, const string &description)
+void OptionParser::add_helpline_(const string &shortHand, const string &longHand, const string &description)
 {
     help_ << shortHand << "\t" << longHand << "\t" << description << endl;
 }
