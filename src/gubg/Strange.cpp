@@ -234,7 +234,7 @@ namespace gubg {
 		res = s.str();
 		return true;
 	}
-	bool Strange::popDecimal(long &res)
+	bool Strange::pop_decimal(long &res)
 	{
 		assert(invariants_());
 		if (empty())
@@ -245,7 +245,7 @@ namespace gubg {
 		forward_(l);
 		return true;
 	}
-	bool Strange::popFloat(double &res)
+	bool Strange::pop_float(double &res)
 	{
 		assert(invariants_());
 		if (empty())

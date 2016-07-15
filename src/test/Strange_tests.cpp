@@ -380,7 +380,7 @@ TEST_CASE("creation from std::string == abc", "[strange]")
 TEST_CASE("numbers", "[strange]")
 {
 	Strange r;
-	SECTION("popDecimal()")
+	SECTION("pop_decimal()")
 	{
 		struct TV
 		{
@@ -398,33 +398,33 @@ TEST_CASE("numbers", "[strange]")
 			{
 				long nbr;
 				r = tv.str;
-				REQUIRE(r.popDecimal(nbr));
+				REQUIRE(r.pop_decimal(nbr));
 				REQUIRE(tv.nbr == nbr);
 
 				std::string str = "-"; str += tv.str;
 				r = str;
-				REQUIRE(r.popDecimal(nbr));
+				REQUIRE(r.pop_decimal(nbr));
 				REQUIRE(-tv.nbr == nbr);
 			}
 			{
 				int nbr;
 				r = tv.str;
-				REQUIRE(r.popDecimal(nbr));
+				REQUIRE(r.pop_decimal(nbr));
 				REQUIRE(tv.nbr == nbr);
 
 				std::string str = "-"; str += tv.str;
 				r = str;
-				REQUIRE(r.popDecimal(nbr));
+				REQUIRE(r.pop_decimal(nbr));
 				REQUIRE(-tv.nbr == nbr);
 			}
 		}
 	}
-	SECTION("popFloat()")
+	SECTION("pop_float()")
 	{
 		std::string flt = "-42.123";
 		r = flt;
 		double d;
-		REQUIRE(r.popFloat(d));
+		REQUIRE(r.pop_float(d));
 		REQUIRE(-42.123 == d);
 	}
 }

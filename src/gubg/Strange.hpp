@@ -51,17 +51,17 @@ namespace gubg {
             //this and strange are assumed to be related and have the same end
             bool diff_to(const Strange &strange);
 
-            bool popDecimal(long &res);
+            bool pop_decimal(long &res);
             template <typename Int>
-                bool popDecimal(Int &i)
+                bool pop_decimal(Int &i)
                 {
                     long l;
-                    if (!popDecimal(l))
+                    if (!pop_decimal(l))
                         return false;
                     i = l;
                     return true;
                 }
-            bool popFloat(double &res);
+            bool pop_float(double &res);
 
             bool pop_if(const char ch);
             bool pop_back_if(const char ch);

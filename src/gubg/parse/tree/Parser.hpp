@@ -9,6 +9,9 @@
 
 namespace gubg { namespace parse { namespace tree { 
 
+    using Name = std::string;
+    using Attributes = std::map<std::string, std::string>;
+
     template <typename Receiver>
         class Parser_crtp
         {
@@ -16,9 +19,6 @@ namespace gubg { namespace parse { namespace tree {
                 constexpr static const char *logns = nullptr;//"tree::Parser";
 
             public:
-                using Name = std::string;
-                using Attributes = std::map<std::string, std::string>;
-
                 ReturnCode process(const std::string &content)
                 {
                     MSS_BEGIN(ReturnCode, logns);
