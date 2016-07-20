@@ -11,7 +11,7 @@ namespace gubg
     {
         namespace numbers
         {
-            static const char *debug_ns = "parse_numbers";
+            static const char *debug_ns = nullptr;//"parse_numbers";
 
             namespace priv
             {
