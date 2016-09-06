@@ -19,6 +19,7 @@ namespace gubg { namespace gnuplot {
             {
                 of_ << "EOD" << std::endl;
                 of_ << "plot $data using 1:2" << std::endl;
+                of_ << "pause mouse" << std::endl;
             }
 
             template <typename Array>
