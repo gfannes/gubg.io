@@ -12,6 +12,13 @@ namespace gubg { namespace gnuplot {
         public:
             Stream(const std::string &fn): fn_(fn), of_(fn_, std::ios::out)
             {
+                of_ << "$data << EOD" << std::endl;
+            }
+
+            ~Stream()
+            {
+                of_ << "EOD" << std::endl;
+                of_ << "plot $data using 1:2" << std::endl;
             }
 
             template <typename Array>
