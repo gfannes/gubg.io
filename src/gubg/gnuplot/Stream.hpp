@@ -103,7 +103,7 @@ namespace gubg { namespace gnuplot {
                     os << "EOD" << std::endl;
                 }
 
-                OnlyOnce add_plot;
+                OnlyOnce first_time;
                 for (const auto &p: part)
                 {
                     const auto ix = p.first;
@@ -111,20 +111,27 @@ namespace gubg { namespace gnuplot {
                     const auto nr_cols = info.max_nr_cols;
                     const auto &name = info.name;
 
-                    os << (add_plot() ? "plot " : ", ");
-                    stream_data_name_(os, ix);
-                    os << " using ";
-                    if (nr_cols == 1)
+                    auto add_plot = [&](unsigned int x, unsigned int y)
                     {
-                        os << 0 << ':' << 1 << " with lines";
+                        os << (first_time() ? "plot " : ", ");
+                        stream_data_name_(os, ix);
+                        os << " using " << x << ':' << y << " with lines ";
                         if (!name.empty())
-                            os << " t \"" << name << '\"';
+                            os << "t \"" << name << "\" ";
+                    };
+                    if (nr_cols <= 0)
+                    {
                     }
-                    else if (nr_cols == 2)
+                    else if (nr_cols == 1)
                     {
-                        os << 1 << ':' << 2 << " with lines";
-                        if (!name.empty())
-                            os << " t \"" << name << '\"';
+                        //row ix vs. single column
+                        add_plot(0, 1);
+                    }
+                    else
+                    {
+                        //first column vs. all the others
+                        for (auto c = 2; c <= nr_cols; ++c)
+                            add_plot(1, c);
                     }
                 }
                 os << std::endl;

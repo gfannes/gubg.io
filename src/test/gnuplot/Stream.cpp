@@ -1,6 +1,5 @@
 #include "catch.hpp"
 #include "gubg/gnuplot/Stream.hpp"
-#include "gubg/Sinc.hpp"
 #include <cmath>
 
 TEST_CASE("gnuplot tests", "[ut][gnuplot]")
@@ -16,8 +15,8 @@ TEST_CASE("gnuplot tests", "[ut][gnuplot]")
 
     gs.pause();
     gs.name(42, "sinc");
-    for (double t = -15.0; t <= 15.0; t += 0.1)
-        gs.data(42) << t << gubg::sinc(t);
+    for (double t = -10.0; t <= 10.0; t += 0.1)
+        gs.data(42) << t << std::round(std::sin(t)) << std::sin(std::round(t));
 
     gs.save("test.gnuplot");
 }
