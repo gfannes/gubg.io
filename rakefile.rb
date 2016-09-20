@@ -45,6 +45,7 @@ namespace :ut do
         ut.build
         options = %w[-d yes -a]
         options << '[ut]'
+        # options << '[gnuplot]'
         ut.run(options)
     end
 end
