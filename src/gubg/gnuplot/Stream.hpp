@@ -13,6 +13,9 @@ namespace gubg { namespace gnuplot {
 
     class Stream
     {
+        public:
+            using DataIX = int;
+
         private:
             using Line = std::string;
             using Lines = std::list<Line>;
@@ -23,8 +26,14 @@ namespace gubg { namespace gnuplot {
                 Lines lines;
                 std::string name;
             };
+            using Part = std::map<DataIX, Info>;
 
         public:
+            Stream()
+            {
+                add_new_part_();
+            }
+
             class Data
             {
                 public:
@@ -53,12 +62,37 @@ namespace gubg { namespace gnuplot {
                     std::ostringstream oss_;
                     Info &info_;
             };
-            Data data(int ix = 0) { return Data(data_[ix]); }
-            Stream &name(int ix, const std::string &n) { data_[ix].name = n; return *this; }
+
+            Data data(DataIX ix = 0) { return Data(part_()[ix]); }
+            Stream &name(DataIX ix, const std::string &n) { part_()[ix].name = n; return *this; }
+
+            void pause() {add_new_part_();}
 
             void stream(std::ostream &os) const
             {
-                for (const auto &p: data_)
+                for (const auto &data: parts_)
+                {
+                    stream_data_(data, os);
+                    os << "pause mouse" << std::endl;
+                }
+            }
+            std::string str() const
+            {
+                std::ostringstream oss;
+                stream(oss);
+                return oss.str();
+            }
+            void save(const std::string &fn) const
+            {
+                std::ofstream of(fn);
+                stream(of);
+            }
+
+        private:
+            static void stream_data_name_(std::ostream &os, DataIX ix) { os << "$data_" << ix; }
+            static void stream_data_(const Part &part, std::ostream &os)
+            {
+                for (const auto &p: part)
                 {
                     const auto ix = p.first;
                     const auto &lines = p.second.lines;
@@ -70,7 +104,7 @@ namespace gubg { namespace gnuplot {
                 }
 
                 OnlyOnce add_plot;
-                for (const auto &p: data_)
+                for (const auto &p: part)
                 {
                     const auto ix = p.first;
                     const auto &info = p.second;
@@ -94,24 +128,12 @@ namespace gubg { namespace gnuplot {
                     }
                 }
                 os << std::endl;
-
-                os << "pause mouse" << std::endl;
             }
-            std::string str() const
-            {
-                std::ostringstream oss;
-                stream(oss);
-                return oss.str();
-            }
-            void save(const std::string &fn) const
-            {
-                std::ofstream of(fn);
-                stream(of);
-            }
-
-        private:
-            static void stream_data_name_(std::ostream &os, int ix) { os << "$data_" << ix; }
-            std::map<int, Info> data_;
+            using Parts = std::list<Part>;
+            Parts parts_;
+            Part &part_() { return parts_.back(); }
+            const Part &part_() const { return parts_.back(); }
+            void add_new_part_() {parts_.emplace_back();}
     };
 
 } } 
