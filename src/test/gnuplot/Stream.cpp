@@ -6,10 +6,8 @@ TEST_CASE("gnuplot tests", "[ut][gnuplot]")
 {
     gubg::gnuplot::Stream gs;
 
-    gs.name(0, "sinus data");
-    gs.name(0, 0, "x").name(0, 1, "sinus(x)");
-    gs.name(1, "cosinus data");
-    gs.name(1, 0, "x").name(1, 1, "cosinus(x)");
+    gs.name(0, "sinus data").name(0, 0, "x").name(0, 1, "sinus(x)");
+    gs.name(1, "cosinus data").name(1, 0, "x").name(1, 1, "cosinus(x)");
     for (double t = -3.0; t <= 3.0; t += 0.01)
     {
         gs.data() << t << std::sin(t);
