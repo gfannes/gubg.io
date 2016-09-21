@@ -15,6 +15,8 @@ namespace gubg { namespace gnuplot {
     {
         public:
             using DataIX = int;
+            using ColIX = unsigned int;
+            using Name = std::string;
 
         private:
             using Line = std::string;
@@ -24,7 +26,8 @@ namespace gubg { namespace gnuplot {
                 unsigned int col_count = 0;
                 unsigned int max_nr_cols = 0;
                 Lines lines;
-                std::string name;
+                Name name;
+                std::map<ColIX, Name> col_names;
             };
             using Part = std::map<DataIX, Info>;
 
@@ -64,15 +67,17 @@ namespace gubg { namespace gnuplot {
             };
 
             Data data(DataIX ix = 0) { return Data(part_()[ix]); }
-            Stream &name(DataIX ix, const std::string &n) { part_()[ix].name = n; return *this; }
+            Stream &name(DataIX ix, const Name &n) { part_()[ix].name = n; return *this; }
+            //cix is 0-based
+            Stream &name(DataIX ix, ColIX cix, const Name &n) { part_()[ix].col_names[cix+1] = n; return *this; }
 
             void pause() {add_new_part_();}
 
             void stream(std::ostream &os) const
             {
-                for (const auto &data: parts_)
+                for (const auto &part: parts_)
                 {
-                    stream_data_(data, os);
+                    stream_part_(part, os);
                     os << "pause mouse" << std::endl;
                 }
             }
@@ -90,8 +95,9 @@ namespace gubg { namespace gnuplot {
 
         private:
             static void stream_data_name_(std::ostream &os, DataIX ix) { os << "$data_" << ix; }
-            static void stream_data_(const Part &part, std::ostream &os)
+            static void stream_part_(const Part &part, std::ostream &os)
             {
+                S("gnuplot::Stream");
                 for (const auto &p: part)
                 {
                     const auto ix = p.first;
@@ -110,14 +116,31 @@ namespace gubg { namespace gnuplot {
                     const auto &info = p.second;
                     const auto nr_cols = info.max_nr_cols;
                     const auto &name = info.name;
+                    const auto &col_names = info.col_names;
+                    L(C(ix)C(name)C(nr_cols));
 
                     auto add_plot = [&](unsigned int x, unsigned int y)
                     {
                         os << (first_time() ? "plot " : ", ");
                         stream_data_name_(os, ix);
                         os << " using " << x << ':' << y << " with lines ";
+                        os << "t \"";
                         if (!name.empty())
-                            os << "t \"" << name << "\" ";
+                            os << name << ": ";
+
+                        auto add_name = [&](unsigned int i)
+                        {
+                            auto it = col_names.find(i);
+                            if (it == col_names.end())
+                                os << "<unnamed>";
+                            else
+                                os << it->second;
+                        };
+                        add_name(x);
+                        os << " vs. ";
+                        add_name(y);
+
+                        os << "\" ";
                     };
                     if (nr_cols <= 0)
                     {
