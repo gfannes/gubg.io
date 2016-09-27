@@ -121,7 +121,10 @@ namespace gubg { namespace gnuplot {
 
                     auto add_plot = [&](unsigned int x, unsigned int y)
                     {
-                        os << (first_time() ? "plot " : ", ");
+                        if (!first_time())
+                            os << std::endl << "pause mouse" << std::endl;
+                        os << "plot";
+                        /* os << (first_time() ? "plot " : ", "); */
                         stream_data_name_(os, ix);
                         os << " using " << x << ':' << y << " with lines ";
                         os << "t \"";
