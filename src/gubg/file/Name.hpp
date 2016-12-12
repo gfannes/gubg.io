@@ -18,6 +18,46 @@ namespace gubg { namespace file {
                 return name_;
             }
 
+            bool operator<(const Name &rhs)  const { return name_ <  rhs.name_; }
+            bool operator>(const Name &rhs)  const { return name_ >  rhs.name_; }
+            bool operator==(const Name &rhs) const { return name_ == rhs.name_; }
+            bool operator!=(const Name &rhs) const { return name_ != rhs.name_; }
+
+            Name &operator/=(const std::string &part)
+            {
+                if (name_.empty())
+                {
+                    name_ = part;
+                }
+                else if (part.empty())
+                {
+                    //Nothing todo
+                }
+                else
+                {
+                    const bool name_has_slash = (name_.back() == '/');
+                    const bool part_has_slash = (part.front() == '/');
+                    if (name_has_slash)
+                    {
+                        if (part_has_slash)
+                            name_ += part.substr(1);
+                        else
+                            name_ += part;
+                    }
+                    else
+                    {
+                        if (part_has_slash)
+                            name_ += part;
+                        else
+                        {
+                            name_.push_back('/');
+                            name_ += part;
+                        }
+                    }
+                }
+                return *this;
+            }
+
             void stream(std::ostream &os) const
             {
                 os << name_;
