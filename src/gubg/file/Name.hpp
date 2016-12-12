@@ -13,6 +13,11 @@ namespace gubg { namespace file {
             Name(const std::string &name): name_(name) {}
             Name(const char *name): name_(name) {}
 
+            operator const std::string & () const
+            {
+                return name_;
+            }
+
             void stream(std::ostream &os) const
             {
                 os << name_;
