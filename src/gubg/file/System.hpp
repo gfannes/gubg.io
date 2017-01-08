@@ -106,8 +106,11 @@ namespace gubg { namespace file {
             std::string pattern_re = pattern;
 
             details::sub(pattern_re, pattern_re, std::string("."), std::string("\\."));
+            //We use \0 to represent * temporarily
             details::sub(pattern_re, pattern_re, std::string("**"), std::string(".\0", 2));
             details::sub(pattern_re, pattern_re, std::string("*"), std::string("[^/]\0", 5));
+
+            //Replace \0 with *
             details::sub(pattern_re, pattern_re, std::string("\0", 1), std::string("*"));
 
             return each_regex(pattern_re, cb);
