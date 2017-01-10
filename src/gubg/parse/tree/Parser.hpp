@@ -34,33 +34,36 @@ namespace gubg { namespace parse { namespace tree {
                 {
                     MSS_BEGIN(ReturnCode, logns);
 
-                    Name name;
-                    switch (const auto rc = pop_name_(name))
+                    while (true)
                     {
-                        case ReturnCode::OK:
-                            break;
-                        case ReturnCode::NotFound:
-                            MSS_RETURN_OK();
-                            break;
-                        default: MSS(rc); break;
-                    }
-
-                    Attributes attrs;
-                    MSS(pop_attrs_(attrs));
-
-                    receiver_().parser_open(name, attrs);
-
-                    pop_whitespace_();
-                    if (content_.pop_if('{'))
-                    {
-                        pop_whitespace_();
-                        while (!content_.pop_if('}'))
+                        Name name;
+                        switch (const auto rc = pop_name_(name))
                         {
-                            MSS(process_());
+                            case ReturnCode::OK:
+                                break;
+                            case ReturnCode::NotFound:
+                                MSS_RETURN_OK();
+                                break;
+                            default: MSS(rc); break;
                         }
-                    }
 
-                    receiver_().parser_close();
+                        Attributes attrs;
+                        MSS(pop_attrs_(attrs));
+
+                        receiver_().parser_open(name, attrs);
+
+                        pop_whitespace_();
+                        if (content_.pop_if('{'))
+                        {
+                            pop_whitespace_();
+                            while (!content_.pop_if('}'))
+                            {
+                                MSS(process_());
+                            }
+                        }
+
+                        receiver_().parser_close();
+                    }
 
                     MSS_END();
                 }
