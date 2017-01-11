@@ -58,23 +58,26 @@ namespace gubg { namespace file {
         bool each_recursive(Callback cb) { return each_recursive(cb, std::filesystem::current_path()); }
 
     template <typename Callback>
-        bool each_regex(const std::string &pattern, Callback cb)
+        bool each_regex(const std::string &pattern, Callback cb, const std::filesystem::path &dir)
         {
             MSS_BEGIN(bool, "");
-            auto pattern_full = std::filesystem::current_path();
+            auto pattern_full = dir;
             pattern_full /= pattern;
             L(C(pattern_full));
             std::regex re(static_cast<std::string>(pattern_full));
             auto recursor = [&](const std::filesystem::path &fn)
             {
+                L(C(fn));
                 const auto fn_str = static_cast<std::string>(fn);
                 if (std::regex_match(fn_str, re))
                     cb(fn);
                 return true;
             };
-            each_recursive(recursor);
+            each_recursive(recursor, dir);
             MSS_END();
         }
+    template <typename Callback>
+        bool each_regex(const std::string &pattern, Callback cb) { return each_regex(pattern, cb, std::filesystem::current_path()); }
 
     namespace details { 
         template <typename String>
@@ -101,7 +104,7 @@ namespace gubg { namespace file {
             }
     } 
     template <typename Callback>
-        bool each_glob(const std::string &pattern, Callback cb)
+        bool each_glob(const std::string &pattern, Callback cb, const std::filesystem::path &dir)
         {
             std::string pattern_re = pattern;
 
@@ -113,8 +116,10 @@ namespace gubg { namespace file {
             //Replace \0 with *
             details::sub(pattern_re, pattern_re, std::string("\0", 1), std::string("*"));
 
-            return each_regex(pattern_re, cb);
+            return each_regex(pattern_re, cb, dir);
         }
+    template <typename Callback>
+        bool each_glob(const std::string &pattern, Callback cb) { return each_glob(pattern, cb, std::filesystem::current_path()); }
 
 } } 
 
