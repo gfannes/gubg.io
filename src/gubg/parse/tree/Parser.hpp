@@ -79,11 +79,11 @@ namespace gubg { namespace parse { namespace tree {
                 {
                     MSS_BEGIN(ReturnCode, logns);
                     pop_whitespace_();
-                    if (content_.empty() || content_.front() != '(')
+                    if (content_.empty() || content_.front() != '[')
                     {
                         MSS_Q(ReturnCode::NotFound);
                     }
-                    MSS(content_.pop_bracket(name, "()"));
+                    MSS(content_.pop_bracket(name, "[]"));
                     L(C(name));
                     MSS_END();
                 }
@@ -91,7 +91,7 @@ namespace gubg { namespace parse { namespace tree {
                 {
                     MSS_BEGIN(ReturnCode, logns);
                     gubg::Strange attr;
-                    while ((pop_whitespace_(), content_.pop_bracket(attr, "[]")))
+                    while ((pop_whitespace_(), content_.pop_bracket(attr, "()")))
                     {
                         std::string key, value;
                         pop_whitespace_(attr);
