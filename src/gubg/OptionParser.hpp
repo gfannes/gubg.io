@@ -18,49 +18,49 @@ namespace gubg
 
             OptionParser(const std::string &caption);
 
-            //shortHand example: "-h"
-            //longHand example: "--help"
+            //shorthand example: "-h"
+            //longhand example: "--help"
 			//lambda is called without arguments
             template <typename Lambda>
-                void add_switch(const std::string &shortHand, const std::string &longHand, const std::string &description, Lambda lambda)
+                void add_switch(char shorthand, const std::string &longhand, const std::string &description, Lambda lambda)
                 {
-                    switch_callbacks_[shortHand] = lambda;
-                    switch_callbacks_[longHand] = lambda;
-                    add_helpline_(shortHand, longHand, description);
+                    switch_callbacks_[shorthand_(shorthand)] = lambda;
+                    switch_callbacks_[longhand] = lambda;
+                    add_helpline_(shorthand, longhand, description);
                 }
 
-            //longHand can be of the form: "--<option>" or "--<option> <name>"
+            //longhand can be of the form: "--<option>" or "--<option> <name>"
 			//<name> is optional
 			//lambda is called with <name> or "" as argument
             template <typename Lambda>
-                void add_optional(const std::string &shortHand, const std::string &longHand, const std::string &description, Lambda lambda)
+                void add_optional(char shorthand, const std::string &longhand, const std::string &description, Lambda lambda)
                 {
-                    optional_callbacks_[shortHand] = lambda;
+                    optional_callbacks_[shorthand_(shorthand)] = lambda;
                     {
-                        std::string longOption = longHand;
+                        std::string longOption = longhand;
                         size_t pos = longOption.find(' ');
                         if (pos != std::string::npos)
                             longOption.resize(pos);
                         optional_callbacks_[longOption] = lambda;
                     }
-                    add_helpline_(shortHand, longHand, description);
+                    add_helpline_(shorthand, longhand, description);
                 }
 
-            //longHand has to be of the form: "--<option> <name>"
+            //longhand has to be of the form: "--<option> <name>"
 			//<name> is mandatory
 			//lambda is called with <name> as argument
             template <typename Lambda>
-                void add_mandatory(const std::string &shortHand, const std::string &longHand, const std::string &description, Lambda lambda)
+                void add_mandatory(char shorthand, const std::string &longhand, const std::string &description, Lambda lambda)
                 {
-                    mandatory_callbacks_[shortHand] = lambda;
+                    mandatory_callbacks_[shorthand_(shorthand)] = lambda;
                     {
-                        std::string longOption = longHand;
+                        std::string longOption = longhand;
                         size_t pos = longOption.find(' ');
                         if (pos != std::string::npos)
                             longOption.resize(pos);
                         mandatory_callbacks_[longOption] = lambda;
                     }
-                    add_helpline_(shortHand, longHand, description);
+                    add_helpline_(shorthand, longhand, description);
                 }
 
             std::string help() const;
@@ -71,7 +71,13 @@ namespace gubg
             ReturnCode parse(Args &args, bool stripExe = true);
 
         private:
-            void add_helpline_(const std::string &shortHand, const std::string &longHand, const std::string &description);
+            void add_helpline_(char shorthand, const std::string &longhand, const std::string &description);
+            static std::string shorthand_(char sh)
+            {
+                std::string str(2, '-');
+                str[1] = sh;
+                return str;
+            }
 
             std::string caption_;
             std::ostringstream help_;

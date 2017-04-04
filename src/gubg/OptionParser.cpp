@@ -65,9 +65,9 @@ OptionParser::ReturnCode OptionParser::parse(Args &args, bool stripExe)
     MSS_END();
 }
 
-void OptionParser::add_helpline_(const string &shortHand, const string &longHand, const string &description)
+void OptionParser::add_helpline_(char shorthand, const string &longhand, const string &description)
 {
-    help_ << shortHand << "\t" << longHand << "\t" << description << endl;
+    help_ << shorthand_(shorthand) << "\t" << longhand << "\t" << description << endl;
 }
 string OptionParser::help() const
 {
