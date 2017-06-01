@@ -3,20 +3,20 @@ require('gubg/build/Executable')
 require('gubg/build/Library')
 include GUBG
 
-task :default => :help
-task :help do
-    puts('declare: copy all headers to GUBG::shared')
-    puts('define: build and copy libraries and executables to GUBG::shared')
+task :default do
+    sh "rake -T"
 end
 
 task :clean do
     rm_rf '.cache'
 end
 
+desc "Publish all headers"
 task :declare do
     publish('src', pattern: '**/*.hpp', dst: 'include')
 end
 
+desc "Build library"
 task :define => :declare do
     lib = Build::Library.new('gubg.io')
     lib.add_include_path(shared_dir('include'))
@@ -26,6 +26,7 @@ task :define => :declare do
     publish(lib.lib_filename, dst: 'lib')
 end
 
+desc "Run the unit tests"
 task :test => :define do
     Rake::Task['ut:test'].invoke
 end

@@ -8,16 +8,16 @@ namespace gubg { namespace tree {
 
     struct EndOfDocument { };
 
-    enum State {Text, Tag, Attr, Open, Close};
+    enum class State {Text, Tag, Attr, Open, Close};
     std::ostream &operator<<(std::ostream &os, State s)
     {
         switch (s)
         {
-            case Text: os << "Text"; break;
-            case Tag: os << "Tag"; break;
-            case Attr: os << "Attr"; break;
-            case Open: os << "Open"; break;
-            case Close: os << "Close"; break;
+            case State::Text: os << "Text"; break;
+            case State::Tag: os << "Tag"; break;
+            case State::Attr: os << "Attr"; break;
+            case State::Open: os << "Open"; break;
+            case State::Close: os << "Close"; break;
             default: os << "Unknown state " << (int)s; break;
         }
         return os;
@@ -42,36 +42,36 @@ namespace gubg { namespace tree {
             S(logns);L(C(ch));
             switch (state_)
             {
-                case Text:
+                case State::Text:
                     switch (ch)
                     {
                         case '[':
-                            change_state_<Tag>();
+                            change_state_<State::Tag>();
                             break;
                     }
                     break;
-                case Tag:
+                case State::Tag:
                     switch (ch)
                     {
                         case ']':
-                            change_state_<Text>();
+                            change_state_<State::Text>();
                             break;
                         default:
                             tag_.push_back(ch);
                             break;
                     }
                     break;
-                case Attr:
+                case State::Attr:
                     break;
-                case Open:
+                case State::Open:
                     break;
-                case Close:
+                case State::Close:
                     break;
             }
         }
         void process(EndOfDocument)
         {
-            change_state_<Text>();
+            change_state_<State::Text>();
             if (tag_is_open_)
             {
                 receiver_().tree_close();
@@ -79,7 +79,7 @@ namespace gubg { namespace tree {
             }
 
             while (scope_level_ > 0)
-                change_state_<Close>();
+                change_state_<State::Close>();
         }
 
     private:
@@ -97,12 +97,12 @@ namespace gubg { namespace tree {
             //Exit
             switch (state_)
             {
-                case Text:
+                case State::Text:
                     if (!text_.empty())
                         receiver_().tree_text(text_);
                     text_.clear();
                     break;
-                case Tag:
+                case State::Tag:
                     if (!tag_.empty())
                         receiver_().tree_open_tag(tag_);
                     tag_is_open_ = true;
@@ -114,7 +114,7 @@ namespace gubg { namespace tree {
             //Enter
             switch (state_)
             {
-                case Tag:
+                case State::Tag:
                     if (tag_is_open_)
                     {
                         receiver_().tree_close();
@@ -125,7 +125,7 @@ namespace gubg { namespace tree {
             }
         }
 
-        State state_ = Text;
+        State state_ = State::Text;
         bool tag_is_open_ = false;
         unsigned int bracket_level_ = 0;
         unsigned int scope_level_ = 0;
