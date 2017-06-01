@@ -3,12 +3,11 @@
 /* #include "gubg/parse/tree/Parser.hpp" */
 #include <string>
 #include <vector>
+#include <cassert>
 
 namespace gubg { namespace tree { 
 
-    struct EndOfDocument { };
-
-    enum class State {Text, Tag, Attr, Open, Close};
+    enum class State {Start, Text, Tag, Attr, Open, Close, Stop};
     std::ostream &operator<<(std::ostream &os, State s)
     {
         switch (s)
@@ -27,49 +26,199 @@ namespace gubg { namespace tree {
     class Parser_crtp
     {
     private:
+        using Self = Parser_crtp<Receiver>;
         constexpr static const char *logns = "tree::Parser";
 
     public:
+        Parser_crtp()
+        {
+            change_state_<State::Text>();
+        }
+
         void process(const std::string &content)
         {
             for (auto ch: content)
-                process(ch);
-            process(EndOfDocument());
+                (this->*process_)(ch);
+            end_of_document_();
         }
 
-        void process(char ch)
+    private:
+        Receiver &receiver_() {return static_cast<Receiver&>(*this);}
+
+        void nothing_() {}
+        void nothing_(char ch) {}
+
+        void (Self::*enter_)() = nullptr;
+        void (Self::*process_)(char ch) = nullptr;
+        void (Self::*exit_)() = &Self::nothing_;
+
+        //State::Text
+        std::string text_;
+        void text_enter_()
         {
-            S(logns);L(C(ch));
-            switch (state_)
+            S(logns);
+            text_.clear();
+        }
+        void text_exit_()
+        {
+            S(logns);
+            if (!text_.empty())
+                receiver_().tree_text(text_);
+            text_.clear();
+        }
+        void text_process_(char ch)
+        {
+            S(logns);
+            switch (ch)
             {
-                case State::Text:
-                    switch (ch)
-                    {
-                        case '[':
-                            change_state_<State::Tag>();
-                            break;
-                    }
+                case '[':
+                    change_state_<State::Tag>();
                     break;
-                case State::Tag:
-                    switch (ch)
-                    {
-                        case ']':
-                            change_state_<State::Text>();
-                            break;
-                        default:
-                            tag_.push_back(ch);
-                            break;
-                    }
+                case '(':
+                    change_state_<State::Attr>();
                     break;
-                case State::Attr:
+                case '{':
+                    change_state_<State::Open>();
                     break;
-                case State::Open:
+                case '}':
+                    if (scope_level_ > 0)
+                        change_state_<State::Close>();
+                    else
+                        //Probably incorrect nesting, we treat this as text
+                        text_.push_back(ch);
                     break;
-                case State::Close:
+                default:
+                    text_.push_back(ch);
                     break;
             }
         }
-        void process(EndOfDocument)
+
+        //State::Tag
+        std::string tag_;
+        void tag_enter_()
+        {
+            S(logns);
+            if (tag_is_open_)
+            {
+                receiver_().tree_close();
+                tag_is_open_ = false;
+            }
+            tag_.clear();
+        }
+        void tag_exit_()
+        {
+            S(logns);
+            receiver_().tree_open_tag(tag_);
+            tag_is_open_ = true;
+        }
+        void tag_process_(char ch)
+        {
+            S(logns);
+            switch (ch)
+            {
+                case ']':
+                    change_state_<State::Text>();
+                    break;
+                default:
+                    tag_.push_back(ch);
+                    break;
+            }
+        }
+
+        //State::Attr
+        std::string key_;
+        std::string value_;
+        std::string *kv_;
+        void attr_enter_()
+        {
+            key_.clear();
+            value_.clear();
+            kv_ = &key_;
+        }
+        void attr_exit_()
+        {
+            receiver_().tree_attr(key_, value_);
+        }
+        void attr_process_(char ch)
+        {
+            switch (ch)
+            {
+                case ':':
+                    kv_ = &value_;
+                    break;
+                case ')':
+                    change_state_<State::Text>();
+                    break;
+                default:
+                    kv_->push_back(ch);
+                    break;
+            }
+        }
+
+        //State::Open/Close
+        unsigned int scope_level_ = 0;
+        void open_enter_()
+        {
+            ++scope_level_;
+            tag_is_open_ = false;
+            change_state_<State::Text>();
+        }
+        void close_enter_()
+        {
+            assert(scope_level_ > 0);
+            --scope_level_;
+            receiver_().tree_close();
+            change_state_<State::Text>();
+        }
+
+        template <State WantedState>
+        void change_state_()
+        {
+            if (state_ == WantedState)
+                return;
+
+            (this->*exit_)();
+
+            state_ = WantedState;
+
+            switch (WantedState)
+            {
+                case State::Text:
+                    enter_ = &Self::text_enter_;
+                    process_ = &Self::text_process_;
+                    exit_ = &Self::text_exit_;
+                    break;
+                case State::Tag:
+                    enter_ = &Self::tag_enter_;
+                    process_ = &Self::tag_process_;
+                    exit_ = &Self::tag_exit_;
+                    break;
+                case State::Attr:
+                    enter_ = &Self::attr_enter_;
+                    process_ = &Self::attr_process_;
+                    exit_ = &Self::attr_exit_;
+                    break;
+                case State::Open:
+                    enter_ = &Self::open_enter_;
+                    process_ = &Self::nothing_;
+                    exit_ = &Self::nothing_;
+                    break;
+                case State::Close:
+                    enter_ = &Self::close_enter_;
+                    process_ = &Self::nothing_;
+                    exit_ = &Self::nothing_;
+                    break;
+                case State::Stop:
+                    enter_ = &Self::nothing_;
+                    process_ = &Self::nothing_;
+                    exit_ = &Self::nothing_;
+                    break;
+            }
+
+            (this->*enter_)();
+        }
+
+        void end_of_document_()
         {
             change_state_<State::Text>();
             if (tag_is_open_)
@@ -80,59 +229,13 @@ namespace gubg { namespace tree {
 
             while (scope_level_ > 0)
                 change_state_<State::Close>();
+
+            change_state_<State::Stop>();
         }
 
-    private:
-        Receiver &receiver_() {return static_cast<Receiver&>(*this);}
-
-        template <State WantedState>
-        void change_state_()
-        {
-            if (state_ == WantedState)
-                return;
-
-            S(logns);
-            L(C(state_)C(WantedState));
-
-            //Exit
-            switch (state_)
-            {
-                case State::Text:
-                    if (!text_.empty())
-                        receiver_().tree_text(text_);
-                    text_.clear();
-                    break;
-                case State::Tag:
-                    if (!tag_.empty())
-                        receiver_().tree_open_tag(tag_);
-                    tag_is_open_ = true;
-                    break;
-            }
-
-            state_ = WantedState;
-
-            //Enter
-            switch (state_)
-            {
-                case State::Tag:
-                    if (tag_is_open_)
-                    {
-                        receiver_().tree_close();
-                        tag_is_open_ = false;
-                    }
-                    tag_.clear();
-                    break;
-            }
-        }
-
-        State state_ = State::Text;
+        State state_ = State::Start;
         bool tag_is_open_ = false;
         unsigned int bracket_level_ = 0;
-        unsigned int scope_level_ = 0;
-        std::string text_;
-        std::string tag_;
-        std::string key_;
-        std::string value_;
     };
 
 } } 
@@ -155,11 +258,15 @@ namespace  {
         {
             result.push_back("close");
         }
+        void tree_attr(const std::string &key, const std::string &value)
+        {
+            result.push_back("attr:"+key+"=>"+value);
+        }
     private:
     };
 } 
 
-TEST_CASE("tree::Parser tests", "[ut][tree]")
+TEST_CASE("tree::Parser tests", "[ut][tree2]")
 {
     std::string content;
     std::vector<std::string> wanted;
@@ -178,6 +285,35 @@ TEST_CASE("tree::Parser tests", "[ut][tree]")
         wanted.push_back("close");
         wanted.push_back("open:tag_b");
         wanted.push_back("close");
+    }
+    SECTION("tag + 2 attr")
+    {
+        content = "[tag](a:0)(b)(:c)(a:1)";
+        wanted.push_back("open:tag");
+        wanted.push_back("attr:a=>0");
+        wanted.push_back("attr:b=>");
+        wanted.push_back("attr:=>c");
+        wanted.push_back("attr:a=>1");
+        wanted.push_back("close");
+    }
+    SECTION("2 x (tag + attr)")
+    {
+        content = "[tag0](a:0)[tag1](b:1)";
+        wanted.push_back("open:tag0");
+        wanted.push_back("attr:a=>0");
+        wanted.push_back("close");
+        wanted.push_back("open:tag1");
+        wanted.push_back("attr:b=>1");
+        wanted.push_back("close");
+    }
+    SECTION("nested")
+    {
+        content = "[tag0]{[tag1]}}";
+        wanted.push_back("open:tag0");
+        wanted.push_back("open:tag1");
+        wanted.push_back("close");
+        wanted.push_back("close");
+        wanted.push_back("text:}");
     }
 
     Parser parser;
