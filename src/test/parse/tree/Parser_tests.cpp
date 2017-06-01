@@ -71,28 +71,15 @@ namespace gubg { namespace tree {
         }
         void process(EndOfDocument)
         {
+            change_state_<Text>();
             if (tag_is_open_)
             {
                 receiver_().tree_close();
                 tag_is_open_ = false;
             }
-            switch (state_)
-            {
-                case Text:
-                    break;
-                case Tag:
-                    break;
-                case Attr:
-                    break;
-                case Open:
-                    break;
-                case Close:
-                    break;
-            }
-            for (; scope_level_ > 0; --scope_level_)
-            {
-                receiver_().tree_close();
-            }
+
+            while (scope_level_ > 0)
+                change_state_<Close>();
         }
 
     private:
