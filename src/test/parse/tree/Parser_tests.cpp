@@ -27,7 +27,7 @@ namespace gubg { namespace tree {
     {
     private:
         using Self = Parser_crtp<Receiver>;
-        constexpr static const char *logns = "tree::Parser";
+        constexpr static const char *logns = nullptr;//"tree::Parser";
 
     public:
         Parser_crtp()
@@ -52,45 +52,66 @@ namespace gubg { namespace tree {
         void (Self::*process_)(char ch) = nullptr;
         void (Self::*exit_)() = &Self::nothing_;
 
+        unsigned int bracket_level_ = 0;
+
         //State::Text
         std::string text_;
         void text_enter_()
         {
             S(logns);
             text_.clear();
+            bracket_level_ = 0;
         }
         void text_exit_()
         {
             S(logns);
             if (!text_.empty())
                 receiver_().tree_text(text_);
-            text_.clear();
         }
         void text_process_(char ch)
         {
             S(logns);
+            //We only react if the we are not within <> brackets
+            if (bracket_level_ == 0)
+            {
+                switch (ch)
+                {
+                    case '[':
+                        change_state_<State::Tag>();
+                        return;
+                        break;
+                    case '(':
+                        change_state_<State::Attr>();
+                        return;
+                        break;
+                    case '{':
+                        if (tag_is_open_)
+                        {
+                            change_state_<State::Open>();
+                            return;
+                        }
+                        //Probably a { before a tag
+                        break;
+                    case '}':
+                        if (scope_level_ > 0)
+                        {
+                            change_state_<State::Close>();
+                            return;
+                        }
+                        //Probably incorrect nesting, we treat this as text
+                        break;
+                }
+            }
             switch (ch)
             {
-                case '[':
-                    change_state_<State::Tag>();
+                case '<':
+                    ++bracket_level_;
                     break;
-                case '(':
-                    change_state_<State::Attr>();
-                    break;
-                case '{':
-                    change_state_<State::Open>();
-                    break;
-                case '}':
-                    if (scope_level_ > 0)
-                        change_state_<State::Close>();
-                    else
-                        //Probably incorrect nesting, we treat this as text
-                        text_.push_back(ch);
-                    break;
-                default:
-                    text_.push_back(ch);
+                case '>':
+                    --bracket_level_;
                     break;
             }
+            text_.push_back(ch);
         }
 
         //State::Tag
@@ -104,6 +125,7 @@ namespace gubg { namespace tree {
                 tag_is_open_ = false;
             }
             tag_.clear();
+            bracket_level_ = 0;
         }
         void tag_exit_()
         {
@@ -117,12 +139,18 @@ namespace gubg { namespace tree {
             switch (ch)
             {
                 case ']':
-                    change_state_<State::Text>();
+                    if (bracket_level_ == 0)
+                    {
+                        change_state_<State::Text>();
+                        return;
+                    }
+                    --bracket_level_;
                     break;
-                default:
-                    tag_.push_back(ch);
+                case '[':
+                    ++bracket_level_;
                     break;
             }
+            tag_.push_back(ch);
         }
 
         //State::Attr
@@ -134,6 +162,7 @@ namespace gubg { namespace tree {
             key_.clear();
             value_.clear();
             kv_ = &key_;
+            bracket_level_ = 0;
         }
         void attr_exit_()
         {
@@ -144,15 +173,25 @@ namespace gubg { namespace tree {
             switch (ch)
             {
                 case ':':
-                    kv_ = &value_;
+                    if (kv_ == &key_)
+                    {
+                        kv_ = &value_;
+                        return;
+                    }
+                    break;
+                case '(':
+                    ++bracket_level_;
                     break;
                 case ')':
-                    change_state_<State::Text>();
-                    break;
-                default:
-                    kv_->push_back(ch);
+                    if (bracket_level_ == 0)
+                    {
+                        change_state_<State::Text>();
+                        return;
+                    }
+                    --bracket_level_;
                     break;
             }
+            kv_->push_back(ch);
         }
 
         //State::Open/Close
@@ -235,7 +274,6 @@ namespace gubg { namespace tree {
 
         State state_ = State::Start;
         bool tag_is_open_ = false;
-        unsigned int bracket_level_ = 0;
     };
 
 } } 
@@ -272,6 +310,11 @@ TEST_CASE("tree::Parser tests", "[ut][tree2]")
     std::vector<std::string> wanted;
 
     SECTION("empty") { }
+    SECTION("text")
+    {
+        content = "text";
+        wanted.push_back("text:text");
+    }
     SECTION("one tag")
     {
         content = "[tag]";
@@ -314,6 +357,40 @@ TEST_CASE("tree::Parser tests", "[ut][tree2]")
         wanted.push_back("close");
         wanted.push_back("close");
         wanted.push_back("text:}");
+    }
+    SECTION("tag with []")
+    {
+        content = "[tag[]]";
+        wanted.push_back("open:tag[]");
+        wanted.push_back("close");
+    }
+    SECTION("attr with ()")
+    {
+        content = "[tag](a():0)";
+        wanted.push_back("open:tag");
+        wanted.push_back("attr:a()=>0");
+        wanted.push_back("close");
+    }
+    SECTION("key with :")
+    {
+        content = "[tag](a:b:c)";
+        wanted.push_back("open:tag");
+        wanted.push_back("attr:a=>b:c");
+        wanted.push_back("close");
+    }
+    SECTION("comment")
+    {
+        content = "[tag](a:0)<(b:1)>(c:2)";
+        wanted.push_back("open:tag");
+        wanted.push_back("attr:a=>0");
+        wanted.push_back("text:<(b:1)>");
+        wanted.push_back("attr:c=>2");
+        wanted.push_back("close");
+    }
+    SECTION("{ before a tag")
+    {
+        content = "{}";
+        wanted.push_back("text:{}");
     }
 
     Parser parser;
