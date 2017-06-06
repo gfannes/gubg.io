@@ -9,103 +9,313 @@
 
 namespace gubg { namespace parse { namespace tree { 
 
-    using Name = std::string;
-    using Attributes = std::map<std::string, std::string>;
+    enum class State {Start, Text, Tag, Attr, Open, Close, Stop};
+    inline std::ostream &operator<<(std::ostream &os, State s)
+    {
+        switch (s)
+        {
+            case State::Text: os << "Text"; break;
+            case State::Tag: os << "Tag"; break;
+            case State::Attr: os << "Attr"; break;
+            case State::Open: os << "Open"; break;
+            case State::Close: os << "Close"; break;
+            default: os << "Unknown state " << (int)s; break;
+        }
+        return os;
+    }
 
     template <typename Receiver>
-        class Parser_crtp
+    class Parser_crtp
+    {
+    private:
+        using Self = Parser_crtp<Receiver>;
+        constexpr static const char *logns = nullptr;//"tree::Parser";
+
+    public:
+        using Tag = std::string;
+        using Key = std::string;
+        using Value = std::string;
+        using Text = std::string;
+
+        Parser_crtp()
         {
-            private:
-                constexpr static const char *logns = nullptr;//"tree::Parser";
+            reset();
+        }
 
-            public:
-                ReturnCode process(const std::string &content)
+        bool process(const std::string &content)
+        {
+            MSS_BEGIN(bool);
+            for (auto ch: content)
+            {
+                (this->*process_)(ch);
+                if (!ok_)
+                    break;
+            }
+            end_of_document_();
+            MSS(ok_);
+            MSS_END();
+        }
+
+        void reset()
+        {
+            ok_ = true;
+            exit_ = &Self::nothing_;
+            change_state_<State::Text>();
+        }
+
+    private:
+        Receiver &receiver_() {return static_cast<Receiver&>(*this);}
+
+        bool ok_ = true;
+
+        void nothing_() {}
+        void nothing_(char ch) {}
+
+        void (Self::*enter_)() = nullptr;
+        void (Self::*process_)(char ch) = nullptr;
+        void (Self::*exit_)() = &Self::nothing_;
+
+        unsigned int bracket_level_ = 0;
+
+        //State::Text
+        Text text_;
+        void text_enter_()
+        {
+            S(logns);
+            text_.resize(0);
+            bracket_level_ = 0;
+        }
+        void text_exit_()
+        {
+            S(logns);
+            if (!text_.empty())
+                ok_ = ok_ && receiver_().tree_text(text_);
+        }
+        void text_process_(char ch)
+        {
+            S(logns);
+            //We only react if the we are not within <> brackets
+            if (bracket_level_ == 0)
+            {
+                switch (ch)
                 {
-                    MSS_BEGIN(ReturnCode, logns);
-                    content_ = gubg::Strange(content);
-                    const auto rc = process_();
-                    content_.clear();
-                    MSS(rc);
-                    MSS_END();
-                }
-
-            private:
-                ReturnCode process_()
-                {
-                    MSS_BEGIN(ReturnCode, logns);
-
-                    while (true)
-                    {
-                        Name name;
-                        switch (const auto rc = pop_name_(name))
+                    case '[':
+                        change_state_<State::Tag>();
+                        return;
+                        break;
+                    case '(':
+                        if (attr_allowed_)
                         {
-                            case ReturnCode::OK:
-                                break;
-                            case ReturnCode::NotFound:
-                                MSS_RETURN_OK();
-                                break;
-                            default: MSS(rc); break;
+                            change_state_<State::Attr>();
+                            return;
                         }
-
-                        Attributes attrs;
-                        MSS(pop_attrs_(attrs));
-
-                        receiver_().parser_open(name, attrs);
-
-                        pop_whitespace_();
-                        if (content_.pop_if('{'))
+                        break;
+                    case '{':
+                        if (attr_allowed_)
                         {
-                            pop_whitespace_();
-                            while (!content_.pop_if('}'))
-                            {
-                                MSS(process_());
-                            }
+                            change_state_<State::Open>();
+                            return;
                         }
+                        //Probably a { before a tag
+                        break;
+                    case '}':
+                        if (scope_level_ > 0)
+                        {
+                            change_state_<State::Close>();
+                            return;
+                        }
+                        //Probably incorrect nesting, we treat this as text
+                        break;
+                }
+            }
+            switch (ch)
+            {
+                case '<': ++bracket_level_; break;
+                case '>': --bracket_level_; break;
+            }
+            text_.push_back(ch);
+        }
 
-                        receiver_().parser_close();
+        //State::Tag
+        Tag tag_;
+        void tag_enter_()
+        {
+            S(logns);
+            if (attr_allowed_)
+            {
+                attr_allowed_ = false;
+                ok_ = ok_ && receiver_().tree_attr_done();
+                ok_ = ok_ && receiver_().tree_node_close();
+            }
+            tag_.resize(0);
+            bracket_level_ = 0;
+        }
+        void tag_exit_()
+        {
+            S(logns);
+            ok_ = ok_ && receiver_().tree_node_open(tag_);
+            attr_allowed_ = true;
+        }
+        void tag_process_(char ch)
+        {
+            S(logns);
+            switch (ch)
+            {
+                case ']':
+                    if (bracket_level_ == 0)
+                    {
+                        change_state_<State::Text>();
+                        return;
                     }
+                    --bracket_level_;
+                    break;
+                case '[':
+                    ++bracket_level_;
+                    break;
+            }
+            tag_.push_back(ch);
+        }
 
-                    MSS_END();
-                }
-                static void pop_whitespace_(gubg::Strange &strange)
-                {
-                    strange.strip(" \t\n\r");
-                }
-                void pop_whitespace_()
-                {
-                    pop_whitespace_(content_);
-                }
-                ReturnCode pop_name_(Name &name)
-                {
-                    MSS_BEGIN(ReturnCode, logns);
-                    pop_whitespace_();
-                    if (content_.empty() || content_.front() != '[')
+        //State::Attr
+        Key key_;
+        Value value_;
+        std::string *kv_;
+        void attr_enter_()
+        {
+            S(logns);
+            key_.resize(0);
+            value_.resize(0);
+            kv_ = &key_;
+            bracket_level_ = 0;
+        }
+        void attr_exit_()
+        {
+            S(logns);
+            ok_ = ok_ && receiver_().tree_attr(key_, value_);
+        }
+        void attr_process_(char ch)
+        {
+            S(logns);
+            switch (ch)
+            {
+                case ':':
+                    if (kv_ == &key_)
                     {
-                        MSS_Q(ReturnCode::NotFound);
+                        kv_ = &value_;
+                        return;
                     }
-                    MSS(content_.pop_bracket(name, "[]"));
-                    L(C(name));
-                    MSS_END();
-                }
-                ReturnCode pop_attrs_(Attributes &attrs)
-                {
-                    MSS_BEGIN(ReturnCode, logns);
-                    gubg::Strange attr;
-                    while ((pop_whitespace_(), content_.pop_bracket(attr, "()")))
+                    break;
+                case '(':
+                    ++bracket_level_;
+                    break;
+                case ')':
+                    if (bracket_level_ == 0)
                     {
-                        std::string key, value;
-                        pop_whitespace_(attr);
-                        MSS(attr.pop_until(key, ':'));
-                        MSS(attr.pop_all(value));
-                        L(C(key)C(value));
-                        attrs[key] = value;
+                        change_state_<State::Text>();
+                        return;
                     }
-                    MSS_END();
-                }
-                Receiver &receiver_(){return static_cast<Receiver&>(*this);}
-                gubg::Strange content_;
-                gubg::Strange dump_;
-        };
+                    --bracket_level_;
+                    break;
+            }
+            kv_->push_back(ch);
+        }
+
+        //State::Open/Close
+        unsigned int scope_level_ = 0;
+        void open_enter_()
+        {
+            S(logns);
+            ++scope_level_;
+            assert(attr_allowed_);
+            attr_allowed_ = false;
+            ok_ = ok_ && receiver_().tree_attr_done();
+            change_state_<State::Text>();
+        }
+        void close_enter_()
+        {
+            S(logns);
+            assert(scope_level_ > 0);
+            --scope_level_;
+            if (attr_allowed_)
+            {
+                attr_allowed_ = false;
+                ok_ = ok_ && receiver_().tree_attr_done();
+                ok_ = ok_ && receiver_().tree_node_close();
+            }
+            ok_ = ok_ && receiver_().tree_node_close();
+            change_state_<State::Text>();
+        }
+
+        template <State WantedState>
+        void change_state_()
+        {
+            S(logns);
+
+            if (state_ == WantedState)
+                return;
+
+            (this->*exit_)();
+
+            state_ = WantedState;
+
+            switch (WantedState)
+            {
+                case State::Text:
+                    enter_ = &Self::text_enter_;
+                    process_ = &Self::text_process_;
+                    exit_ = &Self::text_exit_;
+                    break;
+                case State::Tag:
+                    enter_ = &Self::tag_enter_;
+                    process_ = &Self::tag_process_;
+                    exit_ = &Self::tag_exit_;
+                    break;
+                case State::Attr:
+                    enter_ = &Self::attr_enter_;
+                    process_ = &Self::attr_process_;
+                    exit_ = &Self::attr_exit_;
+                    break;
+                case State::Open:
+                    enter_ = &Self::open_enter_;
+                    process_ = &Self::nothing_;
+                    exit_ = &Self::nothing_;
+                    break;
+                case State::Close:
+                    enter_ = &Self::close_enter_;
+                    process_ = &Self::nothing_;
+                    exit_ = &Self::nothing_;
+                    break;
+                case State::Stop:
+                    enter_ = &Self::nothing_;
+                    process_ = &Self::nothing_;
+                    exit_ = &Self::nothing_;
+                    break;
+            }
+
+            (this->*enter_)();
+        }
+
+        void end_of_document_()
+        {
+            S(logns);
+
+            change_state_<State::Text>();
+            if (attr_allowed_)
+            {
+                attr_allowed_ = false;
+                ok_ = ok_ && receiver_().tree_attr_done();
+                ok_ = ok_ && receiver_().tree_node_close();
+            }
+
+            while (scope_level_ > 0)
+                change_state_<State::Close>();
+
+            change_state_<State::Stop>();
+        }
+
+        State state_ = State::Start;
+        bool attr_allowed_ = false;
+    };
 
 } } } 
 
