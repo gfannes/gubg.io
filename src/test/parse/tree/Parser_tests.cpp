@@ -59,7 +59,7 @@ namespace gubg { namespace tree {
         void text_enter_()
         {
             S(logns);
-            text_.clear();
+            text_.resize(0);
             bracket_level_ = 0;
         }
         void text_exit_()
@@ -124,7 +124,7 @@ namespace gubg { namespace tree {
                 receiver_().tree_close();
                 tag_is_open_ = false;
             }
-            tag_.clear();
+            tag_.resize(0);
             bracket_level_ = 0;
         }
         void tag_exit_()
@@ -159,8 +159,8 @@ namespace gubg { namespace tree {
         std::string *kv_;
         void attr_enter_()
         {
-            key_.clear();
-            value_.clear();
+            key_.resize(0);
+            value_.resize(0);
             kv_ = &key_;
             bracket_level_ = 0;
         }
