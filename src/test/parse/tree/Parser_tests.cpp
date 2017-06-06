@@ -6,7 +6,7 @@
 #include <cassert>
 
 namespace  { 
-    class Parser: public gubg::tree::Parser_crtp<Parser>
+    class Parser: public gubg::parse::tree::Parser_crtp<Parser>
     {
     public:
         std::vector<std::string> result;
@@ -40,7 +40,7 @@ namespace  {
     };
 } 
 
-TEST_CASE("tree::Parser tests", "[ut][tree2]")
+TEST_CASE("tree::Parser tests", "[ut][tree]")
 {
     std::string content;
     std::vector<std::string> wanted;
@@ -55,14 +55,17 @@ TEST_CASE("tree::Parser tests", "[ut][tree2]")
     {
         content = "[tag]";
         wanted.push_back("open:tag");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
     }
     SECTION("two tags")
     {
         content = "[tag_a][tag_b]";
         wanted.push_back("open:tag_a");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
         wanted.push_back("open:tag_b");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
     }
     SECTION("tag + 2 attr")
@@ -73,6 +76,7 @@ TEST_CASE("tree::Parser tests", "[ut][tree2]")
         wanted.push_back("attr:b=>");
         wanted.push_back("attr:=>c");
         wanted.push_back("attr:a=>1");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
     }
     SECTION("2 x (tag + attr)")
@@ -80,16 +84,20 @@ TEST_CASE("tree::Parser tests", "[ut][tree2]")
         content = "[tag0](a:0)[tag1](b:1)";
         wanted.push_back("open:tag0");
         wanted.push_back("attr:a=>0");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
         wanted.push_back("open:tag1");
         wanted.push_back("attr:b=>1");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
     }
     SECTION("nested")
     {
         content = "[tag0]{[tag1]}}";
         wanted.push_back("open:tag0");
+        wanted.push_back("attr_done");
         wanted.push_back("open:tag1");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
         wanted.push_back("close");
         wanted.push_back("text:}");
@@ -98,6 +106,7 @@ TEST_CASE("tree::Parser tests", "[ut][tree2]")
     {
         content = "[tag[]]";
         wanted.push_back("open:tag[]");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
     }
     SECTION("attr with ()")
@@ -105,6 +114,7 @@ TEST_CASE("tree::Parser tests", "[ut][tree2]")
         content = "[tag](a():0)";
         wanted.push_back("open:tag");
         wanted.push_back("attr:a()=>0");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
     }
     SECTION("key with :")
@@ -112,6 +122,7 @@ TEST_CASE("tree::Parser tests", "[ut][tree2]")
         content = "[tag](a:b:c)";
         wanted.push_back("open:tag");
         wanted.push_back("attr:a=>b:c");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
     }
     SECTION("comment")
@@ -121,6 +132,7 @@ TEST_CASE("tree::Parser tests", "[ut][tree2]")
         wanted.push_back("attr:a=>0");
         wanted.push_back("text:<(b:1)>");
         wanted.push_back("attr:c=>2");
+        wanted.push_back("attr_done");
         wanted.push_back("close");
     }
     SECTION("{ before a tag")
