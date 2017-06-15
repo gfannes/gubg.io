@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 using namespace std;
 using namespace gubg::parse::numbers;
 
