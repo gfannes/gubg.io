@@ -16,20 +16,23 @@ namespace gubg
         public:
             enum class ReturnCode {OK, Error, CouldNotFindExecutable, ExpectedMandatoryArgument, };
 
+            typedef std::list<std::string> Args;
+            static Args create_args(int argc, const char **argv);
+
             OptionParser(const std::string &caption);
 
-            //shorthand example: "-h"
-            //longhand example: "--help"
+            //shorthand example: "h"
+            //longhand example: "help"
 			//lambda is called without arguments
             template <typename Lambda>
                 void add_switch(char shorthand, const std::string &longhand, const std::string &description, Lambda lambda)
                 {
                     switch_callbacks_[shorthand_(shorthand)] = lambda;
-                    switch_callbacks_[longhand] = lambda;
+                    switch_callbacks_[longhand_(longhand)] = lambda;
                     add_helpline_(shorthand, longhand, description);
                 }
 
-            //longhand can be of the form: "--<option>" or "--<option> <name>"
+            //longhand can be of the form: "<option>" or "<option> <name>"
 			//<name> is optional
 			//lambda is called with <name> or "" as argument
             template <typename Lambda>
@@ -41,12 +44,12 @@ namespace gubg
                         size_t pos = longOption.find(' ');
                         if (pos != std::string::npos)
                             longOption.resize(pos);
-                        optional_callbacks_[longOption] = lambda;
+                        optional_callbacks_[longhand_(longOption)] = lambda;
                     }
                     add_helpline_(shorthand, longhand, description);
                 }
 
-            //longhand has to be of the form: "--<option> <name>"
+            //longhand has to be of the form: "<option> <name>"
 			//<name> is mandatory
 			//lambda is called with <name> as argument
             template <typename Lambda>
@@ -58,15 +61,12 @@ namespace gubg
                         size_t pos = longOption.find(' ');
                         if (pos != std::string::npos)
                             longOption.resize(pos);
-                        mandatory_callbacks_[longOption] = lambda;
+                        mandatory_callbacks_[longhand_(longOption)] = lambda;
                     }
                     add_helpline_(shorthand, longhand, description);
                 }
 
             std::string help() const;
-
-            typedef std::list<std::string> Args;
-            static Args create_args(int argc, const char **argv);
 
             ReturnCode parse(Args &args, bool stripExe = true);
 
@@ -76,6 +76,14 @@ namespace gubg
             {
                 std::string str(2, '-');
                 str[1] = sh;
+                return str;
+            }
+            static std::string longhand_(const std::string &lh)
+            {
+                if (lh.size() >= 2 && lh.substr(0, 2) == "--")
+                    return lh;
+                std::string str(lh.size()+2, '-');
+                lh.copy(&str[2], lh.size());
                 return str;
             }
 

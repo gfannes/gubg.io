@@ -56,6 +56,21 @@ namespace gubg { namespace parse { namespace tree {
             MSS_END();
         }
 
+        bool process(char ch)
+        {
+            MSS_BEGIN(bool);
+            (this->*process_)(ch);
+            MSS(ok_);
+            MSS_END();
+        }
+        bool stop()
+        {
+            MSS_BEGIN(bool);
+            end_of_document_();
+            MSS(ok_);
+            MSS_END();
+        }
+
         void reset()
         {
             ok_ = true;

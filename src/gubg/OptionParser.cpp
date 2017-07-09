@@ -67,7 +67,7 @@ OptionParser::ReturnCode OptionParser::parse(Args &args, bool stripExe)
 
 void OptionParser::add_helpline_(char shorthand, const string &longhand, const string &description)
 {
-    help_ << shorthand_(shorthand) << "\t" << longhand << "\t" << description << endl;
+    help_ << shorthand_(shorthand) << "\t" << longhand_(longhand) << "\t" << description << endl;
 }
 string OptionParser::help() const
 {
