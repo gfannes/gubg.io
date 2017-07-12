@@ -127,10 +127,10 @@ TEST_CASE("tree::Parser tests", "[ut][tree]")
     }
     SECTION("comment")
     {
-        content = "[tag](a:0)<(b:1)>(c:2)";
+        content = "[tag](a:0)```(b:1)```(c:2)";
         wanted.push_back("open:tag");
         wanted.push_back("attr:a=>0");
-        wanted.push_back("text:<(b:1)>");
+        wanted.push_back("text:```(b:1)```");
         wanted.push_back("attr:c=>2");
         wanted.push_back("attr_done");
         wanted.push_back("close");

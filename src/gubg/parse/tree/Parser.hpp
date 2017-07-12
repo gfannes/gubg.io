@@ -91,6 +91,7 @@ namespace gubg { namespace parse { namespace tree {
         void (Self::*exit_)() = &Self::nothing_;
 
         unsigned int bracket_level_ = 0;
+        unsigned int fence_depth_ = 0;
 
         //State::Text
         Text text_;
@@ -98,6 +99,7 @@ namespace gubg { namespace parse { namespace tree {
         {
             S(logns);
             text_.resize(0);
+            fence_depth_ = 0;
             bracket_level_ = 0;
         }
         void text_exit_()
@@ -109,7 +111,35 @@ namespace gubg { namespace parse { namespace tree {
         void text_process_(char ch)
         {
             S(logns);
-            //We only react if the we are not within <> brackets
+
+            if (fence_depth_ == 0)
+            {
+                switch (ch)
+                {
+                    case '`':
+                        ++bracket_level_;
+                        break;
+                    default:
+                        fence_depth_ = bracket_level_;
+                        break;
+                }
+            }
+            else
+            {
+                switch (ch)
+                {
+                    case '`':
+                        --bracket_level_;
+                        if (bracket_level_ == 0)
+                            fence_depth_ = 0;
+                        break;
+                    default:
+                        bracket_level_ = fence_depth_;
+                        break;
+                }
+            }
+
+            //We only react if the we are not within a ```-fenced block. The number of ``` is variable, but should match.
             if (bracket_level_ == 0)
             {
                 switch (ch)
@@ -142,11 +172,6 @@ namespace gubg { namespace parse { namespace tree {
                         //Probably incorrect nesting, we treat this as text
                         break;
                 }
-            }
-            switch (ch)
-            {
-                case '<': ++bracket_level_; break;
-                case '>': --bracket_level_; break;
             }
             text_.push_back(ch);
         }
