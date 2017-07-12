@@ -13,6 +13,7 @@ namespace std { namespace filesystem {
     inline path current_path() {return std::experimental::filesystem::current_path();}
     inline bool is_directory(const path &p) {return std::experimental::filesystem::is_directory(p);}
     inline bool is_regular_file(const path &p) {return std::experimental::filesystem::is_regular_file(p);}
+    inline bool create_directory(const path &p) {return std::experimental::filesystem::create_directory(p);}
 
 } } 
 
