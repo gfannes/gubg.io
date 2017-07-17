@@ -340,17 +340,18 @@ namespace gubg { namespace parse { namespace tree {
             S(logns);
 
             change_state_<State::Text>();
+
+            while (scope_level_ > 0)
+                change_state_<State::Close>();
+
+            change_state_<State::Stop>();
+
             if (attr_allowed_)
             {
                 attr_allowed_ = false;
                 ok_ = ok_ && receiver_().tree_attr_done();
                 ok_ = ok_ && receiver_().tree_node_close();
             }
-
-            while (scope_level_ > 0)
-                change_state_<State::Close>();
-
-            change_state_<State::Stop>();
         }
 
         State state_ = State::Start;
