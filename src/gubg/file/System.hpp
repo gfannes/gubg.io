@@ -81,21 +81,17 @@ namespace gubg { namespace file {
 
     namespace details { 
         template <typename String>
-            void sub(String &dst, String src, const String &pattern, const String &replace)
+            void substitute(String &dst, String src, const String &pattern, const String &replace)
             {
-                S("sub");
                 dst.clear();
                 for (size_t pos = 0; true; )
                 {
-                    L(C(pos));
                     auto pattern_pos = src.find(pattern, pos);
                     if (pattern_pos == String::npos)
                     {
-                        L(C(pattern) << " not found (anymore)");
                         dst.append(src, pos, String::npos);
                         return;
                     }
-                    L("Found " << C(pattern) << " at " << C(pattern_pos));
                     dst.append(src, pos, pattern_pos-pos);
                     pos = pattern_pos;
                     pos += pattern.size();
@@ -106,15 +102,16 @@ namespace gubg { namespace file {
     template <typename Callback>
         bool each_glob(const std::string &pattern, Callback cb, const std::filesystem::path &dir)
         {
+            S("each_glob");L(C(pattern)C(dir));
             std::string pattern_re = pattern;
 
-            details::sub(pattern_re, pattern_re, std::string("."), std::string("\\."));
+            details::substitute(pattern_re, pattern_re, std::string("."), std::string("\\."));
             //We use \0 to represent * temporarily
-            details::sub(pattern_re, pattern_re, std::string("**"), std::string(".\0", 2));
-            details::sub(pattern_re, pattern_re, std::string("*"), std::string("[^/]\0", 5));
+            details::substitute(pattern_re, pattern_re, std::string("**"), std::string(".\0", 2));
+            details::substitute(pattern_re, pattern_re, std::string("*"), std::string("[^/]\0", 5));
 
             //Replace \0 with *
-            details::sub(pattern_re, pattern_re, std::string("\0", 1), std::string("*"));
+            details::substitute(pattern_re, pattern_re, std::string("\0", 1), std::string("*"));
 
             return each_regex(pattern_re, cb, dir);
         }
