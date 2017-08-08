@@ -1,0 +1,8 @@
+recipe("gubg.io", "func", fun(r){
+    r.add_header("src", "gubg/**.hpp")
+    r.add_source("src", "gubg/**.cpp")
+})
+
+recipe("gubg.io", "ut", fun(r){
+    r.add_source("src/test", "**.cpp")
+})
