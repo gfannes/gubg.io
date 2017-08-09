@@ -11,6 +11,8 @@ task :clean do
     rm_rf '.cache'
 end
 
+task :prepare
+
 desc "Publish all headers"
 task :declare do
     publish('src', pattern: '**/*.hpp', dst: 'include')
