@@ -6,8 +6,13 @@ using namespace gubg::mss;
 TEST_CASE("file::Forest tests", "[ut]")
 {
     S("test");
+
+    auto ptr = std::getenv("gubg");
+    const std::string gubg_dir = (ptr ? ptr : "");
+    REQUIRE(!gubg_dir.empty());
+
     Forest forest;
-    REQUIRE(is_ok(forest.add(File("/home/geert/gubg/gubg.io"), {"cpp", "hpp"})));
+    REQUIRE(is_ok(forest.add(File(gubg_dir+"/gubg.io"), {"cpp", "hpp"})));
     L("\nAll files");
     for (auto f: forest.allFiles())
         L(f.name());
