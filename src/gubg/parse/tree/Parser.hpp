@@ -47,6 +47,7 @@ namespace gubg { namespace parse { namespace tree {
             MSS_BEGIN(bool);
             for (auto ch: content)
             {
+                /* std::cout << "(" << ch << ")" << std::endl; */
                 (this->*process_)(ch);
                 if (!ok_)
                     break;
@@ -110,7 +111,7 @@ namespace gubg { namespace parse { namespace tree {
         }
         void text_process_(char ch)
         {
-            S(logns);
+            S(logns);L(ch);
 
             if (fence_depth_ == 0)
             {
@@ -198,7 +199,7 @@ namespace gubg { namespace parse { namespace tree {
         }
         void tag_process_(char ch)
         {
-            S(logns);
+            S(logns);L(ch);
             switch (ch)
             {
                 case ']':
@@ -235,7 +236,7 @@ namespace gubg { namespace parse { namespace tree {
         }
         void attr_process_(char ch)
         {
-            S(logns);
+            S(logns);L(ch);
             switch (ch)
             {
                 case ':':
