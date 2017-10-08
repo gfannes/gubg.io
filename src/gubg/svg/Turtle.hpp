@@ -11,12 +11,17 @@ namespace gubg { namespace svg {
     class Turtle
     {
     public:
-        void down() { actions_.push_back(Action::create_down()); }
-        void up() { actions_.push_back(Action::create_up()); }
-        void run(double distance) { actions_.push_back(Action::create_run(distance)); }
+        Turtle & down() { actions_.push_back(Action::create_down()); return *this; }
+        Turtle & up() { actions_.push_back(Action::create_up());  return *this;}
+        Turtle & run(double distance) { actions_.push_back(Action::create_run(distance));  return *this;}
+        Turtle & turn(double angle_frac, double radius = 0.0) { actions_.push_back(Action::create_turn(angle_frac, radius));  return *this;}
+        Turtle & zoom(double zoom) { actions_.push_back(Action::create_zoom(zoom));  return *this;}
+        Turtle & to(double x, double y, double angle_frac) { actions_.push_back(Action::create_to(x,y, angle_frac));  return *this;}
+        Turtle & color(const std::string &color) { actions_.push_back(Action::create_color(color));  return *this;}
 
-        void stream(std::ostream &os, unsigned int x_width, unsigned int y_width) const
+        bool stream(std::ostream &os, unsigned int x_width, unsigned int y_width) const
         {
+            MSS_BEGIN(bool);
             using namespace gubg::xml::builder;
             {
                 Header header(os);
@@ -30,21 +35,37 @@ namespace gubg { namespace svg {
             svg.attr("width", x_width);
             svg.attr("height", y_width);
             auto g = svg.tag("g");
-            auto path = svg.tag("path");
 
             std::ostringstream oss;
-            double d = 10;
-            auto M = [&](int x, int y){oss << "M" << d*x << "," << d*y << " ";};
-            auto m = [&](int x, int y){oss << "m" << d*x << "," << d*y << " ";};
-            auto arc = [&](int x, int y, bool b){oss << "a" << d*2 << "," << d*2 << " 0 0," << (b?1:0) << d*x << "," << d*y << " ";};
-            auto a = [&](int x, int y){arc(x, y, true);};
-            auto aa = [&](int x, int y){arc(x, y, false);};
-            auto l = [&](int x, int y){oss << "l" << d*x << "," << d*y << " ";};
+            double zoom = 1.0;
+            auto trans = [&](const V2 &pos){return V2(zoom*pos.x, zoom*(y_width-pos.y));};
 
-            M(10,10);
+            auto mm = [&](const V2 &p){const auto pos = trans(p); oss << "M" << pos.x << "," << pos.y << " ";};
+            auto m = [&](const V2 &p){const auto pos = trans(p); oss << "m" << pos.x << "," << pos.y << " ";};
+            auto arc = [&](const V2 &p, bool b){const auto pos = trans(p); oss << "a" << zoom*2 << "," << zoom*2 << " 0 0," << (b?1:0) << pos.x << "," << pos.y << " ";};
+            auto a = [&](const V2 &p){arc(p, true);};
+            auto aa = [&](const V2 &p){arc(p, false);};
+            auto l = [&](const V2 &p){const auto pos = trans(p); oss << "l" << pos.x << "," << pos.y << " ";};
+            auto ll = [&](const V2 &p){const auto pos = trans(p); oss << "L" << pos.x << "," << pos.y << " ";};
 
+            V2 start_pos;
             V2 pos;
-            double angle = 0.0;
+            std::string color = "black";
+
+            auto commit = [&](){
+                const auto str = oss.str();
+                if (!str.empty())
+                {
+                    oss.str("");
+                    mm(start_pos);
+                    start_pos = pos;
+                    auto path = g.tag("path");
+                    path.attr("d", oss.str()+str).attr("fill", "none").attr("stroke", color);
+                    oss.str("");
+                }
+            };
+
+            double angle_frac = 0.0;
             bool down = false;
             for (const auto &action: actions_)
             {
@@ -55,37 +76,71 @@ namespace gubg { namespace svg {
                         break;
                     case Run:
                         {
-                            const auto dir = V2::from_frac(angle, action.distance);
+                            const auto dir = V2::from_frac(angle_frac, action.distance);
                             pos += dir;
                             if (down)
-                                l(pos.x, pos.y);
+                                ll(pos);
                             else
-                                m(pos.x, pos.y);
+                                mm(pos);
                         }
                         break;
                     case Turn:
+                        if (action.radius == 0.0)
                         {
-                            const auto dir = V2::from_frac(angle, action.distance);
-                            const auto ortho = V2::ortho(dir, action.angle >= 0);
+                            angle_frac += action.angle_frac;
                         }
+                        else
+                        {
+                            const auto dir = V2::from_frac(angle_frac, action.distance);
+                            const auto ortho = V2::ortho(dir, action.angle_frac >= 0);
+                        }
+                        break;
+                    case Zoom:
+                        {
+                            zoom = action.zoom;
+                        }
+                        break;
+                    case To:
+                        {
+                            pos = action.pos;
+                            if (down)
+                                ll(pos);
+                            else
+                                mm(pos);
+                            angle_frac = action.angle_frac;
+                        }
+                        break;
+                    case Color:
+                        if (color != action.color)
+                        {
+                            commit();
+                            color = action.color;
+                        }
+                        break;
+                    default:
+                        MSS(false, std::cout << "Error: Unknown command " << C(action.cmd, int) << std::endl);
                         break;
                 }
             }
-            g.attr("d", oss.str()).attr("fill", "none").attr("stroke", "blue");
+            commit();
+            MSS_END();
         }
 
     private:
         enum Command
         {
-            Pen, Run, Turn,
+            Pen, Run, Turn, Zoom, To, Color,
         };
         struct Action
         {
             Command cmd;
             bool down = false;
             double distance = 0.0;
-            double angle = 0.0;
+            V2 pos;
+            double angle_frac = 0.0;
             double radius = 0.0;
+            double zoom = 0.0;
+            std::string color;
 
             Action(){}
             Action(Command cmd): cmd(cmd) {}
@@ -106,6 +161,33 @@ namespace gubg { namespace svg {
             {
                 Action action(Run);
                 action.distance = distance;
+                return action;
+            }
+            static Action create_turn(double angle_frac, double radius)
+            {
+                Action action(Turn);
+                action.angle_frac = angle_frac;
+                action.radius = radius;
+                return action;
+            }
+            static Action create_zoom(double zoom)
+            {
+                Action action(Zoom);
+                action.zoom = zoom;
+                return action;
+            }
+            static Action create_to(double x, double y, double angle_frac)
+            {
+                Action action(To);
+                action.pos.x = x;
+                action.pos.y = y;
+                action.angle_frac = angle_frac;
+                return action;
+            }
+            static Action create_color(const std::string &color)
+            {
+                Action action(Color);
+                action.color = color;
                 return action;
             }
         };
