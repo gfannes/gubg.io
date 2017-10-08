@@ -10,24 +10,18 @@ TEST_CASE("svg::Turtle", "[ut][turtle]")
 
     /* t.run(10).turn(0.25).run(10); */
 
-    t.run(10).turn(0.25).run(10).turn(0.25).run(10).turn(0.25).run(10).turn(0.25);
-    t.up();
-
-    if (true)
+    if (false)
     {
-        t.to(100,100, 0);
-
-        t.down();
-        /* t.zoom(4); */
-
+        t.run(10).turn(0.25).run(10).turn(0.25).run(10).turn(0.25).run(10).turn(0.25);
+        t.up();
+    }
+    else
+    {
         const double h = 10;
         const double w = 20;
         const double s = 4;
         auto ripple_a = [&](){
             t.color("red").run(w);
-        };
-        auto ripple_aa = [&](){
-            t.color("brown").run(w-s);
         };
         auto ripple_b = [&](){
             t.color("blue").run(s).turn(-0.25).run(h).turn(-0.25).run(s).turn(0.25).run(h).turn(0.25);
@@ -35,41 +29,27 @@ TEST_CASE("svg::Turtle", "[ut][turtle]")
         auto ripple_c = [&](){
             t.color("green").run(w).turn(0.25).run(2*h).turn(-0.25);
         };
-        auto ripple_cc = [&](){
-            t.color("brown").run(w+s).turn(0.25).run(2*h).turn(-0.25);
-        };
 
         int nr = 20;
 
+        t.up().to(100,100, 0).down();
         for (int i = 0; i < nr; ++i)
         {
             ripple_a();
             ripple_b();
             ripple_c();
         }
-        t.color("black").turn(0.25).run(200).turn(0.25);
+        t.color("black").run(s+w/2).turn(0.25).run(200);
+
+        t.up().to(100,100, 0).down();
+        t.color("black").turn(0.25).run(200).turn(-0.25).run(s);
         for (int i = 0; i < nr; ++i)
         {
-            if (i == 0)
-            {
-                ripple_aa();
-                ripple_b();
-                ripple_c();
-            }
-            else if (i == nr-1)
-            {
-                ripple_a();
-                ripple_b();
-                ripple_cc();
-            }
-            else
-            {
-                ripple_a();
-                ripple_b();
-                ripple_c();
-            }
+            ripple_a();
+            ripple_b();
+            ripple_c();
         }
-        t.color("black").turn(0.25).run(200).turn(0.25);
+        t.run(w/2);
     }
 
     std::ofstream fo("turtle.svg");
