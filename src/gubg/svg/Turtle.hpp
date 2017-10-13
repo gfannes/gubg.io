@@ -3,7 +3,7 @@
 
 #include "gubg/xml/Builder.hpp"
 #include "gubg/V2.hpp"
-#include <ostream>
+#include <sstream>
 #include <vector>
 
 namespace gubg { namespace svg { 
