@@ -6,5 +6,6 @@ add_book("gubg.io", fun(b){
 
     b.add_recipe("ut", fun(r){
         r.add_source("src/test", "**.cpp")
+        r.depends_on("gubg.io.func")
     })
 })
