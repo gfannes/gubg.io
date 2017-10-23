@@ -29,12 +29,15 @@ namespace gubg { namespace file {
         bool each_entry(Callback cb, const std::filesystem::path &dir, bool skip_hidden = true)
         {
             MSS_BEGIN(bool);
-            for (const auto &path: std::filesystem::directory_iterator(dir))
+            if (std::filesystem::is_directory(dir))
             {
-                if (skip_hidden && is_hidden(path))
-                    continue;
-                if (!cb(path))
-                    break;
+                for (const auto &path: std::filesystem::directory_iterator(dir))
+                {
+                    if (skip_hidden && is_hidden(path))
+                        continue;
+                    if (!cb(path))
+                        break;
+                }
             }
             MSS_END();
         }
