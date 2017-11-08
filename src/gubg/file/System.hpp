@@ -67,12 +67,11 @@ namespace gubg { namespace file {
             auto pattern_full = dir;
             pattern_full /= pattern;
             L(C(pattern_full));
-            std::regex re(static_cast<std::string>(pattern_full));
+            std::regex re(pattern_full.string());
             auto recursor = [&](const std::filesystem::path &fn)
             {
                 L(C(fn));
-                const auto fn_str = static_cast<std::string>(fn);
-                if (std::regex_match(fn_str, re))
+                if (std::regex_match(fn.string(), re))
                     cb(fn);
                 return true;
             };
