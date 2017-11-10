@@ -34,6 +34,10 @@ namespace gubg { namespace svg {
             Tag svg(os, "svg");
             svg.attr("width", x_width);
             svg.attr("height", y_width);
+            {
+                std::ostringstream oss; oss << "0 0 " << x_width << " " << y_width;
+                svg.attr("viewBox", oss.str());
+            }
             auto g = svg.tag("g");
 
             std::ostringstream oss;

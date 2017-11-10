@@ -8,13 +8,27 @@ TEST_CASE("svg::Turtle", "[ut][turtle]")
 
     t.down();
 
+    const double min_th = 5;
+
+    const double floor_th = 4;
+
+    const double tooth_w = 20;
+    const double tooth_ww = tooth_w/2;
+    const double tooth_th = 5;
+
+    const double front_th = 4;
+    const double back_th = 4;
+
+    const double side_th = 4;
+
+    const unsigned int hnrw = 2;
+
+    const double side_height = min_th+floor_th+hnrw*tooth_w-tooth_ww+min_th+2*tooth_th;
+
     const double h = 8;
-    const double w = 20;
-    const double ww = w/2;
     const double s = 8;
     const double d = 8;
     const unsigned int nr = 9;
-    const unsigned int hnrw = 2;
     const double l = 300;
 
     auto side = [&](bool b)
@@ -25,16 +39,16 @@ TEST_CASE("svg::Turtle", "[ut][turtle]")
         const double offset = (b ? -s : s/2);
 
         auto ripple_a = [&](double delta = 0.0){
-            t.color("red").run(w+delta);
+            t.color("red").run(tooth_w+delta);
         };
         auto ripple_b = [&](){
-            t.color("blue").run(s).turn(-0.25).run(h).turn(-0.25).run(s).turn(0.25).run(h).turn(0.25);
+            t.color("blue").run(tooth_ww).turn(-0.25).run(tooth_th).turn(-0.25).run(tooth_ww).turn(0.25).run(tooth_th).turn(0.25);
         };
         auto ripple_bb = [&](){
-            t.color("blue").turn(-0.25).run(h).turn(-0.25).run(s).turn(0.25).run(h).turn(0.25).run(s);
+            t.color("blue").turn(-0.25).run(tooth_th).turn(-0.25).run(tooth_ww).turn(0.25).run(tooth_th).turn(0.25).run(tooth_ww);
         };
         auto ripple_c = [&](){
-            t.color("green").run(w).turn(0.25).run(2*h).turn(-0.25);
+            t.color("green").run(tooth_w).turn(0.25).run(2*tooth_th).turn(-0.25);
         };
 
         t.up().to(x,y, 0).down();
@@ -44,58 +58,57 @@ TEST_CASE("svg::Turtle", "[ut][turtle]")
             ripple_b();
             ripple_c();
         }
-        t.color("black").run(w-offset).turn(0.25).run(hnrw*w+w+ww);
+        t.color("black").run(tooth_w-offset).turn(0.25).run(side_height);
 
         t.up().to(x,y, 0).down();
-        t.color("black").turn(0.25).run(hnrw*w+w+ww).turn(-0.25).run(s+offset);
+        t.color("black").turn(0.25).run(side_height).turn(-0.25).run(s+offset);
         for (int i = 0; i < nr; ++i)
         {
             ripple_a();
             ripple_bb();
             ripple_c();
         }
-        t.color("black").run(w-s-offset);
+        t.color("black").run(tooth_w-s-offset);
 
-        t.up().to(x,y, 0).turn(0.25).run(h).turn(-0.25);
+        t.up().to(x,y, 0).turn(0.25).run(min_th).turn(-0.25);
         for (int i = 0; i < nr; ++i)
         {
-            t.run(w).down().run(w).turn(0.25).run(d).turn(0.25).run(w).turn(0.25).run(d).turn(0.25).up().run(w);
+            t.run(tooth_w).down().run(tooth_w).turn(0.25).run(floor_th).turn(0.25).run(tooth_w).turn(0.25).run(floor_th).turn(0.25).up().run(tooth_w);
         }
 
-        t.up().to(x,y, 0).run(h+d).turn(0.25).run(ww);
+        t.up().to(x,y, 0).run(min_th+ back_th).turn(0.25).run(min_th+floor_th);
         for (int i = 0; i < hnrw; ++i)
         {
-            t.run(ww).down().run(ww).turn(0.25).run(d).turn(0.25).run(ww).turn(0.25).run(d).turn(0.25).up().run(ww);
+            t.down().run(tooth_ww).turn(0.25).run(back_th).turn(0.25).run(tooth_ww).turn(0.25).run(back_th).turn(0.25).up().run(tooth_w);
         }
 
-        t.up().to(x,y, 0).run(nr*w*2+w-h).turn(0.25).run(ww);
+        t.up().to(x,y, 0).run(nr*tooth_w*2+tooth_w-min_th).turn(0.25).run(min_th+floor_th);
         for (int i = 0; i < hnrw; ++i)
         {
-            t.run(ww).down().run(ww).turn(0.25).run(d).turn(0.25).run(ww).turn(0.25).run(d).turn(0.25).up().run(ww);
+            t.down().run(tooth_ww).turn(0.25).run(front_th).turn(0.25).run(tooth_ww).turn(0.25).run(front_th).turn(0.25).up().run(tooth_w);
         }
     };
 
     side(true);
-    /* side(false); */
+    side(false);
 
     auto front = [&](){
 
-        t.up().to(0,0, 0);
+        t.up().to(0,200, 0);
 
         t.turn(0.25);
-        t.down().run(w-2*d);
+        t.down();
         for (int i = 0; i < hnrw; ++i)
-            t.turn(0.25).run(ww).turn(-0.25).run(ww).turn(-0.25).run(ww).turn(0.25).run(ww);
-        t.run(ww+8);
+            t.turn(0.25).run(2*side_th).turn(-0.25).run(tooth_ww).turn(-0.25).run(2*side_th).turn(0.25).run(tooth_ww);
+        t.run(side_height-hnrw*tooth_w);
         t.turn(-0.25).run(l);
 
-        t.up().to(0,0, 0);
+        t.up().to(0,200, 0);
         t.down().run(l);
         t.turn(0.25);
-        t.run(w-2*d);
         for (int i = 0; i < hnrw; ++i)
-            t.turn(-0.25).run(ww).turn(0.25).run(ww).turn(0.25).run(ww).turn(-0.25).run(ww);
-        t.run(ww+8);
+            t.turn(-0.25).run(2*side_th).turn(0.25).run(tooth_ww).turn(0.25).run(2*side_th).turn(-0.25).run(tooth_ww);
+        t.run(side_height-hnrw*tooth_w);
     };
 
     front();
@@ -104,16 +117,16 @@ TEST_CASE("svg::Turtle", "[ut][turtle]")
         t.up().to(0,100, 0);
         t.down();
         for (int i = 0; i < nr; ++i)
-            t.run(w).turn(-0.25).run(8).turn(0.25).run(w).turn(0.25).run(8).turn(-0.25);
-        t.run(w);
+            t.run(tooth_w).turn(-0.25).run(8).turn(0.25).run(tooth_w).turn(0.25).run(8).turn(-0.25);
+        t.run(tooth_w);
         t.turn(0.25).run(l);
 
         t.up().to(0,100, 0);
         t.down();
         t.turn(0.25).run(l).turn(-0.25);
         for (int i = 0; i < nr; ++i)
-            t.run(w).turn(0.25).run(8).turn(-0.25).run(w).turn(-0.25).run(8).turn(0.25);
-        t.run(w);
+            t.run(tooth_w).turn(0.25).run(8).turn(-0.25).run(tooth_w).turn(-0.25).run(8).turn(0.25);
+        t.run(tooth_w);
     };
 
     floor();
