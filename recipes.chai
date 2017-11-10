@@ -1,7 +1,9 @@
-open_book("gubg.io", fun(b){
+open_book(["gubg","io"], fun(b){
     b.add_recipe("func", fun(r){
         r.add_header("src", "gubg/**.hpp")
         r.add_source("src", "gubg/**.cpp")
+
+        r.depends_on("gubg.std.func")
     })
 
     b.add_recipe("ut", fun(r){
