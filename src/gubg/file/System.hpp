@@ -4,6 +4,7 @@
 #include "gubg/file/Name.hpp"
 #include "gubg/mss.hpp"
 #include "gubg/std/filesystem.hpp"
+#include "gubg/string_algo/substitute.hpp"
 #include <regex>
 #include <fstream>
 
@@ -60,27 +61,6 @@ namespace gubg { namespace file {
     template <typename Callback>
         bool each_recursive(Callback cb) { return each_recursive(cb, std::filesystem::current_path()); }
 
-    namespace details { 
-        template <typename String>
-            void substitute(String &dst, String src, const String &pattern, const String &replace)
-            {
-                dst.clear();
-                for (size_t pos = 0; true; )
-                {
-                    auto pattern_pos = src.find(pattern, pos);
-                    if (pattern_pos == String::npos)
-                    {
-                        dst.append(src, pos, String::npos);
-                        return;
-                    }
-                    dst.append(src, pos, pattern_pos-pos);
-                    pos = pattern_pos;
-                    pos += pattern.size();
-                    dst.append(replace);
-                }
-            }
-    } 
-
     template <typename Callback>
         bool each_regex(const std::string &pattern, Callback cb, std::filesystem::path dir)
         {
@@ -90,7 +70,7 @@ namespace gubg { namespace file {
             //lexically_normal() does not exist on VS 2017
             if (!pattern_full_str.empty() && pattern_full_str[pattern_full_str.size()-1] != std::filesystem::path::preferred_separator)
                 pattern_full_str.push_back(std::filesystem::path::preferred_separator);
-            details::substitute<std::string>(pattern_full_str, pattern_full_str, "\\", "\\\\");
+            string_algo::substitute<std::string>(pattern_full_str, pattern_full_str, "\\", "\\\\");
             pattern_full_str += pattern;
             L(C(pattern_full_str));
             std::regex re(pattern_full_str);
@@ -117,13 +97,13 @@ namespace gubg { namespace file {
 
             std::string pattern_re = pattern;
 
-            details::substitute(pattern_re, pattern_re, std::string("."), std::string("\\."));
+            string_algo::substitute(pattern_re, pattern_re, std::string("."), std::string("\\."));
             //We use \0 to represent * temporarily
-            details::substitute(pattern_re, pattern_re, std::string("**"), std::string(".\0", 2));
-            details::substitute(pattern_re, pattern_re, std::string("*"), std::string("[^/]\0", 5));
+            string_algo::substitute(pattern_re, pattern_re, std::string("**"), std::string(".\0", 2));
+            string_algo::substitute(pattern_re, pattern_re, std::string("*"), std::string("[^/]\0", 5));
 
             //Replace \0 with *
-            details::substitute(pattern_re, pattern_re, std::string("\0", 1), std::string("*"));
+            string_algo::substitute(pattern_re, pattern_re, std::string("\0", 1), std::string("*"));
 
             MSS(each_regex(pattern_re, cb, dir));
 
