@@ -60,27 +60,6 @@ namespace gubg { namespace file {
     template <typename Callback>
         bool each_recursive(Callback cb) { return each_recursive(cb, std::filesystem::current_path()); }
 
-    template <typename Callback>
-        bool each_regex(const std::string &pattern, Callback cb, const std::filesystem::path &dir)
-        {
-            MSS_BEGIN(bool, "");
-            auto pattern_full = dir;
-            pattern_full /= pattern;
-            L(C(pattern_full));
-            std::regex re(pattern_full.string());
-            auto recursor = [&](const std::filesystem::path &fn)
-            {
-                L(C(fn));
-                if (std::regex_match(fn.string(), re))
-                    cb(fn);
-                return true;
-            };
-            each_recursive(recursor, dir);
-            MSS_END();
-        }
-    template <typename Callback>
-        bool each_regex(const std::string &pattern, Callback cb) { return each_regex(pattern, cb, std::filesystem::current_path()); }
-
     namespace details { 
         template <typename String>
             void substitute(String &dst, String src, const String &pattern, const String &replace)
@@ -101,10 +80,41 @@ namespace gubg { namespace file {
                 }
             }
     } 
+
+    template <typename Callback>
+        bool each_regex(const std::string &pattern, Callback cb, std::filesystem::path dir)
+        {
+            MSS_BEGIN(bool);
+            dir.make_preferred();
+            std::string pattern_full_str = dir.string();
+            //lexically_normal() does not exist on VS 2017
+            if (!pattern_full_str.empty() && pattern_full_str[pattern_full_str.size()-1] != std::filesystem::path::preferred_separator)
+                pattern_full_str.push_back(std::filesystem::path::preferred_separator);
+            details::substitute<std::string>(pattern_full_str, pattern_full_str, "\\", "\\\\");
+            pattern_full_str += pattern;
+            L(C(pattern_full_str));
+            std::regex re(pattern_full_str);
+            auto recursor = [&](const std::filesystem::path &fn)
+            {
+                L(C(fn));
+                if (std::regex_match(fn.string(), re))
+                {
+                    L("\tthis file matches the search pattern");
+                    cb(fn);
+                }
+                return true;
+            };
+            each_recursive(recursor, dir);
+            MSS_END();
+        }
+    template <typename Callback>
+        bool each_regex(const std::string &pattern, Callback cb) { return each_regex(pattern, cb, std::filesystem::current_path()); }
+
     template <typename Callback>
         bool each_glob(const std::string &pattern, Callback cb, const std::filesystem::path &dir)
         {
-            S("each_glob");L(C(pattern)C(dir));
+            MSS_BEGIN(bool);
+
             std::string pattern_re = pattern;
 
             details::substitute(pattern_re, pattern_re, std::string("."), std::string("\\."));
@@ -115,7 +125,9 @@ namespace gubg { namespace file {
             //Replace \0 with *
             details::substitute(pattern_re, pattern_re, std::string("\0", 1), std::string("*"));
 
-            return each_regex(pattern_re, cb, dir);
+            MSS(each_regex(pattern_re, cb, dir));
+
+            MSS_END();
         }
     template <typename Callback>
         bool each_glob(const std::string &pattern, Callback cb) { return each_glob(pattern, cb, std::filesystem::current_path()); }
