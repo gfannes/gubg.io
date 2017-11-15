@@ -94,16 +94,20 @@ namespace gubg { namespace file {
         bool each_glob(const std::string &pattern, Callback cb, const std::filesystem::path &dir)
         {
             MSS_BEGIN(bool);
+            L(C(pattern));
 
             std::string pattern_re = pattern;
 
+            if (std::filesystem::path::preferred_separator == '\\')
+                string_algo::substitute(pattern_re, pattern_re, std::string("/"), std::string("\\\\"));
             string_algo::substitute(pattern_re, pattern_re, std::string("."), std::string("\\."));
             //We use \0 to represent * temporarily
             string_algo::substitute(pattern_re, pattern_re, std::string("**"), std::string(".\0", 2));
-            string_algo::substitute(pattern_re, pattern_re, std::string("*"), std::string("[^/]\0", 5));
+            string_algo::substitute(pattern_re, pattern_re, std::string("*"), std::string("[^/\\\\]\0", 7));
 
             //Replace \0 with *
             string_algo::substitute(pattern_re, pattern_re, std::string("\0", 1), std::string("*"));
+            L(C(pattern)C(pattern_re));
 
             MSS(each_regex(pattern_re, cb, dir));
 
