@@ -107,7 +107,7 @@ namespace gubg { namespace file {
 
             //Replace \0 with *
             string_algo::substitute(pattern_re, pattern_re, std::string("\0", 1), std::string("*"));
-            L(C(pattern)C(pattern_re));
+            L(C(pattern)C(pattern_re)C(dir));
 
             MSS(each_regex(pattern_re, cb, dir));
 
