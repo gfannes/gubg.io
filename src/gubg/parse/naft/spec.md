@@ -1,5 +1,7 @@
-Tree Format Specification
+NAFT Format Specification
 =========================
+
+NAFT: Node-Attribute-Freetext-Tree
 
 ## Requirements
 
@@ -10,9 +12,9 @@ Tree Format Specification
   * Support for _key_/_value_-based attributes
   * Support for nesting
   * Support for duplicate _tags_ and _keys_
-4. Every message string is a valid tree document
+4. Every message string is a valid naft document
   * No restriction on _tags_, _keys_ and _values_
-  * Tree pieces can be embedded in a text document with reasonable restrictions on the text
+  * NAFT pieces can be embedded in a text document with reasonable restrictions on the text
 5. Streaming support
   * Data can already be extracted without need to have the complete message string
 
@@ -57,7 +59,7 @@ After the attributes, _tags_ can be nested, the nesting scope is expressed via `
 
 ## White space
 
-White space characters (space, tab, newline and carriage return) are ignored when placed in-between _tags_ and _attributes_. Other characters that cannot be interpreted as part of the tree format are ignored, but can be used to close the attribute list.
+White space characters (space, tab, newline and carriage return) are ignored when placed in-between _tags_ and _attributes_. Other characters that cannot be interpreted as part of the naft format are ignored, but can be used to close the attribute list.
 
 * `[tag]`: parser cannot know if attributes will be present yes or no, and cannot signal this yet
 * `[tag].`: parser knows no attributes will be given, and can signal this. The `.` is not signalled.

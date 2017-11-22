@@ -1,37 +1,37 @@
 #include "catch.hpp"
 #include "gubg/debug.hpp"
-#include "gubg/parse/tree/Parser.hpp"
+#include "gubg/parse/naft/Parser.hpp"
 #include <string>
 #include <vector>
 #include <cassert>
 
 namespace  { 
-    class Parser: public gubg::parse::tree::Parser_crtp<Parser>
+    class Parser: public gubg::parse::naft::Parser_crtp<Parser>
     {
     public:
         std::vector<std::string> result;
 
-        bool tree_text(const std::string &text)
+        bool naft_text(const std::string &text)
         {
             result.push_back("text:"+text);
             return true;
         }
-        bool tree_node_open(const std::string &tag)
+        bool naft_node_open(const std::string &tag)
         {
             result.push_back("open:"+tag);
             return true;
         }
-        bool tree_attr(const std::string &key, const std::string &value)
+        bool naft_attr(const std::string &key, const std::string &value)
         {
             result.push_back("attr:"+key+"=>"+value);
             return true;
         }
-        bool tree_attr_done()
+        bool naft_attr_done()
         {
             result.push_back("attr_done");
             return true;
         }
-        bool tree_node_close()
+        bool naft_node_close()
         {
             result.push_back("close");
             return true;
@@ -40,7 +40,7 @@ namespace  {
     };
 } 
 
-TEST_CASE("tree::Parser tests", "[ut][tree]")
+TEST_CASE("naft::Parser tests", "[ut][naft]")
 {
     std::string content;
     std::vector<std::string> wanted;

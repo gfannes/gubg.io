@@ -1,13 +1,13 @@
-#ifndef HEADER_gubg_parse_tree_Parser_hpp_ALREADY_INCLUDED
-#define HEADER_gubg_parse_tree_Parser_hpp_ALREADY_INCLUDED
+#ifndef HEADER_gubg_parse_naft_Parser_hpp_ALREADY_INCLUDED
+#define HEADER_gubg_parse_naft_Parser_hpp_ALREADY_INCLUDED
 
-#include "gubg/parse/tree/Codes.hpp"
+#include "gubg/parse/naft/Codes.hpp"
 #include "gubg/Strange.hpp"
 #include "gubg/mss.hpp"
 #include <string>
 #include <map>
 
-namespace gubg { namespace parse { namespace tree { 
+namespace gubg { namespace parse { namespace naft { 
 
     enum class State {Start, Text, Tag, Attr, Open, Close, Stop};
     inline std::ostream &operator<<(std::ostream &os, State s)
@@ -29,7 +29,7 @@ namespace gubg { namespace parse { namespace tree {
     {
     private:
         using Self = Parser_crtp<Receiver>;
-        constexpr static const char *logns = nullptr;//"tree::Parser";
+        constexpr static const char *logns = nullptr;//"naft::Parser";
 
     public:
         using Tag = std::string;
@@ -107,7 +107,7 @@ namespace gubg { namespace parse { namespace tree {
         {
             S(logns);
             if (!text_.empty())
-                ok_ = ok_ && receiver_().tree_text(text_);
+                ok_ = ok_ && receiver_().naft_text(text_);
         }
         void text_process_(char ch)
         {
@@ -185,8 +185,8 @@ namespace gubg { namespace parse { namespace tree {
             if (attr_allowed_)
             {
                 attr_allowed_ = false;
-                ok_ = ok_ && receiver_().tree_attr_done();
-                ok_ = ok_ && receiver_().tree_node_close();
+                ok_ = ok_ && receiver_().naft_attr_done();
+                ok_ = ok_ && receiver_().naft_node_close();
             }
             tag_.resize(0);
             bracket_level_ = 0;
@@ -194,7 +194,7 @@ namespace gubg { namespace parse { namespace tree {
         void tag_exit_()
         {
             S(logns);
-            ok_ = ok_ && receiver_().tree_node_open(tag_);
+            ok_ = ok_ && receiver_().naft_node_open(tag_);
             attr_allowed_ = true;
         }
         void tag_process_(char ch)
@@ -232,7 +232,7 @@ namespace gubg { namespace parse { namespace tree {
         void attr_exit_()
         {
             S(logns);
-            ok_ = ok_ && receiver_().tree_attr(key_, value_);
+            ok_ = ok_ && receiver_().naft_attr(key_, value_);
         }
         void attr_process_(char ch)
         {
@@ -269,7 +269,7 @@ namespace gubg { namespace parse { namespace tree {
             ++scope_level_;
             assert(attr_allowed_);
             attr_allowed_ = false;
-            ok_ = ok_ && receiver_().tree_attr_done();
+            ok_ = ok_ && receiver_().naft_attr_done();
             change_state_<State::Text>();
         }
         void close_enter_()
@@ -280,10 +280,10 @@ namespace gubg { namespace parse { namespace tree {
             if (attr_allowed_)
             {
                 attr_allowed_ = false;
-                ok_ = ok_ && receiver_().tree_attr_done();
-                ok_ = ok_ && receiver_().tree_node_close();
+                ok_ = ok_ && receiver_().naft_attr_done();
+                ok_ = ok_ && receiver_().naft_node_close();
             }
-            ok_ = ok_ && receiver_().tree_node_close();
+            ok_ = ok_ && receiver_().naft_node_close();
             change_state_<State::Text>();
         }
 
@@ -350,8 +350,8 @@ namespace gubg { namespace parse { namespace tree {
             if (attr_allowed_)
             {
                 attr_allowed_ = false;
-                ok_ = ok_ && receiver_().tree_attr_done();
-                ok_ = ok_ && receiver_().tree_node_close();
+                ok_ = ok_ && receiver_().naft_attr_done();
+                ok_ = ok_ && receiver_().naft_node_close();
             }
         }
 

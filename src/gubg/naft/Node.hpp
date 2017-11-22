@@ -1,10 +1,10 @@
-#ifndef HEADER_gubg_tree_Node_hpp_ALREADY_INCLUDED
-#define HEADER_gubg_tree_Node_hpp_ALREADY_INCLUDED
+#ifndef HEADER_gubg_naft_Node_hpp_ALREADY_INCLUDED
+#define HEADER_gubg_naft_Node_hpp_ALREADY_INCLUDED
 
 #include <string>
 #include <ostream>
 
-namespace gubg { namespace tree { 
+namespace gubg { namespace naft {
 
     class Node
     {
