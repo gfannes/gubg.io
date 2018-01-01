@@ -13,10 +13,8 @@ namespace gubg { namespace file {
             Name(const std::string &name): name_(name) {}
             Name(const char *name): name_(name) {}
 
-            operator const std::string & () const
-            {
-                return name_;
-            }
+            operator const std::string & () const { return name_; }
+            const std::string &str() const {return name_;}
 
             bool operator<(const Name &rhs)  const { return name_ <  rhs.name_; }
             bool operator>(const Name &rhs)  const { return name_ >  rhs.name_; }

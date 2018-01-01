@@ -10,6 +10,18 @@
 
 namespace gubg { namespace file { 
 
+    inline bool read(std::string &content, const Name &name)
+    {
+        MSS_BEGIN(bool);
+        std::ifstream fi(name.str(), std::ios::binary | std::ios::ate);
+        const auto end_pos = fi.tellg();
+        fi.seekg(0);
+        const size_t size = end_pos - fi.tellg();
+        content.resize(size);
+        fi.read(content.data(), size);
+        MSS_END();
+    }
+
     inline bool exists(const gubg::file::Name &fn)
     {
         MSS_BEGIN(bool);
