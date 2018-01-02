@@ -2,10 +2,10 @@
 #define HEADER_gubg_parse_naft_Parser_hpp_ALREADY_INCLUDED
 
 #include "gubg/parse/naft/Codes.hpp"
-#include "gubg/Strange.hpp"
 #include "gubg/mss.hpp"
 #include <string>
 #include <map>
+#include <cassert>
 
 namespace gubg { namespace parse { namespace naft { 
 
