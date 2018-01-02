@@ -8,9 +8,53 @@ namespace gubg {
         s_(0), l_(0)
     {
     }
-    Strange::Strange(const std::string &str)
-    :s_(str.data()), l_(str.size())
+    Strange::Strange(const std::string &str): data_(new std::string(str)), s_(data_->data()), l_(data_->size())
     {
+    }
+    Strange::Strange(const char *cstr): data_(new std::string(cstr)), s_(data_->data()), l_(data_->size())
+    {
+    }
+    Strange::Strange(const char *buffer, size_t len): data_(new std::string(buffer, len)), s_(data_->data()), l_(data_->size())
+    {
+    }
+    Strange::Strange(std::string &&dying): data_(new std::string(dying)), s_(data_->data()), l_(data_->size())
+    {
+    }
+
+    Strange::Strange(const Strange &rhs): data_(rhs.data_), s_(rhs.s_), l_(rhs.l_)
+    {
+    }
+    Strange::Strange(Strange &&dying): data_(std::move(dying.data_)), s_(dying.s_), l_(dying.l_)
+    {
+    }
+
+    Strange &Strange::operator=(const Strange &rhs)
+    {
+        data_ = rhs.data_;
+        s_ = rhs.s_;
+        l_ = rhs.l_;
+        return *this;
+    }
+    Strange &Strange::operator=(Strange &&dying)
+    {
+        data_ = std::move(dying.data_);
+        s_ = dying.s_;
+        l_ = dying.l_;
+        return *this;
+    }
+    Strange &Strange::operator=(const std::string &str)
+    {
+        data_.reset(new std::string(str));
+        s_ = data_->data();
+        l_ = data_->size();
+        return *this;
+    }
+    Strange &Strange::operator=(std::string &&dying)
+    {
+        data_.reset(new std::string(dying));
+        s_ = data_->data();
+        l_ = data_->size();
+        return *this;
     }
 
     bool Strange::empty() const

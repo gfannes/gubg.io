@@ -2,7 +2,7 @@
 #include "gubg/Strange.hpp"
 using namespace gubg;
 
-TEST_CASE("default ctor", "[strange]")
+TEST_CASE("gubg::Strange default ctor tests", "[ut][Strange]")
 {
 	Strange r;
 	SECTION("default ctor should be empty")
@@ -37,7 +37,7 @@ TEST_CASE("default ctor", "[strange]")
 		REQUIRE(r.empty());
 	}
 }
-TEST_CASE("creation from std::string == abc", "[strange]")
+TEST_CASE("gubg::Strange creation from std::string == abc tests", "[ut][Strange]")
 {
 	std::string str("abc");
 
@@ -137,7 +137,7 @@ TEST_CASE("creation from std::string == abc", "[strange]")
 			REQUIRE(r.str() == "bc");
 		}
 	}
-    SECTION("diff_to() with strange")
+    SECTION("diff_to() with Strange")
     {
         Strange sp = r;
         SECTION("when r is not changed, sp should diff to empty")
@@ -377,7 +377,7 @@ TEST_CASE("creation from std::string == abc", "[strange]")
 		}
 	}
 }
-TEST_CASE("numbers", "[strange]")
+TEST_CASE("gubg::Strange number tests", "[ut][Strange]")
 {
 	Strange r;
 	SECTION("pop_decimal()")
@@ -428,6 +428,44 @@ TEST_CASE("numbers", "[strange]")
 		REQUIRE(-42.123 == d);
 	}
 }
-TEST_CASE("subtract", "[strange]")
+TEST_CASE("gubg::Strange construction and content lifetime tests", "[ut][Strange]")
 {
+    SECTION("const char *")
+    {
+        Strange strange("abc");
+        REQUIRE(strange.str() == "abc");
+    }
+    SECTION("const char * and len")
+    {
+        Strange strange("abc", 2);
+        REQUIRE(strange.str() == "ab");
+    }
+    SECTION("const std::string &")
+    {
+        const std::string str("abc");
+        Strange strange(str);
+        REQUIRE(strange.str() == "abc");
+    }
+    SECTION("std::string &&")
+    {
+        std::string str("abc");
+        Strange strange(std::move(str));
+        REQUIRE(strange.str() == "abc");
+    }
+    SECTION("dead std::string")
+    {
+        std::unique_ptr<std::string> str{new std::string("abc")};
+        Strange strange(*str);
+        str.reset();
+        REQUIRE(strange.str() == "abc");
+    }
+    SECTION("out of scope")
+    {
+        Strange strange;
+        {
+            std::string str("abc");
+            strange = str;
+        }
+        REQUIRE(strange.str() == "abc");
+    }
 }

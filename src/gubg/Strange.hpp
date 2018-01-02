@@ -7,6 +7,7 @@
 #include <ostream>
 #include <cstring>
 #include <cstdint>
+#include <memory>
 
 //TODO: the methods that take a Strange& as argument are currently not correct when this argument
 //is the same as the this pointer
@@ -17,8 +18,18 @@ namespace gubg {
     {
     public:
         Strange();
-        //Make sure str outlives Strange
         Strange(const std::string &);
+        Strange(const char *cstr);
+        Strange(const char *buffer, size_t len);
+        Strange(std::string &&);
+
+        Strange(const Strange &);
+        Strange(Strange &&);
+
+        Strange &operator=(const Strange &);
+        Strange &operator=(Strange &&);
+        Strange &operator=(const std::string &);
+        Strange &operator=(std::string &&);
 
         bool empty() const;
         size_t size() const;
@@ -108,6 +119,7 @@ namespace gubg {
         void forward_(const size_t nr);
         void shrink_(const size_t nr);
 
+        std::shared_ptr<const std::string> data_;
         const char *s_;
         size_t l_;
     };
