@@ -307,6 +307,19 @@ namespace gubg {
         forward_(e-s_);
         return true;
     }
+    bool Strange::pop_float(float &res)
+    {
+        assert(invariants_());
+        if (empty())
+            return false;
+        char *e = 0;
+        float d = std::strtof(s_, &e);
+        if (e == s_)
+            return false;
+        res = d;
+        forward_(e-s_);
+        return true;
+    }
 
     bool Strange::pop_if(const char ch)
     {

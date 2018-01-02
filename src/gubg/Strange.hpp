@@ -73,6 +73,7 @@ namespace gubg {
             return true;
         }
         bool pop_float(double &res);
+        bool pop_float(float &res);
 
         bool pop_if(const char ch);
         bool pop_back_if(const char ch);
