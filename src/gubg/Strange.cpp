@@ -132,6 +132,7 @@ namespace gubg {
                 --level;
                 if (level == 0)
                 {
+                    res.data_ = data_;
                     res.s_ = sp.s_;
                     res.l_ = s_-res.s_;
                     pop_front();
@@ -175,6 +176,7 @@ namespace gubg {
         char *ptr = (char*)std::memchr(s_, ch, l_);
         if (!ptr)
             return false;
+        res.data_ = data_;
         res.s_ = s_;
         res.l_ = ptr-s_;
         forward_(res.l_);
@@ -198,6 +200,7 @@ namespace gubg {
                 break;
             if (0 == std::memcmp(str.data(), s_, s))
             {
+                res.data_ = data_;
                 res.s_ = sp.s_;
                 res.l_ = s_-res.s_;
                 return true;
@@ -229,6 +232,7 @@ namespace gubg {
         for (size_t i = 0; i < l_; ++i)
             if (s_[i] == ch)
             {
+                res.data_ = data_;
                 res.s_ = s_;
                 res.l_ = i + (inclusive ? 1 : 0);
                 forward_(i+1);
@@ -262,6 +266,7 @@ namespace gubg {
                 //Pontential match, check the rest of str
                 if (!std::memcmp(str.data(), s_+i, s))
                 {
+                    res.data_ = data_;
                     res.s_ = s_;
                     res.l_ = i + (inclusive ? s : 0);
                     forward_(i+s);
@@ -372,13 +377,11 @@ namespace gubg {
 
     bool Strange::pop_line(Strange &line)
     {
-        S("");
+        S(nullptr);
         assert(invariants_());
 
         if (empty())
             return false;
-
-        L(str());
 
         //We start looking for 0xa because that is the most likely indicator of an end-of-line
         //0xd can occur on its own, but that is old-mac style, which is not used anymore
@@ -395,6 +398,7 @@ namespace gubg {
                 return true;
             }
             L("An old-mac end-of-line was found");
+            line.data_ = data_;
             line.s_ = s_;
             line.l_ = ptr-s_;
             forward_(line.l_+1);
@@ -404,6 +408,7 @@ namespace gubg {
         if (ptr == s_)
         {
             L("This is an empty line, it does not make sense to check for 0xd");
+            line.data_ = data_;
             line.s_ = s_;
             line.l_ = 0;
             forward_(1);
@@ -413,12 +418,14 @@ namespace gubg {
         if (ptr[-1] == '\x0d')
         {
             L("This line is dos-style terminated");
+            line.data_ = data_;
             line.s_ = s_;
             line.l_ = ptr-s_-1;
             forward_(line.l_+2);
             return true;
         }
         L("No 0xd was found before ptr so we have a unix-style terminated line");
+        line.data_ = data_;
         line.s_ = s_;
         line.l_ = ptr-s_;
         forward_(line.l_+1);
@@ -485,6 +492,7 @@ namespace gubg {
     {
         if (l_ < nr)
             return false;
+        res.data_ = data_;
         res.s_ = s_;
         res.l_ = nr;
         forward_(nr);
