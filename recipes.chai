@@ -8,7 +8,7 @@ root.book("gubg/io", fun(b){
     })
 
     b.recipe("ut", fun(r){
-        r.add("src/test", "**.cpp")
+        r.add("test/src", "**.cpp")
         r.depends_on("func")
         r.depends_on("/catch/func")
     })
