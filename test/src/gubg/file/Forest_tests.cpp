@@ -21,6 +21,6 @@ TEST_CASE("file::Forest tests", "[ut]")
         L(r.name());
 
     File resolved;
-    REQUIRE(is_ok(forest.resolve(resolved, File("gubg.io/src/test/file/Forest_tests.cpp"))));
+    REQUIRE(is_ok(forest.resolve(resolved, File("gubg.io/test/src/gubg/file/Forest_tests.cpp"))));
     L(resolved.name());
 }
