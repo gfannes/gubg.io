@@ -21,6 +21,7 @@ namespace
         ReturnCode recursor_discoveredFile(const File &file)
         {
             MSS_BEGIN(ReturnCode);
+            L(C(file));
             tree.add(file);
             MSS_END();
         }
@@ -52,6 +53,7 @@ ReturnCode Tree::add(const File &file)
 ReturnCode Forest::add(const File &root, const Tree::Extensions &extensions)
 {
     MSS_BEGIN(ReturnCode);
+    L(C(root));
     auto tree = Tree::create(root, extensions);
     MSS(!!tree);
     MSS(on_fail(count(trees_.begin(), trees_.end(), tree) == 0, ReturnCode::TreeAlreadyAdded));

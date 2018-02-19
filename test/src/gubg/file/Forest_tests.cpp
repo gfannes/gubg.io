@@ -3,7 +3,7 @@
 using namespace gubg::file;
 using namespace gubg::mss;
 
-TEST_CASE("file::Forest tests", "[ut]")
+TEST_CASE("file::Forest tests", "[ut][file][Forest]")
 {
     S("test");
 
