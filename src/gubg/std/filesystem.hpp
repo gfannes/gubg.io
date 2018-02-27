@@ -20,8 +20,24 @@ inline bool create_directories(const path &p) {return std::experimental::filesys
 inline bool remove(const path &p) {return std::experimental::filesystem::remove(p);}
 inline bool remove_all(const path &p) {return std::experimental::filesystem::remove_all(p);}
 inline bool equivalent(const path &lhs, const path &rhs) {return std::experimental::filesystem::equivalent(lhs, rhs);}
+inline std::size_t hash_value(const path & p) { return std::experimental::filesystem::hash_value(p); }
+
+
 
 } } 
+
+namespace std {
+
+    template<> struct hash<std::filesystem::path>
+    {
+        typedef std::filesystem::path argument_type;
+        typedef std::size_t result_type;
+        result_type operator()(argument_type const& s) const noexcept
+        {
+            return filesystem::hash_value(s);
+        }
+    };
+}
 
 namespace gubg{ namespace filesystem {
 
