@@ -8,21 +8,26 @@ NAFT: Node-Attribute-Freetext-Tree
 1. Easy to write (both human and machine)
 2. Easy to read/parse (both human and machine)
 3. Format can be used to express object hierarchies
-  * Leading _tag_ to communicate the type
-  * Support for _key_/_value_-based attributes
-  * Support for nesting
-  * Support for duplicate _tags_ and _keys_
+  * Efficient expression of types, _key_/_value_-based attributes and nesting
 4. Every message string is a valid naft document
   * No restriction on _tags_, _keys_ and _values_
   * NAFT pieces can be embedded in a text document with reasonable restrictions on the text
 5. Streaming support
   * Data can already be extracted without need to have the complete message string
+6. Well-defined transformation from serialized to deserialized, and back
+  * This allows embedding active elements into a document that can be parsed, executed and rendered again
+7. Binary variant for low-bitrate serial transmission
+  * Easy to parse on low-end embedded systems
+8. Low probability of interfering with existing formats
+  * XML, [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code#Escape_sequences), JSON
 
 ## Tags
 
 A _tag_ is communicated by enclosing it with `[]`: `[tag]`.
 
-The _tag_ itself can contain `[` or `]` characters. After finding the opening `[` character, the parser will look for the closing `]` character to identify the _tag_. A `]` character can only be a closing `]` character if it saw the same amount of `[` and `]` characters. If the `[]` characters happen to be out-of-balance, you can balance it while instructing the parser to _not include_ those in the actual _tag_ by prepending it with the `^` character. `^` characters are used as-is, when they happen to appear in front of a `[` on `]` character, they should be duplicated.
+The _tag_ itself can contain `[` or `]` characters. After finding the opening `[` character, the parser will look for the closing `]` character to identify the _tag_. A `]` character can only be a closing `]` character if it saw the same amount of `[` and `]` characters. If the `[]` characters happen to be out-of-balance, you can balance them while instructing the parser to _not include_ those in the actual _tag_ by prepending it with the `^` character. `^` characters are used as-is, when they happen to appear in front of a `[` on `]` character, they should be duplicated.
+
+This system ensures an easy parser implementation: once the opening character '[' for a tag is found, it needs to collect all the characters until the matching ']' character is found. Each additional '[' character requires an additional ']' character to be found before the tag is completely parsed. Once the raw tag is found, it should be processed for the '^' escape characters.
 
 * `abc` => `[abc]`
 * `ab[]c` => `[ab[]c]`
