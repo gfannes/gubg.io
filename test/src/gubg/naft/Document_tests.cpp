@@ -9,10 +9,24 @@ TEST_CASE("naft::Document tests", "[ut][naft]")
     std::string wanted;
     {
         naft::Document doc(oss);
-        SECTION("root")
+        SECTION("root via doc")
         {
-            wanted = "[root]\n\n";
             auto root = doc.node("root");
+            SECTION("no attr")
+            {
+                wanted = "[root]\n";
+            }
+            SECTION("with attr")
+            {
+                wanted = "[root](a:b)\n";
+                root.attr("a", "b");
+            }
+        }
+        SECTION("root via node")
+        {
+            wanted = "[root]\n";
+            naft::Node &node = doc;
+            auto root = node.node("root");
         }
     }
     REQUIRE(oss.str() == wanted);

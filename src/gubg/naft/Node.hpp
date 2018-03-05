@@ -6,8 +6,14 @@
 
 namespace gubg { namespace naft {
 
+    class Document;
+
     class Node
     {
+    private:
+        friend class Document;
+        Node(std::ostream &os): level_(-1), os_(&os), is_leaf_(false) { }
+
     public:
         Node(int level, std::ostream &os, const std::string &name): level_(level), os_(&os)
         {
@@ -45,6 +51,12 @@ namespace gubg { namespace naft {
         Node &attr(const Key &key, const Value &value)
         {
             *os_ << '(' << key << ':' << value << ')';
+            return *this;
+        }
+        template <typename Key>
+        Node &attr(const Key &key)
+        {
+            *os_ << '(' << key << ')';
             return *this;
         }
 

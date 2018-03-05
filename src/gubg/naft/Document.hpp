@@ -6,23 +6,15 @@
 
 namespace gubg { namespace naft {
 
-    class Document
+    class Document: public Node
     {
     public:
-        Document(std::ostream &os): os_(os) {}
+        Document(std::ostream &os): Node(os) {}
         ~Document()
         {
-            os_ << std::endl;
+            //We act as if we are dead, making sure ~Node will not close this node
+            Node::os_ = nullptr;
         }
-
-        Node node(const std::string &name)
-        {
-            Node n(0, os_, name);
-            return n;
-        }
-
-    private:
-        std::ostream &os_;
     };
 
 } } 
