@@ -9,10 +9,12 @@
 #include <netdb.h>
 #include <unistd.h>
 #endif
+
 #ifdef GUBG_API_MINGW
 #include <Winsock2.h>
 #include <WS2tcpip.h>
 #endif
+
 #include <sys/stat.h>
 #include <fcntl.h>
 

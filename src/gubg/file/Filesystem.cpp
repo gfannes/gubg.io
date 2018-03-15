@@ -141,7 +141,7 @@ ReturnCode gubg::file::read(std::vector<File> &files, const File &file)
             if (bn == "." || bn == "..")
                 //We skip "." and ".."
                 continue;
-		    if (mss::isOK(determineType(f)))
+		    if (mss::is_ok(determineType(f)))
 			    files.push_back(f);
         }
         while (FindNextFile(hFind, &FindFileData));
