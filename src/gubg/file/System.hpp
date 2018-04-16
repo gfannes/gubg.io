@@ -92,7 +92,7 @@ namespace gubg { namespace file {
                 if (std::regex_match(fn.string(), re))
                 {
                     L("\tthis file matches the search pattern");
-                    cb(fn);
+                    MSS(cb(fn));
                 }
                 return true;
             };
