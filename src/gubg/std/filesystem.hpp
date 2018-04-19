@@ -9,9 +9,12 @@ namespace std { namespace filesystem {
 #define L_IMPORT(name) using name = std::experimental::filesystem::name
 L_IMPORT(path);
 L_IMPORT(directory_iterator);
+L_IMPORT(recursive_directory_iterator);
+L_IMPORT(directory_options);
 #undef L_IMPORT
 
 inline path current_path() {return std::experimental::filesystem::current_path();}
+inline void current_path(const std::experimental::filesystem::path & path ) {std::experimental::filesystem::current_path(path);}
 inline bool is_directory(const path &p) {return std::experimental::filesystem::is_directory(p);}
 inline bool is_regular_file(const path &p) {return std::experimental::filesystem::is_regular_file(p);}
 inline bool exists(const path & p) { return std::experimental::filesystem::exists(p); }
@@ -21,7 +24,6 @@ inline bool remove(const path &p) {return std::experimental::filesystem::remove(
 inline bool remove_all(const path &p) {return std::experimental::filesystem::remove_all(p);}
 inline bool equivalent(const path &lhs, const path &rhs) {return std::experimental::filesystem::equivalent(lhs, rhs);}
 inline std::size_t hash_value(const path & p) { return std::experimental::filesystem::hash_value(p); }
-
 
 
 } } 
@@ -41,60 +43,58 @@ namespace std {
 
 namespace gubg{ namespace filesystem {
 
-inline std::filesystem::path get_relative_to(const std::filesystem::path & from, const std::filesystem::path & to)
+struct ChangeDirectory
 {
-    using range = gubg::Range<std::filesystem::path::iterator>;
-
-    auto pop_equal_fronts = [&](range & lhs, range & rhs)
+    ChangeDirectory(const std::filesystem::path & new_directory)
+        : old_(std::filesystem::current_path())
     {
-        while(!lhs.empty() && !rhs.empty())
-        {
-            if (lhs.front() != rhs.front())
-                return;
+        std::filesystem::current_path(new_directory);
+    }
 
-            lhs.pop_front();
-            rhs.pop_front();
-        }
-    };
+    ~ChangeDirectory()
+    {
+        std::filesystem::current_path(old_);
+    }
 
-    // from absolute and to relative -> to
-    // from relative and to absolute -> to
-    if (from.is_absolute() != to.is_absolute())
-        return to;
+    ChangeDirectory(ChangeDirectory &&) = default;
+    ChangeDirectory & operator=(ChangeDirectory &&) = default;
 
-    // remove the front part which is the same
-    auto rf = gubg::make_range(from);
-    auto rt = gubg::make_range(to);
-    pop_equal_fronts(rf, rt);
 
-    // start at from
-    std::filesystem::path result;
+private:
+    ChangeDirectory(const ChangeDirectory &) = delete;
+    ChangeDirectory & operator=(const ChangeDirectory &) = delete;
 
-    // go back till different part
-    for(const auto & v : rf)
-        result /= "..";
-    // add the new part
-    for(const auto & v : rt)
-        result /= v;
 
-    return result;
+    std::filesystem::path old_;
+};
+
+inline ChangeDirectory change_directory(const std::filesystem::path & p)
+{
+    return ChangeDirectory(p);
 }
+
+std::filesystem::path get_relative_to(const std::filesystem::path & from, const std::filesystem::path & to);
+std::filesystem::path normalize(const std::filesystem::path & src);
 
 inline std::filesystem::path combine(const std::initializer_list<std::filesystem::path> & lst)
 {
     auto it = lst.end();
     for(--it; it->is_relative() && it != lst.begin(); --it)
         ;;
+
     std::filesystem::path p;
     for(; it != lst.end(); ++it)
         p /= *it;
-    return p;
+
+    return normalize(p);
 }
 
 inline std::filesystem::path combine(const std::filesystem::path & lhs, const std::filesystem::path & rhs)
 {
-    return rhs.is_absolute() ? rhs : lhs/rhs;
+    return normalize(rhs.is_absolute() ? rhs : lhs/rhs);
 }
+
+
 
 } }
 
