@@ -23,6 +23,7 @@ inline bool create_directories(const path &p) {return std::experimental::filesys
 inline bool remove(const path &p) {return std::experimental::filesystem::remove(p);}
 inline bool remove_all(const path &p) {return std::experimental::filesystem::remove_all(p);}
 inline bool equivalent(const path &lhs, const path &rhs) {return std::experimental::filesystem::equivalent(lhs, rhs);}
+inline bool equivalent(const path &lhs, const path &rhs, std::error_code & ec) {return std::experimental::filesystem::equivalent(lhs, rhs, ec);}
 inline std::size_t hash_value(const path & p) { return std::experimental::filesystem::hash_value(p); }
 
 
