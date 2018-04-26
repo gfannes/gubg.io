@@ -63,7 +63,7 @@ namespace
     };
 }
 #endif
-#if defined(GUBG_API_POSIX) && !defined(GUBG_API_LINUX)
+#if defined(GUBG_API_POSIX) && !defined(GUBG_API_LINUX) && !defined(GUBG_API_APPLE)
 //Some things are missing for MinGW
 #define NAME_MAX FILENAME_MAX
 int readdir_r(DIR *dirp, struct dirent *entry, struct dirent **result)
