@@ -452,7 +452,7 @@ namespace gubg {
         if (l_ < sizeof(v))
             return false;
         v = 0;
-        for (int i = 0; i < sizeof(v); ++i)
+        for (unsigned int i = 0; i < sizeof(v); ++i)
         {
             T tmp = *(const T *)(s_+i);
             tmp <<= i*8;
@@ -477,7 +477,7 @@ namespace gubg {
         if (l_ < sizeof(v))
             return false;
         v = 0;
-        for (int i = 0; i < sizeof(v); ++i)
+        for (unsigned int i = 0; i < sizeof(v); ++i)
         {
             v <<= 8;
             v |= *(std::uint8_t*)(s_+i);

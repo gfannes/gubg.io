@@ -1,6 +1,6 @@
 #include "gubg/std/filesystem.hpp"
 #include <list>
-
+#include <algorithm>
 
 namespace gubg { namespace filesystem {
 
@@ -38,11 +38,10 @@ std::filesystem::path get_relative_to(const std::filesystem::path & from, const 
     std::filesystem::path result;
 
     // go back till different part
-    for(const auto & v : rf)
-        result /= "..";
+    std::for_each(RANGE(rf), [&](const auto &) { result /= ".."; });
+
     // add the new part
-    for(const auto & v : rt)
-        result /= v;
+    std::for_each(RANGE(rt), [&](const auto & v) { result /= v; });
 
     return result;
 }
