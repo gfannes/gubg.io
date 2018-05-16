@@ -2,8 +2,11 @@ root.book("gubg/io", fun(b){
     b.recipe("func", fun(r){
         r.add("src", "gubg/**.hpp")
         r.add("src", "gubg/**.cpp")
-r.remove("src", "gubg/file/Descriptor.cpp")
-
+        if (my(OS) == OS.Windows){
+            r.remove("src", "gubg/file/Descriptor.cpp")
+        } else {
+            r.library("stdc++fs")
+        }
         r.depends_on("std/func")
         r.depends_on("math/func")
     })
