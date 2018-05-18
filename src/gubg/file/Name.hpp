@@ -1,6 +1,7 @@
 #ifndef HEADER_gubg_file_Name_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_file_Name_hpp_ALREADY_INCLUDED
 
+#include "gubg/std/filesystem.hpp"
 #include <string>
 #include <ostream>
 
@@ -10,6 +11,7 @@ namespace gubg { namespace file {
     {
         public:
             Name() = default;
+            Name(const std::filesystem::path &name): name_(name.string()) {}
             Name(const std::string &name): name_(name) {}
             Name(const char *name): name_(name) {}
 

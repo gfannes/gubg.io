@@ -21,6 +21,7 @@ namespace gubg { namespace file {
         fi.read(content.data(), size);
         MSS_END();
     }
+    inline bool read(std::string &content, const std::filesystem::path &name) {return read(content, Name{name});}
 
     inline bool exists(const gubg::file::Name &fn)
     {
