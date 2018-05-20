@@ -24,6 +24,24 @@ namespace gubg { namespace naft {
             strip_();
             return true;
         }
+        bool pop_tag(const std::string &tag)
+        {
+            auto sp = strange_;
+            std::string tmp;
+            if (!strange_.pop_bracket(tmp, "[]"))
+            {
+                strange_ = sp;
+                return false;
+            }
+            if (tmp != tag)
+            {
+                strange_ = sp;
+                return false;
+            }
+            strip_();
+            return true;
+        }
+
         void pop_attr(Attr &attr)
         {
             Strange kv;
