@@ -112,24 +112,6 @@ namespace
     typedef HashWords State;
     typedef array<Word, 16> Constants;
     enum {A, B, C, D};//Do not change this lightly, the actual values are used as indices into State and HashWords
-
-    string to_hex(const HashWords &hw)
-    {
-        std::ostringstream oss;
-        oss << std::hex;
-        for (size_t i = 0; i < 4; ++i)
-            oss << "0x" << std::setfill('0') << std::setw(8) << hw[i] << " ";
-        return oss.str();
-    }
-    string to_hex(const Word *words, size_t nr)
-    {
-        std::ostringstream oss;
-        oss << std::hex;
-        for (size_t i = 0; i < nr; ++i)
-            oss << "0x" << std::setfill('0') << std::setw(8) << words[i] << " ";
-        return oss.str();
-    }
-
     enum RoundE {Zero, One, Two, Three};
     template <RoundE> struct Traits  {};
     template <> struct Traits<Zero>
@@ -191,13 +173,11 @@ namespace
         template <RoundE R>
             void round_()
             {
-                S(logns); L(STREAM(to_hex(state_)));
                 assert(words_);
                 typedef Traits<R> Round;
                 uint32_t cachedB;
                 for (int oper = 0; oper < 16; ++oper)
                 {
-                    S(logns); L(STREAM(oper, to_hex(state_)));
                     Round::nonLinearFunction(state_);
                     state_[A] += words_[Round::g[oper]];
                     state_[A] += Round::k[oper];
@@ -207,16 +187,12 @@ namespace
                     state_[D] = state_[C];
                     state_[C] = cachedB;
                 }
-                L(STREAM(to_hex(state_)));
             }
 
         void process(const Word *words)
         {
-            S(logns); L(STREAM(to_hex(hash_)));
-
             assert(words);
             words_ = words;
-            L(STREAM(to_hex(words_, 16)));
 
             state_ = hash_;
 
@@ -229,8 +205,6 @@ namespace
             hash_[B] += state_[B];
             hash_[C] += state_[C];
             hash_[D] += state_[D];
-
-            L(STREAM(to_hex(hash_)));
         }
     };
 }
