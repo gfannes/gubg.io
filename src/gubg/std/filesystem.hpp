@@ -74,6 +74,7 @@ inline ChangeDirectory change_directory(const std::filesystem::path & p)
     return ChangeDirectory(p);
 }
 
+bool get_from_to(std::filesystem::path & result, const std::filesystem::path & from, const std::filesystem::path & to);
 std::filesystem::path get_relative_to(const std::filesystem::path & from, const std::filesystem::path & to);
 std::filesystem::path normalize(const std::filesystem::path & src);
 
