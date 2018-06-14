@@ -13,6 +13,9 @@ root.book("gubg/io", fun(b){
 
     b.recipe("ut", fun(r){
         r.add("test/src", "**.cpp")
+        if (my(OS) == OS.Windows){
+            r.remove("test/src", "**/Descriptor*")
+        }
         r.depends_on("func")
         r.depends_on("/catch/func")
     })

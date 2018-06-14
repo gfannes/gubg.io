@@ -121,7 +121,7 @@ namespace gubg { namespace xml {
                     MSS_Q(mss::on_fail(str_.pop_if("<?xml"), ReturnCode::NoVersionFound));
                     while (str_.pop_if(' ')){}
                     MSS(str_.pop_until(version_, "?>"));
-                    while (!version_.empty() and version_[version_.size()-1] == ' '){version_.resize(version_.size()-1);}
+                    while (!version_.empty() && version_[version_.size()-1] == ' '){version_.resize(version_.size()-1);}
                     MSS_END();
                 }
                 ReturnCode readComment_(Strange &comment)
