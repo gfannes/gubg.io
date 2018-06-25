@@ -33,6 +33,12 @@ namespace std {
         inline bool equivalent(const path &lhs, const path &rhs, std::error_code & ec) {return std::experimental::filesystem::equivalent(lhs, rhs, ec);}
         inline std::size_t hash_value(const path & p) { return std::experimental::filesystem::hash_value(p); }
     }
+} 
+#else
+#include <filesystem>
+#endif
+
+namespace std { 
     template<> struct hash<std::filesystem::path>
     {
         typedef std::filesystem::path argument_type;
@@ -43,9 +49,6 @@ namespace std {
         }
     };
 } 
-#else
-#include <filesystem>
-#endif
 
 namespace gubg{ namespace filesystem {
 
