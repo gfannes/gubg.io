@@ -2,22 +2,28 @@
 #include "gubg/mss.hpp"
 #include <list>
 #include <algorithm>
+#include <cassert>
 
 namespace gubg { namespace filesystem {
 
+    static const char *logns = nullptr;
+
     bool get_from_to(std::filesystem::path & result, const std::filesystem::path & from, const std::filesystem::path & to)
     {
-        MSS_BEGIN(bool);
+        MSS_BEGIN(bool, logns);
+        L(C(from)C(to));
         MSS(from.is_absolute());
         MSS(to.is_absolute());
 
         using range = gubg::Range<std::filesystem::path::iterator>;
         std::filesystem::path f = normalize(from);
         std::filesystem::path t = normalize(to);
+        L(C(f)C(t));
 
         if(from.root_path() != to.root_path())
         {
             result = to;
+            L("Root paths are not the same" << C(result));
             MSS_RETURN_OK();
         }
 
@@ -46,6 +52,8 @@ namespace gubg { namespace filesystem {
 
         // add the new part
         std::for_each(RANGE(rt), [&](const auto & v) { result /= v; });
+
+        L("Could make a shortcut" << C(result));
 
         MSS_END();
     }
@@ -95,13 +103,16 @@ namespace gubg { namespace filesystem {
 
     std::filesystem::path normalize(const std::filesystem::path & src)
     {
+        S(logns);
         std::list<std::filesystem::path::iterator> to_add;
         std::filesystem::path result;
 
         for(auto it = src.begin(); it != src.end(); ++it)
         {
+            const auto &el = *it;
+            L(C(el));
             if (false) {}
-            else if (*it == "..")
+            else if (el == "..")
             {
                 // can we pop a position ?
                 if (!to_add.empty())
@@ -109,9 +120,9 @@ namespace gubg { namespace filesystem {
                     to_add.pop_back();
                 else
                     // no, so add the it to the result
-                    result /= *it;
+                    result /= el;
             }
-            else if (*it != ".")
+            else if (!el.empty() && el != ".")
             {
                 to_add.push_back(it);
             }
