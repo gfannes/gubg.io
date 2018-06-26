@@ -2,10 +2,15 @@
 #define HEADER_gubg_std_filesystem_hpp_ALREADY_INCLUDED
 
 #include "gubg/Range.hpp"
+#include "gubg/platform/os_api.h"
 #include <fstream>
 
 #define GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM 0
 #if defined(_MSC_VER) && !_HAS_CXX17
+#undef  GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM
+#define GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM 1
+#endif
+#if GUBG_API_APPLE
 #undef  GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM
 #define GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM 1
 #endif
