@@ -17,7 +17,7 @@ namespace gubg { namespace naft {
     public:
         Node(int level, std::ostream &os, const std::string &name): level_(level), os_(&os)
         {
-            indent_(false) << '[' << name << ']';
+            indent_() << '[' << name << ']';
         }
         Node(Node &&dying): level_(dying.level_), os_(dying.os_), is_leaf_(dying.is_leaf_)
         {
@@ -31,7 +31,7 @@ namespace gubg { namespace naft {
                 return;
 
             if (!is_leaf_)
-                indent_(false) << "}" << std::endl;
+                indent_() << "}" << std::endl;
             else
                 *os_ << std::endl;
         }
@@ -44,6 +44,7 @@ namespace gubg { namespace naft {
                 is_leaf_ = false;
             }
             Node n(level_+1, *os_, name);
+            do_indent_ = true;
             return n;
         }
 
@@ -60,22 +61,35 @@ namespace gubg { namespace naft {
             return *this;
         }
 
+        template <typename T>
+        Node &text(const T &v)
+        {
+            if (is_leaf_)
+            {
+                *os_ << "{";
+                is_leaf_ = false;
+            }
+            *os_ << v;
+            do_indent_ = false;
+            return *this;
+        }
+
     private:
         Node(const Node &);
         Node &operator=(const Node &);
         Node &operator=(Node &&dying);
 
-        std::ostream &indent_(bool newline = false)
+        std::ostream &indent_()
         {
-            if (newline)
-                *os_ << std::endl;
-            *os_ << std::string(2*level_, ' ');
+            if (do_indent_)
+                *os_ << std::string(2*level_, ' ');
             return *os_;
         }
 
         const int level_;
         std::ostream *os_ = nullptr;
         bool is_leaf_ = true;
+        bool do_indent_ = true;
     };
 
 } } 
