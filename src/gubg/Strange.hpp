@@ -111,6 +111,14 @@ namespace gubg {
 
         bool pop_raw(char *dst, size_t nr);
 
+        template <typename Ftor>
+        void each_split(char delim, Ftor &&ftor)
+        {
+            Strange part;
+            while (pop_until(part, delim) || pop_all(part))
+                ftor(part);
+        }
+
     private:
         template <typename T>
         bool pop_lsb_(T &);
