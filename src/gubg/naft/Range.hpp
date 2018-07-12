@@ -157,9 +157,13 @@ namespace gubg { namespace naft {
         }
 
     private:
-        const std::string whitespace_ = " \t\n\r";
-        void strip_() {strange_.strip(whitespace_);}
-        void strip_(Strange &strange) {strange.strip(whitespace_);}
+        const std::string &whitespace_() const
+        {
+            static const std::string whitespace = " \t\n\r";
+            return whitespace;
+        }
+        void strip_() {strange_.strip(whitespace_());}
+        void strip_(Strange &strange) {strange.strip(whitespace_());}
 
         Strange strange_;
     };

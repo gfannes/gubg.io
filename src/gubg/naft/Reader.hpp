@@ -16,18 +16,30 @@ namespace gubg { namespace naft {
             top_().block = range_;
         }
 
-        bool pop_name(const std::string &name)
+        bool pop_name(const std::string &expected_name)
         {
             MSS_BEGIN(bool);
+            SavePoint sp(*this);
             Info info;
             MSS(pop_info_(info));
+            auto tag = info.tag;
+            Strange name;
+            MSS(tag.pop_until(name, ':') || tag.pop_all(name));
+            MSS(name.str() == expected_name);
+            sp.commit();
             MSS_END();
         }
-        bool pop_type(const std::string &type)
+        bool pop_type(const std::string &expected_type)
         {
             MSS_BEGIN(bool);
+            SavePoint sp(*this);
             Info info;
             MSS(pop_info_(info));
+            auto tag = info.tag;
+            Strange dump;
+            MSS(tag.pop_until(dump, ':'));
+            MSS(tag.str() == expected_type);
+            sp.commit();
             MSS_END();
         }
 
@@ -41,13 +53,28 @@ namespace gubg { namespace naft {
 
         bool pop_info_(Info &info)
         {
-            MSS_BEGIN(bool);
+            MSS_BEGIN(bool, "");
             auto &block = top_().block;
             MSS_Q(block.pop_tag(info.tag));
             block.pop_attr(info.attr);
             block.pop_block(info.block);
             MSS_END();
         }
+
+        struct SavePoint
+        {
+            Range &dst;
+            Range orig;
+            bool committed = false;
+            SavePoint(Reader &reader): dst(reader.top_().block), orig(dst) { }
+            ~SavePoint()
+            {
+                if (committed)
+                    return;
+                dst = orig;
+            }
+            void commit() {committed = true;}
+        };
 
         Range range_;
 
