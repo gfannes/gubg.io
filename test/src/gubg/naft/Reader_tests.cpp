@@ -23,12 +23,12 @@ TEST_CASE("naft::Reader tests", "[ut][naft][Reader]")
     }
     SECTION("name")
     {
-        scn.str = "[name]{}";
+        scn.str = "[name](a:42.1)(b){}";
         exp.name_ok = true;
     }
     SECTION("type")
     {
-        scn.str = "[:type]{}";
+        scn.str = "[:type](a:42.1)(b){}";
         exp.type_ok = true;
     }
 
@@ -47,5 +47,21 @@ TEST_CASE("naft::Reader tests", "[ut][naft][Reader]")
     }
     if (ok)
     {
+        REQUIRE(reader.has_attr("b"));
+        {
+            std::string v;
+            REQUIRE(reader.get_attr("a", v));
+            REQUIRE(v == "42.1");
+        }
+        {
+            int v;
+            REQUIRE(reader.get_attr("a", v));
+            REQUIRE(v == 42);
+        }
+        {
+            float v;
+            REQUIRE(reader.get_attr("a", v));
+            REQUIRE(v == Approx(42.1));
+        }
     }
 }

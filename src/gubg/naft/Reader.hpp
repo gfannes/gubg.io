@@ -27,6 +27,7 @@ namespace gubg { namespace naft {
             MSS(tag.pop_until(name, ':') || tag.pop_all(name));
             MSS(name.str() == expected_name);
             sp.commit();
+            path_.push_back(std::move(info));
             MSS_END();
         }
         bool pop_type(const std::string &expected_type)
@@ -40,10 +41,56 @@ namespace gubg { namespace naft {
             MSS(tag.pop_until(dump, ':'));
             MSS(tag.str() == expected_type);
             sp.commit();
+            path_.push_back(std::move(info));
             MSS_END();
         }
 
+        bool has_attr(const std::string &key)
+        {
+            MSS_BEGIN(bool);
+            const auto &attr = top_().attr;
+            auto it = attr.find(key);
+            MSS(it != attr.end());
+            MSS_END();
+        }
+        template <typename Value>
+        bool get_attr(const std::string &key, Value &value)
+        {
+            return get_attr_<Value>(key, value);
+        }
+
     private:
+        template <typename Value>
+        bool get_attr_(const std::string &key, Value &value, typename std::enable_if<std::is_same<Value, std::string>::value>::type * = 0)
+        {
+            MSS_BEGIN(bool);
+            const auto &attr = top_().attr;
+            auto it = attr.find(key);
+            MSS(it != attr.end());
+            value = it->second;
+            MSS_END();
+        }
+        template <typename Value>
+        bool get_attr_(const std::string &key, Value &value, typename std::enable_if<std::is_integral<Value>::value>::type * = 0)
+        {
+            MSS_BEGIN(bool);
+            const auto &attr = top_().attr;
+            auto it = attr.find(key);
+            MSS(it != attr.end());
+            value = std::stol(it->second);
+            MSS_END();
+        }
+        template <typename Value>
+        bool get_attr_(const std::string &key, Value &value, typename std::enable_if<std::is_floating_point<Value>::value>::type * = 0)
+        {
+            MSS_BEGIN(bool);
+            const auto &attr = top_().attr;
+            auto it = attr.find(key);
+            MSS(it != attr.end());
+            value = std::stod(it->second);
+            MSS_END();
+        }
+
         struct Info
         {
             Strange tag;
