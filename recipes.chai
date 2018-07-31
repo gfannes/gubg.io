@@ -17,6 +17,6 @@ root.book("gubg/io", fun(b){
             r.remove("test/src", "**/Descriptor*")
         }
         r.depends_on("func")
-        r.depends_on("/catch/func")
+        r.depends_on("catch/runner")
     })
 })
