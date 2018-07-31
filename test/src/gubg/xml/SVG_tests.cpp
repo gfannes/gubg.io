@@ -1,6 +1,8 @@
 #include "catch.hpp"
 #include "gubg/xml/Builder.hpp"
 #include <fstream>
+#include <sstream>
+
 using namespace gubg::xml::builder;
 
 TEST_CASE("SVG tests", "[ut][svg]")

@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
+#include <sstream>
 using namespace std;
 using namespace gubg::parse::numbers;
 
