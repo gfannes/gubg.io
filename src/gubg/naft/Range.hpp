@@ -6,7 +6,7 @@
 
 namespace gubg { namespace naft { 
 
-    using Attr = std::map<std::string, std::string>;
+    using Attrs = std::map<std::string, std::string>;
 
     class Range
     {
@@ -49,7 +49,7 @@ namespace gubg { namespace naft {
             return true;
         }
 
-        void pop_attr(Attr &attr)
+        void pop_attrs(Attrs &attrs)
         {
             Strange kv;
             std::string k,v;
@@ -61,14 +61,14 @@ namespace gubg { namespace naft {
                     kv.pop_all(v);
                 else
                     kv.pop_all(k);
-                attr.emplace(k, v);
+                attrs.emplace(k, v);
             }
         }
-        Attr pop_attr()
+        Attrs pop_attrs()
         {
-            Attr attr;
-            pop_attr(attr);
-            return attr;
+            Attrs attrs;
+            pop_attrs(attrs);
+            return attrs;
         }
 
         bool pop_block(Range &block)

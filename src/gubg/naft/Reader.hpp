@@ -48,9 +48,9 @@ namespace gubg { namespace naft {
         bool has_attr(const std::string &key)
         {
             MSS_BEGIN(bool);
-            const auto &attr = top_().attr;
-            auto it = attr.find(key);
-            MSS(it != attr.end());
+            const auto &attrs = top_().attrs;
+            auto it = attrs.find(key);
+            MSS(it != attrs.end());
             MSS_END();
         }
         template <typename Value>
@@ -64,9 +64,9 @@ namespace gubg { namespace naft {
         bool get_attr_(const std::string &key, Value &value, typename std::enable_if<std::is_same<Value, std::string>::value>::type * = 0)
         {
             MSS_BEGIN(bool);
-            const auto &attr = top_().attr;
-            auto it = attr.find(key);
-            MSS(it != attr.end());
+            const auto &attrs = top_().attrs;
+            auto it = attrs.find(key);
+            MSS(it != attrs.end());
             value = it->second;
             MSS_END();
         }
@@ -74,9 +74,9 @@ namespace gubg { namespace naft {
         bool get_attr_(const std::string &key, Value &value, typename std::enable_if<std::is_integral<Value>::value>::type * = 0)
         {
             MSS_BEGIN(bool);
-            const auto &attr = top_().attr;
-            auto it = attr.find(key);
-            MSS(it != attr.end());
+            const auto &attrs = top_().attrs;
+            auto it = attrs.find(key);
+            MSS(it != attrs.end());
             value = std::stol(it->second);
             MSS_END();
         }
@@ -84,9 +84,9 @@ namespace gubg { namespace naft {
         bool get_attr_(const std::string &key, Value &value, typename std::enable_if<std::is_floating_point<Value>::value>::type * = 0)
         {
             MSS_BEGIN(bool);
-            const auto &attr = top_().attr;
-            auto it = attr.find(key);
-            MSS(it != attr.end());
+            const auto &attrs = top_().attrs;
+            auto it = attrs.find(key);
+            MSS(it != attrs.end());
             value = std::stod(it->second);
             MSS_END();
         }
@@ -94,7 +94,7 @@ namespace gubg { namespace naft {
         struct Info
         {
             Strange tag;
-            Attr attr;
+            Attrs attrs;
             Range block;
         };
 
@@ -103,7 +103,7 @@ namespace gubg { namespace naft {
             MSS_BEGIN(bool, "");
             auto &block = top_().block;
             MSS_Q(block.pop_tag(info.tag));
-            block.pop_attr(info.attr);
+            block.pop_attrs(info.attrs);
             block.pop_block(info.block);
             MSS_END();
         }
