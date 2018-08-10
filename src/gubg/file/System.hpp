@@ -18,7 +18,7 @@ namespace gubg { namespace file {
         fi.seekg(0);
         const size_t size = end_pos - fi.tellg();
         content.resize(size);
-        fi.read(content.data(), size);
+        fi.read(&content[0], size);
         MSS_END();
     }
     inline bool read(std::string &content, const std::filesystem::path &name) {return read(content, Name{name});}
