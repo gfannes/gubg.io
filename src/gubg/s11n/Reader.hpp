@@ -32,10 +32,9 @@ namespace gubg { namespace s11n {
         template <typename Name, typename Ftor>
         bool named(const Name &wanted_name, Ftor &&ftor)
         {
-            MSS_BEGIN(bool, "");
-            L(C(this));
+            MSS_BEGIN(bool);
 
-            auto sp = range_;
+            auto sp = range_.savepoint();
 
             Strange tag;
             if (!range_.pop_tag(tag))
@@ -59,9 +58,10 @@ namespace gubg { namespace s11n {
             Reader rdr;
             range_.pop_attrs(rdr.attrs_);
             range_.pop_block(rdr.range_);
-            L(C(rdr.range_.str()));
 
             MSS(ftor(rdr));
+
+            sp.commit();
 
             MSS_END();
         }
@@ -77,12 +77,30 @@ namespace gubg { namespace s11n {
             return true;
         }
 
+        std::string text()
+        {
+            return range_.pop_text();
+        }
+
+        void stream(std::ostream &os) const
+        {
+            for (const auto &p: attrs_)
+                os << "(" << p.first << ":" << p.second << ")" << std::endl;
+            os << "{" << range_.str() << "}" << std::endl;
+        }
+
     private:
         Reader(){}
 
         naft::Attrs attrs_;
         naft::Range range_;
     };
+
+    inline std::ostream &operator<<(std::ostream &os, const Reader &rdr)
+    {
+        rdr.stream(os);
+        return os;
+    }
 
 } } 
 

@@ -1,11 +1,14 @@
 #include "catch.hpp"
 #include "gubg/s11n/Reader.hpp"
+#include "gubg/debug.hpp"
 #include <optional>
 #include <string>
 using namespace gubg;
 
 TEST_CASE("s11n::Reader tests", "[ut][s11n][Reader]")
 {
+    S("");
+
     struct Scn
     {
         std::string message;
@@ -33,6 +36,7 @@ TEST_CASE("s11n::Reader tests", "[ut][s11n][Reader]")
         *exp.text = "abc";
     }
     
+    L(C(scn.message));
     s11n::Reader reader(scn.message);
 
     {
@@ -62,6 +66,7 @@ TEST_CASE("s11n::Reader tests", "[ut][s11n][Reader]")
         std::optional<std::string> text;
         const auto ok = reader.named("text", [&](auto &rdr){
                 text.emplace();
+                *text = rdr.text();
                 return true;
                 });
         REQUIRE(ok == !!exp.text);

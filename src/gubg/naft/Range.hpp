@@ -11,6 +11,19 @@ namespace gubg { namespace naft {
     class Range
     {
     public:
+        class Savepoint
+        {
+        public:
+            Savepoint(Range &range): dst_(&range), orig_(range.strange_) {}
+            Savepoint(Savepoint &&dying): dst_(dying.dst_), orig_(dying.orig_) { dying.dst_ = nullptr; }
+            ~Savepoint() { if (!!dst_) dst_->strange_ = orig_; }
+            void commit() {dst_ = nullptr;}
+        private:
+            Range *dst_ = nullptr;
+            Strange orig_;
+        };
+        Savepoint savepoint() { return Savepoint(*this); }
+
         Range(){}
         Range(const std::string &str): strange_(str) {strip_();}
 
@@ -86,6 +99,13 @@ namespace gubg { namespace naft {
             strip_(block);
             strip_();
             return true;
+        }
+
+        std::string pop_text()
+        {
+            std::string res;
+            strange_.pop_until(res, '[') || strange_.pop_all(res);
+            return res;
         }
 
         bool pop_name(const std::string &name)
