@@ -3,6 +3,7 @@
 
 #include "gubg/s11n/Reader.hpp"
 #include "gubg/s11n/Writer.hpp"
+#include "gubg/file/System.hpp"
 #include "gubg/mss.hpp"
 
 namespace gubg { namespace s11n { 
@@ -22,6 +23,15 @@ namespace gubg { namespace s11n {
         MSS_BEGIN(bool);
         s11n::Reader r(str);
         MSS(r.object(tag, obj));
+        MSS_END();
+    }
+    template <typename Tag, typename Obj>
+    bool read_object_from_file(const std::filesystem::path &fn, const Tag &tag, Obj &obj)
+    {
+        MSS_BEGIN(bool);
+        std::string content;
+        MSS(file::read(content, fn));
+        MSS(read_object(content, tag, obj));
         MSS_END();
     }
 
