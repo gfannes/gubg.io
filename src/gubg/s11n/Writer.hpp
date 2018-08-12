@@ -43,11 +43,11 @@ namespace gubg { namespace s11n {
         Attr, Open, Closed, 
     };
 
-    template <typename Tag_, typename String_>
+    template <typename String_>
     class Writer
     {
     public:
-        using Tag = Tag_;
+        using Self = Writer<String_>;
         using String = String_;
 
         Writer(String &str): str_(str) {}
@@ -59,8 +59,8 @@ namespace gubg { namespace s11n {
             MSS_END();
         }
 
-        template <typename Obj, typename Name>
-        ReturnCode named(const Obj &obj, const Name &name)
+        template <typename Name, typename Ftor>
+        ReturnCode operator()(const Name &name, Ftor &&ftor)
         {
             MSS_BEGIN(ReturnCode);
 
@@ -71,29 +71,16 @@ namespace gubg { namespace s11n {
             MSS(details::push_back(str_, ']'));
 
             path_.emplace_back();
-            MSS(obj.write(*this));
+            MSS(ftor(*this));
             MSS(close_());
             path_.pop_back();
 
             MSS_END();
         }
-        template <typename Obj, typename Name, typename Ftor>
-        ReturnCode named(const Obj &obj, const Name &name, Ftor &&ftor)
+        template <typename Name, typename Obj>
+        ReturnCode object(const Name &name, const Obj &obj)
         {
-            MSS_BEGIN(ReturnCode);
-
-            MSS(open_());
-
-            MSS(details::push_back(str_, '['));
-            MSS(details::append(str_, name));
-            MSS(details::push_back(str_, ']'));
-
-            path_.emplace_back();
-            MSS(ftor(*this, obj));
-            MSS(close_());
-            path_.pop_back();
-
-            MSS_END();
+            return operator()(name, [&](Self &w){return obj.write(w);});
         }
         
         template <typename Key, typename Value>

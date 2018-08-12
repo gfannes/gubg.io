@@ -1,6 +1,7 @@
 #ifndef HEADER_gubg_s11n_Reader_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_s11n_Reader_hpp_ALREADY_INCLUDED
 
+#include "gubg/Strange.hpp"
 #include "gubg/naft/Range.hpp"
 #include "gubg/mss.hpp"
 #include <string>
@@ -29,8 +30,12 @@ namespace gubg { namespace s11n {
     public:
         Reader(const std::string &message): range_(message) {}
 
-        template <typename Name, typename Ftor>
-        bool named(const Name &wanted_name, Ftor &&ftor)
+        std::string tag() {return tag_;}
+
+        bool empty() const {return range_.empty();}
+
+        template <typename Tag, typename Ftor>
+        bool operator()(const Tag &wanted_tag, Ftor &&ftor)
         {
             MSS_BEGIN(bool);
 
@@ -42,20 +47,15 @@ namespace gubg { namespace s11n {
                 L("No naft tag found");
                 return false;
             }
-            Strange actual_name;
-            if (!(tag.pop_until(actual_name, ':') || tag.pop_all(actual_name)))
-            {
-                L("No name found");
-                return false;
-            }
 
-            if (!details::is_same(wanted_name, actual_name))
+            if (!details::is_same(wanted_tag, tag))
             {
-                L("Names are different");
+                L("Tags are different");
                 return false;
             }
 
             Reader rdr;
+            rdr.tag_ = tag.str();
             range_.pop_attrs(rdr.attrs_);
             range_.pop_block(rdr.range_);
 
@@ -66,8 +66,19 @@ namespace gubg { namespace s11n {
             MSS_END();
         }
 
+        template <typename Tag, typename Obj>
+        bool object(const Tag &tag, Obj &obj)
+        {
+            return operator()(tag, [&](Reader &r){return obj.read(r);});
+        }
+        template <typename Tag, typename Obj, typename Info>
+        bool object(const Tag &tag, Obj &obj, const Info &info)
+        {
+            return operator()(tag, [&](Reader &r){return obj.read(r, info);});
+        }
+
         template <typename Value>
-        bool attr(Value &value, const std::string &key)
+        bool attr(const std::string &key, Value &value)
         {
             auto it = attrs_.find(key);
             if (it == attrs_.end())
@@ -81,6 +92,10 @@ namespace gubg { namespace s11n {
         {
             return range_.pop_text();
         }
+        bool text(Strange &strange)
+        {
+            return range_.pop_text(strange);
+        }
 
         void stream(std::ostream &os) const
         {
@@ -92,6 +107,7 @@ namespace gubg { namespace s11n {
     private:
         Reader(){}
 
+        std::string tag_;
         naft::Attrs attrs_;
         naft::Range range_;
     };

@@ -41,17 +41,17 @@ TEST_CASE("s11n::Reader tests", "[ut][s11n][Reader]")
 
     {
         std::optional<std::vector<int>> array;
-        const auto ok = reader.named("array", [&](auto &rdr){
+        const auto ok = reader("array", [&](auto &rdr){
                 MSS_BEGIN(bool);
 
                 unsigned int size;
-                MSS(rdr.attr(size, "size"));
+                MSS(rdr.attr("size", size));
 
                 array.emplace();
                 array->resize(size);
 
                 for (auto ix = 0u; ix < size; ++ix)
-                    MSS(rdr.named(ix, [&](auto &rdr) { return rdr.attr((*array)[ix], "value"); }));
+                    MSS(rdr(ix, [&](auto &rdr) { return rdr.attr("value", (*array)[ix]); }));
 
                 MSS_END();
                 });
@@ -64,7 +64,7 @@ TEST_CASE("s11n::Reader tests", "[ut][s11n][Reader]")
     }
     {
         std::optional<std::string> text;
-        const auto ok = reader.named("text", [&](auto &rdr){
+        const auto ok = reader("text", [&](auto &rdr){
                 text.emplace();
                 *text = rdr.text();
                 return true;

@@ -107,6 +107,10 @@ namespace gubg { namespace naft {
             strange_.pop_until(res, '[') || strange_.pop_all(res);
             return res;
         }
+        bool pop_text(Strange &strange)
+        {
+            return strange_.pop_until(strange, '[') || strange_.pop_all(strange);
+        }
 
         bool pop_name(const std::string &name)
         {

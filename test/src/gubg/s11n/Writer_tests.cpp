@@ -40,7 +40,7 @@ namespace  {
             size_t ix = 0;
             for (const auto &value: values_)
             {
-                MSS(writer.named(value, ix, [](Writer &writer, int value){return writer.attr("value", value);}));
+                MSS(writer(ix, [&](Writer &writer){return writer.attr("value", value);}));
                 ++ix;
             }
             MSS_END();
@@ -64,13 +64,11 @@ namespace  {
     private:
         std::string str_;
     };
-
-    struct MyTag { };
 } 
 
 TEST_CASE("s11n::Writer tests", "[ut][s11n][Writer]")
 {
-    using Writer = s11n::Writer<MyTag, String>;
+    using Writer = s11n::Writer<String>;
 
     struct Scn
     {
@@ -148,7 +146,7 @@ TEST_CASE("s11n::Writer tests", "[ut][s11n][Writer]")
         }
         else
         {
-            AGG(rc, writer.named(*scn.array, "array"));
+            AGG(rc, writer.object("array", *scn.array));
         }
     }
     if (scn.text)
@@ -159,7 +157,7 @@ TEST_CASE("s11n::Writer tests", "[ut][s11n][Writer]")
         }
         else
         {
-            AGG(rc, writer.named(*scn.text, "text"));
+            AGG(rc, writer.object("text", *scn.text));
         }
     }
     REQUIRE(exp.rc == rc);
