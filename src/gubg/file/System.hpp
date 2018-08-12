@@ -23,6 +23,15 @@ namespace gubg { namespace file {
     }
     inline bool read(std::string &content, const std::filesystem::path &name) {return read(content, Name{name});}
 
+    inline bool write(std::string &content, const Name &name)
+    {
+        MSS_BEGIN(bool);
+        std::ofstream fo(name.str(), std::ios::binary);
+        fo << content;
+        MSS_END();
+    }
+    inline bool write(std::string &content, const std::filesystem::path &name) {return write(content, Name{name});}
+
     inline bool exists(const gubg::file::Name &fn)
     {
         MSS_BEGIN(bool);
