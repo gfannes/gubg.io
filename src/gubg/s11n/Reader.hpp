@@ -23,6 +23,8 @@ namespace gubg { namespace s11n {
         inline void assign(std::string &dst, const std::string &src) { dst = src; }
         inline void assign(int &dst, const std::string &src) { dst = std::stoi(src); }
         inline void assign(unsigned int &dst, const std::string &src) { dst = std::stoul(src); }
+        inline void assign(float &dst, const std::string &src) { dst = std::stof(src); }
+        inline void assign(double &dst, const std::string &src) { dst = std::stod(src); }
     } 
 
     class Reader
@@ -86,6 +88,24 @@ namespace gubg { namespace s11n {
             details::assign(value, it->second);
             attrs_.erase(it);
             return true;
+        }
+        template <typename Ftor>
+        bool attr_ftor(const std::string &key, Ftor &&ftor)
+        {
+            auto it = attrs_.find(key);
+            if (it == attrs_.end())
+                return false;
+            if (!ftor(it->second))
+                return false;
+            attrs_.erase(it);
+            return true;
+        }
+        template <typename Ftor>
+        void each_attr(Ftor &&ftor)
+        {
+            for (const auto &p: attrs_)
+                ftor(p.first, p.second);
+            attrs_.clear();
         }
 
         std::string text()

@@ -66,6 +66,11 @@ namespace gubg { namespace s11n {
 
             MSS(open_());
 
+            if (!indent_.empty())
+            {
+                MSS(details::push_back(str_, '\n'));
+                MSS(details::append(str_, indent_));
+            }
             MSS(details::push_back(str_, '['));
             MSS(details::append(str_, name));
             MSS(details::push_back(str_, ']'));
@@ -101,6 +106,24 @@ namespace gubg { namespace s11n {
 
             MSS_END();
         }
+        template <typename Key, typename Ftor>
+        ReturnCode attr_ftor(const Key &key, Ftor &&ftor)
+        {
+            MSS_BEGIN(ReturnCode);
+
+            MSS(!path_.empty());
+            const auto &info = path_.back();
+
+            MSS(info.state == State::Attr);
+
+            MSS(details::push_back(str_, '('));
+            MSS(details::append(str_, key));
+            MSS(details::push_back(str_, ':'));
+            MSS(details::append(str_, ftor()));
+            MSS(details::push_back(str_, ')'));
+
+            MSS_END();
+        }
         
         template <typename Value>
         ReturnCode text(const Value &value)
@@ -130,6 +153,7 @@ namespace gubg { namespace s11n {
                     MSS(details::push_back(str_, '{'));
                 }
             }
+            indent_.resize(path_.size()*2, ' ');
             MSS_END();
         }
         ReturnCode close_()
@@ -142,6 +166,7 @@ namespace gubg { namespace s11n {
                 info.state = State::Closed;
                 MSS(details::push_back(str_, '}'));
             }
+            indent_.resize(path_.size()*2, ' ');
             MSS_END();
         }
         struct Info
@@ -150,6 +175,7 @@ namespace gubg { namespace s11n {
         };
         using Path = std::vector<Info>;
         Path path_;
+        std::string indent_;
         StringAdapter<String> str_;
     };
 
