@@ -20,8 +20,9 @@ namespace gubg { namespace string {
 
     std::string escape_cmake(const std::string &str)
     {
-        std::string res(str.size(), '?');
+        std::string res(str.size()+2, '?');
         res.resize(0);
+        res.push_back('\"');
         for (auto ch: str)
         {
             if (ch == '\\')
@@ -29,6 +30,7 @@ namespace gubg { namespace string {
             else
                 res.push_back(ch);
         }
+        res.push_back('\"');
         return res;
     }
 
