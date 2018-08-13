@@ -5,7 +5,7 @@
 
 namespace gubg { namespace string { 
 
-    std::string escape_c(const std::string &str)
+    inline std::string escape_c(const std::string &str)
     {
         std::string res(str.size(), '?');
         res.resize(0);
@@ -18,11 +18,11 @@ namespace gubg { namespace string {
         return res;
     }
 
-    std::string escape_cmake(const std::string &str)
+    inline std::string escape_cmake(const std::string &str, bool add_quotes = true)
     {
-        std::string res(str.size()+2, '?');
+        std::string res(str.size()+(add_quotes ? 2 : 0), '?');
         res.resize(0);
-        res.push_back('\"');
+        if (add_quotes) res.push_back('\"');
         for (auto ch: str)
         {
             if (ch == '\\')
@@ -30,8 +30,17 @@ namespace gubg { namespace string {
             else
                 res.push_back(ch);
         }
-        res.push_back('\"');
+        if (add_quotes) res.push_back('\"');
+        
         return res;
+    }
+
+    inline std::string dequote(const std::string & str)
+    {
+        if (str.size() >=2  && str.front() == '\"' && str.back() == '\"')
+            return str.substr(1, str.size()-2);
+        else
+            return str;
     }
 
 } } 
