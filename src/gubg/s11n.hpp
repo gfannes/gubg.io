@@ -16,6 +16,15 @@ namespace gubg { namespace s11n {
         MSS(w.object(tag, obj));
         MSS_END();
     }
+    template <typename Tag, typename Obj>
+    bool write_object_to_file(const std::filesystem::path &fn, const Tag &tag, const Obj &obj)
+    {
+        MSS_BEGIN(bool);
+        std::string content;
+        MSS(write_object(content, tag, obj));
+        MSS(file::write(content, fn));
+        MSS_END();
+    }
 
     template <typename String, typename Tag, typename Obj>
     bool read_object(const String &str, const Tag &tag, Obj &obj)
