@@ -24,6 +24,13 @@ namespace gubg { namespace s11n {
             return ReturnCode::OK;
         }
         template <typename String>
+        ReturnCode append(String &dst, char ch)
+        {
+            if (!dst.push_back(ch))
+                return ReturnCode::NoSpaceLeft;
+            return ReturnCode::OK;
+        }
+        template <typename String>
         ReturnCode append(String &dst, const std::string &str)
         {
             for (const auto ch: str)
