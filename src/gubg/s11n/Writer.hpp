@@ -57,7 +57,7 @@ namespace gubg { namespace s11n {
         using Self = Writer<String_>;
         using String = String_;
 
-        Writer(String &str): str_(str) {}
+        Writer(String &str, int indent_level = -1): str_(str), indent_level_(indent_level) {}
 
         template <typename Obj>
         ReturnCode typed(const Obj &obj)
@@ -73,10 +73,13 @@ namespace gubg { namespace s11n {
 
             MSS(open_());
 
-            if (!indent_.empty())
+            if (do_indent_())
             {
-                MSS(details::push_back(str_, '\n'));
-                MSS(details::append(str_, indent_));
+                if (!indent_.empty())
+                {
+                    MSS(details::push_back(str_, '\n'));
+                    MSS(details::append(str_, indent_));
+                }
             }
             MSS(details::push_back(str_, '['));
             MSS(details::append(str_, name));
@@ -160,7 +163,8 @@ namespace gubg { namespace s11n {
                     MSS(details::push_back(str_, '{'));
                 }
             }
-            indent_.resize(path_.size()*2, ' ');
+            if (do_indent_())
+                indent_.resize(path_.size()*indent_level_, ' ');
             MSS_END();
         }
         ReturnCode close_()
@@ -173,15 +177,18 @@ namespace gubg { namespace s11n {
                 info.state = State::Closed;
                 MSS(details::push_back(str_, '}'));
             }
-            indent_.resize(path_.size()*2, ' ');
+            if (do_indent_())
+                indent_.resize(path_.size()*indent_level_, ' ');
             MSS_END();
         }
+        bool do_indent_() const {return indent_level_ >= 0;}
         struct Info
         {
             State state = State::Attr;
         };
         using Path = std::vector<Info>;
         Path path_;
+        int indent_level_;
         std::string indent_;
         StringAdapter<String> str_;
     };

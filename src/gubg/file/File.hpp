@@ -175,8 +175,9 @@ namespace gubg { namespace file {
 
             File relative(const File &wd) const
             {
-                const auto nameParts = string_algo::split<std::vector>(name(), Delimiter);
-                const auto wdParts = string_algo::split<std::vector>(wd.name(), Delimiter);
+                std::vector<std::string> nameParts, wdParts;
+                string_algo::split(nameParts, name(), Delimiter);
+                string_algo::split(wdParts, wd.name(), Delimiter);
                 auto nameIt = nameParts.begin();
                 auto wdIt = wdParts.begin();
                 File file;

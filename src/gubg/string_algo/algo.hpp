@@ -44,23 +44,27 @@ namespace gubg { namespace string_algo {
         inline size_t size(const char &){return 1;}
         inline size_t size(const std::string &str){return str.size();}
     }
-    template <template <typename T, typename Allocator> class Container, typename Delim, typename Allocator = std::allocator<std::string>>
-    Container<std::string, Allocator> split(const std::string &str, const Delim &delim)
+    template <typename Container, typename Delim>
+    unsigned int split(Container &container, const std::string &str, const Delim &delim)
     {
-        Container<std::string, Allocator> parts;
+        unsigned int nr = 0;
+        container.resize(0);
         size_t pos = 0, ix;
         while (std::string::npos != (ix = str.find(delim, pos)))
         {
-            parts.push_back(str.substr(pos, ix-pos));
+            container.push_back(str.substr(pos, ix-pos));
             pos = ix+priv::size(delim);
+            ++nr;
         }
-        parts.push_back(str.substr(pos));
-        return parts;
+        container.push_back(str.substr(pos));
+        ++nr;
+        return nr;
     }
-    template <template <typename T, typename Allocator> class Container, typename Allocator = std::allocator<std::string>>
-    Container<std::string, Allocator> split_lines(const std::string &str)
+    template <typename Container>
+    unsigned int split_lines(Container &container, const std::string &str)
     {
-        Container<std::string, Allocator> parts;
+        unsigned int nr = 0;
+        container.resize(0);
         const auto s = str.size();
         size_t pos = 0, ix;
         while (std::string::npos != (ix = str.find_first_of("\n\r", pos, 2)))
@@ -68,20 +72,23 @@ namespace gubg { namespace string_algo {
             if (str[ix] == '\n')
             {
                 //Single line-feed found
-                parts.push_back(str.substr(pos, ix-pos));
+                container.push_back(str.substr(pos, ix-pos));
+                ++nr;
                 pos = ix+1;
             }
             else if (str[ix] == '\r' && ix+1 < s && str[ix+1] == '\n')
             {
                 //Carriage-return/Line-feed is found
-                parts.push_back(str.substr(pos, ix-pos));
+                container.push_back(str.substr(pos, ix-pos));
+                ++nr;
                 pos = ix+2;
             }
             else
                 pos = ix+1;
         }
-        parts.push_back(str.substr(pos));
-        return parts;
+        container.push_back(str.substr(pos));
+        ++nr;
+        return nr;
     }
 
     template <typename String>
