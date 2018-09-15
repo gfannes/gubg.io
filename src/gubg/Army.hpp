@@ -20,6 +20,8 @@ namespace gubg {
         Army &from_minutes(unsigned int minutes) {minutes_ = minutes; return *this;}
         Army &from_army(unsigned int army) {minutes_ = (army/100)*60 + (army%100); return *this;}
 
+        Army &operator+=(const Army &rhs) { minutes_ += rhs.minutes_; return *this; }
+
     private:
         unsigned int minutes_ = 0;
     };
@@ -28,7 +30,7 @@ namespace gubg {
     {
         const auto minutes = army.as_minutes();
         const auto ch = os.fill();
-        os << minutes/60 << ':' << std::setw(2) << std::setfill('0') << minutes%60;
+        os << std::setw(2) << std::setfill('0') << minutes/60 << ':' << std::setw(2) << std::setfill('0') << minutes%60;
         os.fill(ch);
         return os;
     }
