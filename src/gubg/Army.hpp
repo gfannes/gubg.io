@@ -28,9 +28,13 @@ namespace gubg {
 
     std::ostream &operator<<(std::ostream &os, const Army &army)
     {
-        const auto minutes = army.as_minutes();
+        auto total_minutes = army.as_minutes();
+        const auto days = total_minutes/60/8; total_minutes -= days*8*60;
+        const auto hours = total_minutes/60; total_minutes -= hours*60;
+        const auto minutes = total_minutes;
+
         const auto ch = os.fill();
-        os << std::setw(2) << std::setfill('0') << minutes/60 << ':' << std::setw(2) << std::setfill('0') << minutes%60;
+        os << std::setw(3) << days << "d " << std::setfill('0') << hours << ':' << std::setw(2) << std::setfill('0') << minutes;
         os.fill(ch);
         return os;
     }
