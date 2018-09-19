@@ -1,2 +1,4 @@
-task :prepare
 task :run
+task :proper
+task :clean
+task :prepare
