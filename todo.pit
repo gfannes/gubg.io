@@ -1,0 +1,12 @@
+[markup]{
+    [easy to create markuped text]
+    [html/markdwon/terminal]
+    [coloring]{
+        [good/bad gradation]
+        [normal/info/warning/important]
+    }
+    [stack-based]
+    [rendering to string/ostream]
+    [familiar streaming interface]
+}
+[Remove gubg/file/Filesystem.hpp, especially read() as that is now also present in gubg/file/System.hpp]
