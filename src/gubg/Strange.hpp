@@ -17,6 +17,13 @@ namespace gubg {
     class Strange
     {
     public:
+        struct Position
+        {
+            size_t ix = 0;//zero-based
+            size_t line = 0;//zero-based
+            size_t column = 0;//zero-based
+        };
+
         Strange();
         Strange(const std::string &);
         Strange(const char *cstr);
@@ -118,6 +125,8 @@ namespace gubg {
             while (pop_until(part, delim) || pop_all(part))
                 ftor(part);
         }
+
+        Position position() const;
 
     private:
         template <typename T>

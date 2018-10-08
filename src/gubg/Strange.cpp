@@ -529,6 +529,26 @@ namespace gubg {
             pop_front();
     }
 
+    Strange::Position Strange::position() const
+    {
+        Position pos;
+        if (!data_)
+            return pos;
+
+        pos.ix = (s_ - data_->data());
+
+        for (auto ptr = data_->data(); ptr != s_; ++ptr)
+            if (*ptr == '\n')
+            {
+                ++pos.line;
+                pos.column = 0;
+            }
+            else
+                ++pos.column;
+
+        return pos;
+    }
+
     //Privates
     bool Strange::invariants_() const
     {

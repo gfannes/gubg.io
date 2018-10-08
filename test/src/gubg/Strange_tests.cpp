@@ -469,3 +469,58 @@ TEST_CASE("gubg::Strange construction and content lifetime tests", "[ut][Strange
         REQUIRE(strange.str() == "abc");
     }
 }
+TEST_CASE("gubg::Strange position tests", "[ut][Strange]")
+{
+    struct Scn
+    {
+        std::string content;
+        unsigned int pop_count = 0;
+    };
+    struct Exp
+    {
+        gubg::Strange::Position position;
+    };
+
+    Scn scn;
+
+    Exp exp;
+
+    SECTION("default")
+    {
+    }
+    SECTION("abc, 0 pop")
+    {
+        scn.content = "abc";
+        scn.pop_count = 0;
+    }
+    SECTION("abc, 1 pop")
+    {
+        scn.content = "abc";
+        scn.pop_count = 1;
+        exp.position.ix = 1;
+        exp.position.column = 1;
+    }
+    SECTION("abc, 3 pop")
+    {
+        scn.content = "abc";
+        scn.pop_count = 3;
+        exp.position.ix = 3;
+        exp.position.column = 3;
+    }
+    SECTION("a\nbc, 3 pop")
+    {
+        scn.content = "a\nbc";
+        scn.pop_count = 3;
+        exp.position.ix = 3;
+        exp.position.line = 1;
+        exp.position.column = 1;
+    }
+
+    gubg::Strange strange(scn.content);
+    REQUIRE(strange.pop_count(scn.pop_count));
+
+    auto position = strange.position();
+    REQUIRE(exp.position.ix == position.ix);
+    REQUIRE(exp.position.line == position.line);
+    REQUIRE(exp.position.column == position.column);
+}

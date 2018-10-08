@@ -11,6 +11,8 @@ namespace gubg { namespace naft {
     class Range
     {
     public:
+        using Position = Strange::Position;
+
         class Savepoint
         {
         public:
@@ -29,6 +31,8 @@ namespace gubg { namespace naft {
 
         bool empty() const {return strange_.empty();}
         std::string str() const {return strange_.str();}
+
+        Position position() const {return strange_.position();}
 
         bool pop_tag(std::string &tag)
         {
