@@ -11,6 +11,9 @@ namespace gubg { namespace markup {
     template <typename Renderer>
     class Node
     {
+    private:
+        using Self = Node<Renderer>;
+
     public:
         Node(){}
         template <typename Data>
@@ -35,15 +38,15 @@ namespace gubg { namespace markup {
         }
 
     private:
-        bool render_(Renderer &renderer, std::ostream *os) const
+        bool render_(Renderer &renderer, std::ostream *os, const Self *parent = nullptr) const
         {
             MSS_BEGIN(bool);
             if (!os)
             {
-                MSS(std::visit([&](const auto &data){return renderer.open(render_info_, data);}, data_));
+                MSS(std::visit([&](const auto &data){return renderer.open(render_info_, data, (!!parent ? &parent->render_info_ : nullptr));}, data_));
                 for (const auto &child: childs_)
                 {
-                    MSS(child.render_(renderer, os));
+                    MSS(child.render_(renderer, os, this));
                 }
                 MSS(std::visit([&](const auto &data){return renderer.close(render_info_, data);}, data_));
             }
@@ -52,7 +55,7 @@ namespace gubg { namespace markup {
                 MSS(std::visit([&](const auto &data){return renderer.open(*os, render_info_, data);}, data_));
                 for (const auto &child: childs_)
                 {
-                    MSS(child.render_(renderer, os));
+                    MSS(child.render_(renderer, os, this));
                 }
                 MSS(std::visit([&](const auto &data){return renderer.close(*os, render_info_, data);}, data_));
             }

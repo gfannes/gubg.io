@@ -15,9 +15,19 @@ namespace gubg { namespace markup {
         };
 
         template <typename Data>
-        bool open(Info &info, const Data &) const
+        bool open(Info &info, const Data &, const Info *parent) const
         {
             MSS_BEGIN(bool);
+            if (!!parent)
+                info = *parent;
+            MSS_END();
+        }
+        bool open(Info &info, const Section &sec, const Info *parent) const
+        {
+            MSS_BEGIN(bool);
+            if (!!parent)
+                info = *parent;
+            ++info.level;
             MSS_END();
         }
         bool open(std::ostream &os, const Info &info, const Document &doc) const
@@ -31,7 +41,8 @@ namespace gubg { namespace markup {
         bool open(std::ostream &os, const Info &info, const Section &sec) const
         {
             MSS_BEGIN(bool);
-            os << "## " << sec.title << std::endl;
+            const auto hashtags = std::string(info.level+1, '#');
+            os << hashtags << ' ' << sec.title << std::endl;
             os << std::endl;
             MSS_END();
         }
