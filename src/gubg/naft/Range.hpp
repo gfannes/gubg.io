@@ -6,7 +6,7 @@
 
 namespace gubg { namespace naft { 
 
-    using Attrs = std::map<std::string, std::string>;
+    using Attrs = std::multimap<std::string, std::string>;
 
     class Range
     {
