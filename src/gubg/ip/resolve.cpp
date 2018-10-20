@@ -19,14 +19,14 @@ namespace gubg { namespace ip {
         hints.ai_flags = AI_PASSIVE;     // fill in my IP for me
 
         struct addrinfo *info = nullptr;
-        const int status = getaddrinfo(hostname.c_str(), nullptr, &hints, &info);
+        const int status = ::getaddrinfo(hostname.c_str(), nullptr, &hints, &info);
         MSS(status == 0, return ReturnCode::UnkownHost);
         MSS(!!info, return ReturnCode::UnkownHost);
 
         const auto &addr = *(struct sockaddr_in *)info->ai_addr;
         address.from_uint32(addr.sin_addr.s_addr);
 
-        freeaddrinfo(info);
+        ::freeaddrinfo(info);
 
         MSS_END();
     }

@@ -7,7 +7,9 @@ namespace gubg { namespace ip {
     {
         OK,
         Error,
+        InvalidDescriptor,
         UnkownHost,
+        CouldNotBind,
     };
 
 } } 
