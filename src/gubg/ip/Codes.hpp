@@ -10,6 +10,8 @@ namespace gubg { namespace ip {
         InvalidDescriptor,
         UnkownHost,
         CouldNotBind,
+        CouldNotSend,
+        CouldNotReceive,
     };
 
 } } 

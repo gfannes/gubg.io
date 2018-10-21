@@ -1,6 +1,7 @@
 #include "catch.hpp"
 #include "gubg/ip/Socket.hpp"
 #include "gubg/macro/capture.hpp"
+#include "gubg/Range.hpp"
 #include <iostream>
 using namespace gubg;
 
@@ -24,6 +25,19 @@ TEST_CASE("ip::Socket tests", "[ut][ip][Socket]")
         REQUIRE(socket.setup(ip::Type::UDP, ip::Version::V4));
         ip::Endpoint ep(ip::Address{127,0,0,1}, 1234);
         REQUIRE(socket.bind(ep) == ip::ReturnCode::OK);
+    }
+    SECTION("sendto")
+    {
+        REQUIRE(socket.setup(ip::Type::UDP, ip::Version::V4));
+        /* ip::Endpoint ep(ip::Address{127,0,0,1}, 1234); */
+        ip::Endpoint ep(ip::Address{192,168,1,76}, 6789);
+        std::array<char, 10> buffer;
+        buffer[0] = 'a';
+        buffer[1] = 'b';
+        buffer[2] = '\0';
+        auto data = make_range(buffer);
+        REQUIRE(socket.sendto(data, ep) == ip::ReturnCode::OK);
+        REQUIRE(data.empty());
     }
     std::cout << socket << std::endl;
 }

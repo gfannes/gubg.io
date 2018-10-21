@@ -5,6 +5,8 @@
 #include "gubg/ip/Types.hpp"
 #include "gubg/ip/Endpoint.hpp"
 #include <ostream>
+#include <string>
+#include <cstddef>
 
 namespace gubg { namespace ip { 
 
@@ -24,6 +26,36 @@ namespace gubg { namespace ip {
         bool valid() const;
 
         ReturnCode bind(const Endpoint &);
+
+        ReturnCode sendto(unsigned int &sent, const void *buffer, unsigned int size, const Endpoint &ep);
+
+        template <typename Range>
+        ReturnCode sendto(Range &data, const Endpoint &ep)
+        {
+            static_assert(sizeof(typename Range::value_type) == 1, "Socket::sendto() can only work on byte-like things");
+
+            unsigned int sent = 0;
+            const void *buffer = &data.front();
+            const auto rc = sendto(sent, buffer, data.size(), ep);
+            if (rc == ReturnCode::OK)
+                data.pop_front(sent);
+            return rc;
+        }
+
+        ReturnCode recvfrom(unsigned int &recv, void *buffer, unsigned int size, Endpoint &ep);
+
+        template <typename String>
+        ReturnCode recvfrom(String &data, Endpoint &ep)
+        {
+            static_assert(sizeof(typename String::value_type) == 1, "Socket::recvfrom() can only work on byte-like things");
+
+            unsigned int recv = 0;
+            void *buffer = &data.front();
+            const auto rc = recvfrom(recv, buffer, data.size(), ep);
+            if (rc == ReturnCode::OK)
+                data.resize(recv);
+            return rc;
+        }
 
         void stream(std::ostream &os) const;
 

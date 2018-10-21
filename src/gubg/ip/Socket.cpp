@@ -88,6 +88,27 @@ namespace gubg { namespace ip {
         MSS_END();
     }
 
+    ReturnCode Socket::sendto(unsigned int &sent, const void *buffer, unsigned int size, const Endpoint &ep)
+    {
+        MSS_BEGIN(ReturnCode);
+        MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
+        const auto status = ::sendto(descriptor_, buffer, size, 0, &ep.as_sockaddr(), sizeof(sockaddr));
+        MSS(status != -1, return ReturnCode::CouldNotSend);
+        sent = status;
+        MSS_END();
+    }
+
+    ReturnCode Socket::recvfrom(unsigned int &recv, void *buffer, unsigned int size, Endpoint &ep)
+    {
+        MSS_BEGIN(ReturnCode);
+        MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
+        socklen_t fromlen = sizeof(sockaddr);
+        const auto status = ::recvfrom(descriptor_, buffer, size, 0, &ep.as_sockaddr(), &fromlen);
+        MSS(status != -1, return ReturnCode::CouldNotReceive);
+        recv = status;
+        MSS_END();
+    }
+
     void Socket::stream(std::ostream &os) const
     {
         os << "[Socket](desc:" << descriptor_ << ")";
