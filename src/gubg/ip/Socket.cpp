@@ -85,7 +85,6 @@ namespace gubg { namespace ip {
         MSS_BEGIN(ReturnCode);
         MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
         const auto flags = ::fcntl(descriptor_, F_GETFL, 0);
-        std::cout << std::hex << flags << std::endl;
         block = !(flags & O_NONBLOCK);
         MSS_END();
     }
@@ -94,13 +93,10 @@ namespace gubg { namespace ip {
         MSS_BEGIN(ReturnCode);
         MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
         auto flags = ::fcntl(descriptor_, F_GETFL, 0);
-        std::cout << std::hex << flags << std::endl;
-        std::cout << std::hex << (~O_NONBLOCK) << std::endl;
         if (block)
             flags &= ~O_NONBLOCK;
         else
             flags |= O_NONBLOCK;
-        std::cout << std::hex << flags << std::endl;
         ::fcntl(descriptor_, F_SETFL, flags);
         MSS_END();
     }
@@ -137,6 +133,7 @@ namespace gubg { namespace ip {
                 /* case EAGAIN: */
                 case EWOULDBLOCK:
                     recv = 0;
+                    return ReturnCode::WouldBlock;
                     break;
                 default:
                     MSS(ReturnCode::CouldNotReceive);

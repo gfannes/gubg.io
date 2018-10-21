@@ -55,8 +55,13 @@ namespace gubg { namespace ip {
             unsigned int recv = 0;
             void *buffer = &data.front();
             const auto rc = recvfrom(recv, buffer, data.size(), ep);
-            if (rc == ReturnCode::OK)
-                data.resize(recv);
+            switch (rc)
+            {
+                case ReturnCode::OK:
+                case ReturnCode::WouldBlock:
+                    data.resize(recv);
+                    break;
+            }
             return rc;
         }
 

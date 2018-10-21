@@ -12,6 +12,7 @@ namespace gubg { namespace ip {
         CouldNotBind,
         CouldNotSend,
         CouldNotReceive,
+        WouldBlock,
     };
 
 } } 
