@@ -19,6 +19,7 @@ namespace gubg { namespace ip {
     public:
         Address(){}
         Address(std::uint8_t a, std::uint8_t b, std::uint8_t c, std::uint8_t d): v4_parts_({a, b, c, d}) {}
+        static Address localhost();
 
         Version version() const {return version_;}
 

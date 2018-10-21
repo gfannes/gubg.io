@@ -25,6 +25,9 @@ namespace gubg { namespace ip {
 
         bool valid() const;
 
+        ReturnCode get_blocking(bool &block) const;
+        ReturnCode set_blocking(bool block);
+
         ReturnCode bind(const Endpoint &);
 
         ReturnCode sendto(unsigned int &sent, const void *buffer, unsigned int size, const Endpoint &ep);

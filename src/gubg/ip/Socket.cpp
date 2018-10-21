@@ -3,6 +3,7 @@
 #include <cassert>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 namespace gubg { namespace ip { 
@@ -79,6 +80,31 @@ namespace gubg { namespace ip {
         descriptor_ = -1;
     }
 
+    ReturnCode Socket::get_blocking(bool &block) const
+    {
+        MSS_BEGIN(ReturnCode);
+        MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
+        const auto flags = ::fcntl(descriptor_, F_GETFL, 0);
+        std::cout << std::hex << flags << std::endl;
+        block = !(flags & O_NONBLOCK);
+        MSS_END();
+    }
+    ReturnCode Socket::set_blocking(bool block)
+    {
+        MSS_BEGIN(ReturnCode);
+        MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
+        auto flags = ::fcntl(descriptor_, F_GETFL, 0);
+        std::cout << std::hex << flags << std::endl;
+        std::cout << std::hex << (~O_NONBLOCK) << std::endl;
+        if (block)
+            flags &= ~O_NONBLOCK;
+        else
+            flags |= O_NONBLOCK;
+        std::cout << std::hex << flags << std::endl;
+        ::fcntl(descriptor_, F_SETFL, flags);
+        MSS_END();
+    }
+
     ReturnCode Socket::bind(const Endpoint &ep)
     {
         MSS_BEGIN(ReturnCode);
@@ -104,8 +130,23 @@ namespace gubg { namespace ip {
         MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
         socklen_t fromlen = sizeof(sockaddr);
         const auto status = ::recvfrom(descriptor_, buffer, size, 0, &ep.as_sockaddr(), &fromlen);
-        MSS(status != -1, return ReturnCode::CouldNotReceive);
-        recv = status;
+        if (status == -1)
+        {
+            switch (errno)
+            {
+                /* case EAGAIN: */
+                case EWOULDBLOCK:
+                    recv = 0;
+                    break;
+                default:
+                    MSS(ReturnCode::CouldNotReceive);
+                    break;
+            }
+        }
+        else
+        {
+            recv = status;
+        }
         MSS_END();
     }
 

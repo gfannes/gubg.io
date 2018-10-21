@@ -6,6 +6,11 @@
 
 namespace gubg { namespace ip { 
 
+    Address Address::localhost()
+    {
+        return Address{127,0,0,1};
+    }
+
     void Address::stream(std::ostream &os) const
     {
         os << "[Address](";
