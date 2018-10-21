@@ -6,18 +6,6 @@
 
 namespace gubg { namespace ip { 
 
-    namespace  { 
-        short int to_family(Version version)
-        {
-            switch (version)
-            {
-                case Version::V4: return AF_INET;
-                case Version::V6: return AF_INET6;
-            }
-            return -1;
-        }
-    } 
-
     void Address::stream(std::ostream &os) const
     {
         os << "[Address](";
@@ -49,21 +37,15 @@ namespace gubg { namespace ip {
         *part++ = (addr & 0xff); addr >>= 8;
     }
 
-    const sockaddr *Address::as_sockaddr(Port port) const
+    std::uint32_t Address::as_uint32() const
     {
-        static_assert(sizeof(buffer_) == sizeof(sockaddr), "Buffer is too small to fit sockaddr");
-        std::fill(RANGE(buffer_), 0);
-        auto sa = (sockaddr_in *)buffer_.data();
-        sa->sin_family = to_family(version_);
-        sa->sin_port = port;
         std::uint32_t addr = 0;
         auto part = v4_parts_.rbegin();
         addr <<= 8; addr |= *part++;
         addr <<= 8; addr |= *part++;
         addr <<= 8; addr |= *part++;
         addr <<= 8; addr |= *part++;
-        sa->sin_addr.s_addr = addr;
-        return (const sockaddr *)sa;
+        return addr;
     }
 
     bool Address::operator==(const Address &rhs) const

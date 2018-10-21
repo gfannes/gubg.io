@@ -22,8 +22,8 @@ TEST_CASE("ip::Socket tests", "[ut][ip][Socket]")
     SECTION("bind")
     {
         REQUIRE(socket.setup(ip::Type::UDP, ip::Version::V4));
-        ip::Address address{127,0,0,1};
-        REQUIRE(socket.bind(address, 1234) == ip::ReturnCode::OK);
+        ip::Endpoint ep(ip::Address{127,0,0,1}, 1234);
+        REQUIRE(socket.bind(ep) == ip::ReturnCode::OK);
     }
     std::cout << socket << std::endl;
 }

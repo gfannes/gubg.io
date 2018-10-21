@@ -3,7 +3,7 @@
 
 #include "gubg/ip/Codes.hpp"
 #include "gubg/ip/Types.hpp"
-#include "gubg/ip/Address.hpp"
+#include "gubg/ip/Endpoint.hpp"
 #include <ostream>
 
 namespace gubg { namespace ip { 
@@ -23,7 +23,7 @@ namespace gubg { namespace ip {
 
         bool valid() const;
 
-        ReturnCode bind(const Address &, Port);
+        ReturnCode bind(const Endpoint &);
 
         void stream(std::ostream &os) const;
 

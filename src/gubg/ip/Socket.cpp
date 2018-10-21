@@ -62,6 +62,8 @@ namespace gubg { namespace ip {
         type_ = type;
         version_ = version;
         descriptor_ = ::socket(to_domain(version_), to_type(type_), 0);
+
+        return valid();
     }
 
     bool Socket::valid() const
@@ -77,11 +79,11 @@ namespace gubg { namespace ip {
         descriptor_ = -1;
     }
 
-    ReturnCode Socket::bind(const Address &address, Port port)
+    ReturnCode Socket::bind(const Endpoint &ep)
     {
         MSS_BEGIN(ReturnCode);
         MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
-        const auto status = ::bind(descriptor_, address.as_sockaddr(port), sizeof(sockaddr));
+        const auto status = ::bind(descriptor_, &ep.as_sockaddr(), sizeof(sockaddr));
         MSS(status != -1, return ReturnCode::CouldNotBind);
         MSS_END();
     }
