@@ -69,6 +69,7 @@ namespace gubg { namespace ip {
 
     private:
         int descriptor_ = -1;
+        bool is_blocking_ = true;
         Type type_ = Type::UDP;
         Version version_ = Version::V4;
     };

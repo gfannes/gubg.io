@@ -3,7 +3,12 @@
 
 #include "gubg/ip/Address.hpp"
 
+#include "gubg/platform/os_api.h"
+#if GUBG_API_WIN32
+#include <winsock2.h>
+#else
 #include <sys/socket.h>
+#endif
 
 namespace gubg { namespace ip { 
 

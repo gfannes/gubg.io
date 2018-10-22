@@ -6,6 +6,7 @@ root.book("gubg/io", fun(b){
             r.library("stdc++fs")
         } else {
             r.remove("src", "gubg/file/Descriptor.cpp")
+            r.library("Ws2_32")
         }
         r.depends_on("std/func")
         r.depends_on("math/func")

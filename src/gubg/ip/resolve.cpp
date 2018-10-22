@@ -2,9 +2,15 @@
 #include "gubg/mss.hpp"
 #include <cstring>
 
+#include "gubg/platform/os_api.h"
+#if GUBG_API_WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#endif
 
 namespace gubg { namespace ip { 
 
