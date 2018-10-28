@@ -10,3 +10,15 @@
     [familiar streaming interface]
 }
 [Remove gubg/file/Filesystem.hpp, especially read() as that is now also present in gubg/file/System.hpp]
+[protocol]{
+    [find name]
+    [requirements]{
+        [easy to find start/end of message]
+        [easy to parse]
+        [support for node-attribute, text is optional]
+        [efficient]
+        [byte-based]
+        [optional support for error detection]
+        [optional support embedding in noisy data]
+    }
+}
