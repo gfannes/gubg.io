@@ -131,11 +131,11 @@ namespace gubg { namespace t2 {
                         receiver_().t2_close(level_);
                         --level_;
                     }
-                    receiver_().t2_eom();
+                    receiver_().t2_close(level_);
                     break;
                 case State::Open:
                     if (level_ == 0)
-                        receiver_().t2_som();
+                        receiver_().t2_open(0, level_);
                     break;
                 case State::Tag:
                     ++level_;

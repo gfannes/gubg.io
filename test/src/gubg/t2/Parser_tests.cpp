@@ -32,24 +32,28 @@ namespace  {
         Message message;
         std::list<Message> messages;
 
-        void t2_som()
-        {
-            std::cout << "SOM\n";
-            message = Message{};
-        }
-        void t2_eom()
-        {
-            std::cout << "EOM\n";
-            messages.push_back(message);
-        }
         void t2_open(Data tag, unsigned int level)
         {
-            std::cout << "open " << C(tag)C(level) << std::endl;
-            message.tag = tag;
+            std::cout << "opening " << C(tag)C(level) << std::endl;
+            tags_.resize(level+1);
+            tags_[level] = tag;
+            if (level == 0)
+            {
+                std::cout << "SOM\n";
+                message = Message{};
+            }
+            else
+                message.tag = tag;
         }
         void t2_close(unsigned int level)
         {
-            std::cout << "close " << C(level) << std::endl;
+            tags_.resize(level+1);
+            std::cout << "closing " << C(tags_[level])C(level) << std::endl;
+            if (level == 0)
+            {
+                std::cout << "EOM\n";
+                messages.push_back(message);
+            }
         }
         void t2_attr(Data key, Data value)
         {
@@ -58,6 +62,7 @@ namespace  {
             message.value = value;
         }
     private:
+        std::vector<Data> tags_;
     };
 } 
 
