@@ -6,10 +6,11 @@
 
 namespace gubg { namespace string { 
 
+    template <typename Char>
     class Buffer
     {
     public:
-        using value_type = char;
+        using value_type = Char;
 
         Buffer(value_type *begin, value_type *end): begin_(begin), current_(begin), end_(end) {}
 
