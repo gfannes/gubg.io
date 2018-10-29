@@ -4,13 +4,34 @@
 #include "gubg/t2/Types.hpp"
 #include "gubg/mss.hpp"
 #include <cstdint>
+#include <ostream>
 
 namespace gubg { namespace t2 { 
 
     enum class State
     {
-        Idle, Start, Tag, Key, Value,
+        Idle,
+        Open,    //Block is open at level
+        Tag, //Reading a block tag
+        Key,     //Reading an attribute key
+        Value,   //Reading an attribute value
+        Closing, //Closing a block
     };
+    std::ostream &operator<<(std::ostream &os, State state)
+    {
+        switch (state)
+        {
+#define L_CASE(name) case State::name: os << #name; break
+            L_CASE(Idle);
+            L_CASE(Open);
+            L_CASE(Tag);
+            L_CASE(Key);
+            L_CASE(Value);
+            L_CASE(Closing);
+            default: os << "Unknown state"; break;
+        }
+        return os;
+    }
 
     template <typename Receiver>
     class Parser_crtp
@@ -26,22 +47,26 @@ namespace gubg { namespace t2 {
                     L("Special");
                     switch (byte)
                     {
-                        case md_som: change_state_(State::Start); break;
-                        case md_eom: change_state_(State::Idle); break;
+                        case md_som:
+                            change_state_(State::Idle);
+                            change_state_(State::Open);
+                            break;
+                        case md_eom:
+                            change_state_(State::Idle);
+                            break;
                         case md_close_block:
-                            break;
-                        case md_empty_tag:
-                            break;
-                        case md_empty_attr:
+                            change_state_(State::Closing);
                             break;
                     }
                     break;
                 case md_open_tag:
-                    L("Open tag");
+                    L("Reading tag");
                     change_state_(State::Tag);
                     break;
                 case md_open_attr:
-                    L("Open attr");
+                    L("Reading attr [key|value]");
+                    //If we were parsing the key, we continue with value, else with key
+                    change_state_(state_ == State::Key ? State::Value : State::Key);
                     break;
                 case md_data:
                     L("Data");
@@ -69,35 +94,51 @@ namespace gubg { namespace t2 {
 
         void change_state_(State wanted_state)
         {
-            //Exit
+            S("");
+            L(C(state_)C(wanted_state));
+
+            if (wanted_state == state_)
+                return;
+
+            L("Leaving state " << state_);
             switch (state_)
             {
                 case State::Idle:
-                    receiver_().t2_eom();
+                    level_ = 0;
                     break;
-                case State::Start:
+                case State::Open:
                     break;
                 case State::Tag:
-                    receiver_().t2_tag(&tag_);
+                    receiver_().t2_open(tag_, level_);
                     break;
                 case State::Key:
                     break;
                 case State::Value:
-                    receiver_().t2_attr(&key_, &value_);
+                    receiver_().t2_attr(key_, value_);
+                    break;
+                case State::Closing:
                     break;
             }
 
             state_ = wanted_state;
 
-            //Enter
+            L("Entering state " << state_);
             switch (state_)
             {
                 case State::Idle:
+                    while (level_ > 0)
+                    {
+                        receiver_().t2_close(level_);
+                        --level_;
+                    }
+                    receiver_().t2_eom();
                     break;
-                case State::Start:
-                    receiver_().t2_som();
+                case State::Open:
+                    if (level_ == 0)
+                        receiver_().t2_som();
                     break;
                 case State::Tag:
+                    ++level_;
                     tag_ = 0;
                     break;
                 case State::Key:
@@ -106,10 +147,23 @@ namespace gubg { namespace t2 {
                 case State::Value:
                     value_ = 0;
                     break;
+                case State::Closing:
+                    receiver_().t2_close(level_);
+                    if (level_ == 0)
+                    {
+                        change_state_(State::Idle);
+                    }
+                    else
+                    {
+                        --level_;
+                        change_state_(State::Open);
+                    }
+                    break;
             }
         }
 
         Data tag_, key_, value_;
+        unsigned int level_;
         State state_ = State::Idle;
     };
 

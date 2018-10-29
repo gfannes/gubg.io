@@ -22,8 +22,6 @@ namespace gubg { namespace t2 {
     static constexpr Byte md_som         = md_special | 0x00;
     static constexpr Byte md_eom         = md_special | 0x01;
     static constexpr Byte md_close_block = md_special | 0x02;
-    static constexpr Byte md_empty_tag   = md_special | 0x03;
-    static constexpr Byte md_empty_attr  = md_special | 0x04;
 
 } } 
 
