@@ -2,16 +2,21 @@
 #include "gubg/t2/Parser.hpp"
 #include <vector>
 #include <list>
+#include <optional>
 #include <iostream>
 using namespace gubg;
 
 namespace  { 
+    using Data = t2::Data;
+
     struct Message
     {
-        std::uint32_t tag = 0;
+        std::optional<Data> tag = 0;
+        std::optional<Data> key;
+        std::optional<Data> value;
 
         Message() {}
-        Message(std::uint32_t tag): tag(tag) {}
+        Message(Data tag): tag(tag) {}
     };
 
     class Parser: public t2::Parser_crtp<Parser>
@@ -28,9 +33,17 @@ namespace  {
         {
             messages.push_back(message);
         }
-        void t2_tag(std::uint32_t tag)
+        void t2_tag(const Data *tag)
         {
-            message.tag = tag;
+            if (tag)
+                message.tag = *tag;
+        }
+        void t2_attr(const Data *key, const Data *value)
+        {
+            if (key)
+                message.key = *key;
+            if (value)
+                message.value = *value;
         }
     private:
     };

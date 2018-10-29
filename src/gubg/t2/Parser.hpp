@@ -78,11 +78,12 @@ namespace gubg { namespace t2 {
                 case State::Start:
                     break;
                 case State::Tag:
-                    receiver_().t2_tag(tag_);
+                    receiver_().t2_tag(&tag_);
                     break;
                 case State::Key:
                     break;
                 case State::Value:
+                    receiver_().t2_attr(&key_, &value_);
                     break;
             }
 
@@ -108,7 +109,7 @@ namespace gubg { namespace t2 {
             }
         }
 
-        std::uint32_t tag_, key_, value_;
+        Data tag_, key_, value_;
         State state_ = State::Idle;
     };
 

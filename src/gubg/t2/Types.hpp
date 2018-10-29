@@ -6,6 +6,7 @@
 namespace gubg { namespace t2 { 
 
     using Byte = std::uint8_t;
+    using Data = std::uint32_t;
 
     //Meta-data mask: top-two bits
     static constexpr Byte mask_md        = 0b11000000; 
