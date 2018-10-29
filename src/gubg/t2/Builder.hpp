@@ -53,6 +53,13 @@ namespace gubg { namespace t2 {
             add_(md_open_tag, tag);
             return std::move(n);
         }
+        Node &attr(Data key, Data value)
+        {
+            assert(!!state_);
+            add_(md_open_attr, key);
+            add_(md_open_attr, value);
+            return *this;
+        }
 
     private:
         void add_(Byte tt, Data v)

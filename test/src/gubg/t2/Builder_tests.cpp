@@ -58,6 +58,21 @@ TEST_CASE("t2::Builder tests", "[ut][t2][Builder]")
         exp.message.push_back(t2::md_close_block);
         exp.message.push_back(t2::md_eom);
     }
+    SECTION("tag(0) attr(1,2) attr(1,3)")
+    {
+        scn.ftor = [](Document &doc){
+            auto t0 = doc.tag(0x00);
+            t0.attr(0x01, 0x02).attr(0x01, 0x03);
+        };
+        exp.message.push_back(t2::md_som);
+        exp.message.push_back(t2::md_open_tag | 0x00);
+        exp.message.push_back(t2::md_open_attr | 0x01);
+        exp.message.push_back(t2::md_open_attr | 0x02);
+        exp.message.push_back(t2::md_open_attr | 0x01);
+        exp.message.push_back(t2::md_open_attr | 0x03);
+        exp.message.push_back(t2::md_close_block);
+        exp.message.push_back(t2::md_eom);
+    }
     scn.size = exp.message.size();
 
     Buffer buffer;
