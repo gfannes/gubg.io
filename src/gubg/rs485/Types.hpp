@@ -7,7 +7,6 @@
 
 namespace gubg { namespace rs485 { 
 
-
     class Bus;
     class Endpoint;
     using Endpoint_wptr = std::weak_ptr<Endpoint>;
