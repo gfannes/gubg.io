@@ -2,8 +2,8 @@
 #include "gubg/mss.hpp"
 #include <cassert>
 
-#include "gubg/platform/os_api.h"
-#if GUBG_API_WIN32
+#include "gubg/platform.h"
+#if GUBG_PLATFORM_API_WIN32
 #include <winsock2.h>
 #else
 #include <sys/types.h>
@@ -84,7 +84,7 @@ namespace gubg { namespace ip {
     {
         if (descriptor_ == -1)
             return;
-#if GUBG_API_WIN32
+#if GUBG_PLATFORM_API_WIN32
         ::closesocket(descriptor_);
 #else
         ::close(descriptor_);
@@ -104,7 +104,7 @@ namespace gubg { namespace ip {
     {
         MSS_BEGIN(ReturnCode);
         MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
-#if GUBG_API_WIN32
+#if GUBG_PLATFORM_API_WIN32
         u_long mode = !block;
         ::ioctlsocket(descriptor_, FIONBIO, &mode);
 #else
@@ -132,7 +132,7 @@ namespace gubg { namespace ip {
     {
         MSS_BEGIN(ReturnCode);
         MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
-#if GUBG_API_WIN32
+#if GUBG_PLATFORM_API_WIN32
         const auto status = ::sendto(descriptor_, (const char *)buffer, size, 0, &ep.as_sockaddr(), sizeof(sockaddr));
 #else
         const auto status = ::sendto(descriptor_, buffer, size, 0, &ep.as_sockaddr(), sizeof(sockaddr));
@@ -146,7 +146,7 @@ namespace gubg { namespace ip {
     {
         MSS_BEGIN(ReturnCode);
         MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
-#if GUBG_API_WIN32
+#if GUBG_PLATFORM_API_WIN32
         int fromlen = sizeof(sockaddr);
         const auto status = ::recvfrom(descriptor_, (char *)buffer, size, 0, &ep.as_sockaddr(), &fromlen);
 #else

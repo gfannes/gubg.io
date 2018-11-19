@@ -1,16 +1,16 @@
 #include "gubg/file/Descriptor.hpp"
 #include "gubg/file/Filesystem.hpp"
-#include "gubg/platform/os_api.h"
+#include "gubg/platform.h"
 #include "gubg/macro/stream.hpp"
 
-#ifdef GUBG_API_LINUX
+#if GUBG_PLATFORM_OS_LINUX
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
 #endif
 
-#ifdef GUBG_API_MINGW
+#if GUBG_PLATFORM_OS_WINDOWS
 #include <Winsock2.h>
 #include <WS2tcpip.h>
 #endif
@@ -53,7 +53,7 @@ namespace gubg { namespace file {
 namespace 
 {
 
-#ifdef GUBG_API_MINGW
+#if GUBG_PLATFORM_API_MINGW
     struct InitializeWSA
     {
         bool ok = false;
@@ -145,10 +145,10 @@ struct Descriptor::Pimpl: public enable_shared_from_this<Pimpl>
         S(logns);
         if (desc != InvalidDesc)
         {
-#ifdef GUBG_API_LINUX
+#if GUBG_PLATFORM_OS_LINUX
             ::close(desc);
 #endif
-#ifdef GUBG_API_MINGW
+#if GUBG_PLATFORM_API_MINGW
             if (type == Type::Socket)
             {
                 L("Closing socket desc");
@@ -254,7 +254,7 @@ struct Descriptor::Pimpl: public enable_shared_from_this<Pimpl>
                 s = ::recv(desc, &buffer[0], buffer.size(), 0);
                 break;
             default:
-#ifdef GUBG_API_LINUX
+#if GUBG_PLATFORM_OS_LINUX
                 //Transparent reading from files is only supported in linux
                 s = ::read(desc, &buffer[0], buffer.size());
 #endif
@@ -278,10 +278,10 @@ struct Descriptor::Pimpl: public enable_shared_from_this<Pimpl>
         MSS(role == Role::Normal);
         MSS(desc != InvalidDesc);
 
-#ifdef GUBG_API_LINUX
+#if GUBG_PLATFORM_OS_LINUX
         const auto s = ::write(desc, &buffer[0], buffer.size());
 #endif
-#ifdef GUBG_API_MINGW
+#if GUBG_PLATFORM_API_MINGW
         MSS(type == Type::Socket);
         const auto s = ::send(desc, &buffer[0], buffer.size(), 0);
 #endif
@@ -300,7 +300,7 @@ struct Descriptor::Pimpl: public enable_shared_from_this<Pimpl>
         MSS(role == Role::Normal);
         MSS(desc != InvalidDesc);
 
-#ifdef GUBG_API_LINUX
+#if GUBG_PLATFORM_OS_LINUX
         switch (am)
         {
             case AccessMode::Read:
@@ -314,7 +314,7 @@ struct Descriptor::Pimpl: public enable_shared_from_this<Pimpl>
                 break;
         }
 #endif
-#ifdef GUBG_API_MINGW
+#if GUBG_PLATFORM_API_MINGW
         switch (am)
         {
             case AccessMode::Read:

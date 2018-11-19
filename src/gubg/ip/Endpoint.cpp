@@ -1,8 +1,8 @@
 #include "gubg/ip/Endpoint.hpp"
 #include <cstring>
 
-#include "gubg/platform/os_api.h"
-#if GUBG_API_WIN32
+#include "gubg/platform.h"
+#if GUBG_PLATFORM_API_WIN32
 #include <winsock2.h>
 #else
 #include <sys/types.h>

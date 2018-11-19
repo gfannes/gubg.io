@@ -2,7 +2,7 @@
 #define HEADER_gubg_std_filesystem_hpp_ALREADY_INCLUDED
 
 #include "gubg/Range.hpp"
-#include "gubg/platform/os_api.h"
+#include "gubg/platform.h"
 #include <fstream>
 
 #define GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM 0
@@ -10,7 +10,7 @@
 #undef  GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM
 #define GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM 1
 #endif
-#if GUBG_API_APPLE
+#if GUBG_PLATFORM_OS_OSX
 #undef  GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM
 #define GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM 1
 #endif

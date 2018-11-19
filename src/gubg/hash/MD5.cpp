@@ -1,13 +1,13 @@
 #include "gubg/hash/MD5.hpp"
 #include "gubg/bitmagic/bitmagic.hpp"
-#include "gubg/platform/endian.h"
+#include "gubg/platform.h"
 #include "gubg/debug.hpp"
 #include <iomanip>
 #include <sstream>
 using namespace gubg::hash::md5;
 using namespace std;
 
-#ifndef GUBG_LITTLE_ENDIAN
+#if !GUBG_PLATFORM_ENDIAN_LITTLE
 #error This implementation is for little endian only. Interpreting messages as Word* will fail otherwise
 #endif
 
@@ -248,7 +248,7 @@ Stream &Stream::operator<<(const string &message)
         m += c;
         s -= c;
 
-#ifndef GUBG_LITTLE_ENDIAN
+#if !GUBG_PLATFORM_ENDIAN_LITTLE
 #error Error
 #endif
         bp.process((const Word *)remainder_.data());
@@ -259,7 +259,7 @@ Stream &Stream::operator<<(const string &message)
     //Process full blocks from the message only
     while (s >= 64)
     {
-#ifndef GUBG_LITTLE_ENDIAN
+#if !GUBG_PLATFORM_ENDIAN_LITTLE
 #error Error
 #endif
         bp.process((const Word *)m);
@@ -291,7 +291,7 @@ Hash Stream::hash() const
         assert(sizeof(length) == 8);
         block.append((char*)&length, 8);
         assert(block.size() == 64);
-#ifndef GUBG_LITTLE_ENDIAN
+#if !GUBG_PLATFORM_ENDIAN_LITTLE
 #error Error
 #endif
         bp.process((const Word *)block.data());
@@ -303,7 +303,7 @@ Hash Stream::hash() const
         block.push_back((char)0x80);
         block.append(64-1-rs, '\0');
         assert(block.size() == 64);
-#ifndef GUBG_LITTLE_ENDIAN
+#if !GUBG_PLATFORM_ENDIAN_LITTLE
 #error Error
 #endif
         bp.process((const Word *)block.data());
@@ -313,7 +313,7 @@ Hash Stream::hash() const
         assert(sizeof(length) == 8);
         block.append((char*)&length, 8);
         assert(block.size() == 64);
-#ifndef GUBG_LITTLE_ENDIAN
+#if !GUBG_PLATFORM_ENDIAN_LITTLE
 #error Error
 #endif
         bp.process((const Word *)block.data());
