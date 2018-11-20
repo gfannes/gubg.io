@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #endif
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
 #include <stdlib.h>
 #endif
 #if GUBG_PLATFORM_API_WIN32
@@ -106,7 +106,7 @@ ReturnCode gubg::file::read(std::vector<File> &files, const File &file)
 
         {
             File::Type type = File::Unknown;
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
             switch (entryp->d_type)
             {
                 case DT_DIR: type = File::Directory; break;
@@ -166,7 +166,7 @@ ReturnCode gubg::file::remove(const File &file)
 {
     MSS_BEGIN(ReturnCode);
     MSS_Q(on_fail(exists(file), ReturnCode::FileDoesNotExist));
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
     MSS(on_fail(::remove(file.name().c_str()) == 0, ReturnCode::CouldNotRemove));
 #else
     auto f = file;
@@ -204,7 +204,7 @@ ReturnCode gubg::file::determineType(File &file)
 #else
     struct stat statbuf;
 #endif
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
     auto res = ::lstat(file.name().c_str(), &statbuf);
 #else
 #if GUBG_PLATFORM_COMPILER_GCC
@@ -223,7 +223,7 @@ ReturnCode gubg::file::determineType(File &file)
     {
         case S_IFREG: file.setType(File::Regular); break;
         case S_IFDIR: file.setType(File::Directory); break;
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
         case S_IFIFO: file.setType(File::FIFO); break;
         case S_IFLNK: file.setType(File::Symbolic); break;
 #endif
@@ -241,7 +241,7 @@ ReturnCode gubg::file::resolve(File &file)
     const size_t path_max = PATH_MAX;
 #endif
     char buffer[path_max];
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
     MSS(!!::realpath(file.name().c_str(), buffer));
 #endif
 #if GUBG_PLATFORM_API_WIN32
@@ -256,7 +256,7 @@ ReturnCode gubg::file::resolve(File &file)
 bool gubg::file::exists(const File &file)
 {
     struct stat statbuf;
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
     if (0 != ::lstat(file.name().c_str(), &statbuf))
         return false;
 #else
@@ -268,7 +268,7 @@ bool gubg::file::exists(const File &file)
 bool gubg::file::isRegular(const File &file)
 {
     struct stat statbuf;
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
     if (0 != ::lstat(file.name().c_str(), &statbuf))
         return false;
 #else
@@ -280,7 +280,7 @@ bool gubg::file::isRegular(const File &file)
 bool gubg::file::isDirectory(const File &file)
 {
     struct stat statbuf;
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
     if (0 != ::lstat(file.name().c_str(), &statbuf))
         return false;
 #else
@@ -301,7 +301,7 @@ namespace  {
         if (!dir.empty())
             MSS(mkdir_recursive_(dir));
         dir << bn;
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
         const auto rc = ::mkdir(dir.name().c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         MSS(rc == 0);
 #else
@@ -343,7 +343,7 @@ gubg::file::File gubg::file::getcwd()
 ReturnCode gubg::file::chmod(const File &file, const Mode &mode)
 {
     MSS_BEGIN(ReturnCode);
-#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_APPLE
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
     mode_t m = 0;
     if (mode.user  & Read)    m |= S_IRUSR;
     if (mode.user  & Write)   m |= S_IWUSR;

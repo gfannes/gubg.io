@@ -3,7 +3,7 @@
 #include "gubg/platform.h"
 #include "gubg/macro/stream.hpp"
 
-#if GUBG_PLATFORM_OS_LINUX
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>

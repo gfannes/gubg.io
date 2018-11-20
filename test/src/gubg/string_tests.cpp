@@ -2,6 +2,8 @@
 #include "gubg/string/Std.hpp"
 #include "gubg/string/Buffer.hpp"
 #include "gubg/mss.hpp"
+#include <array>
+
 using namespace gubg;
 
 namespace  { 
