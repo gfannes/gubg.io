@@ -2,6 +2,7 @@
 #include "gubg/serial/Endpoint.hpp"
 #include "gubg/macro/capture.hpp"
 #include <iostream>
+#include <iomanip>
 #include <chrono>
 #include <thread>
 using namespace gubg;
@@ -45,4 +46,37 @@ TEST_CASE("serial::Endpoint tests", "[manual][serial][Endpoint]")
 
     ep0.close();
     REQUIRE(!ep0.valid());
+}
+
+TEST_CASE("serial::Endpoint test", "[manual][serial][stream]")
+{
+    serial::Settings settings;
+    settings.baud_rate = 9600;
+    settings.stop_bits = 2;
+    settings.parity = serial::Parity::None;
+    serial::Endpoint ep{"/dev/ttyUSB0", settings};
+
+    auto send_tp = std::chrono::system_clock::now();
+
+    for (; true; )
+    {
+        if (true)
+        {
+            size_t offset = 0;
+            char buffer[2];
+            ep.receive(offset, buffer, 2);
+            for (auto ix = 0; ix < offset; ++ix)
+                std::cout << "Received " << std::hex << (int)buffer[ix] << std::endl;
+        }
+        if (true)
+        {
+            const auto now = std::chrono::system_clock::now();
+            if (send_tp <= now)
+            {
+                size_t offset = 0;
+                ep.send(offset, "\x1\x3", 2);
+                send_tp += std::chrono::milliseconds(100);
+            }
+        }
+    }
 }
