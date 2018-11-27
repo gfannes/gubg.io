@@ -1,7 +1,7 @@
 #ifndef HEADER_gubg_serial_Endpoint_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_serial_Endpoint_hpp_ALREADY_INCLUDED
 
-#include <cstddef>
+#include "gubg/std/cstddef.hpp"
 #include <cassert>
 
 namespace gubg { namespace serial { 

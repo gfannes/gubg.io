@@ -2,7 +2,7 @@
 #define HEADER_gubg_ip_Address_hpp_ALREADY_INCLUDED
 
 #include "gubg/ip/Types.hpp"
-#include <optional>
+#include "gubg/std/optional.hpp"
 #include <array>
 #include <cstdint>
 #include <ostream>
