@@ -3,8 +3,12 @@
 
 #include "gubg/t2/Types.hpp"
 #include "gubg/mss.hpp"
-#include <cstdint>
+#include "gubg/std/cstdint.hpp"
+#include "gubg/platform.h"
+#if GUBG_PLATFORM_OS_ARDUINO
+#else
 #include <ostream>
+#endif
 
 namespace gubg { namespace t2 { 
 
@@ -17,6 +21,8 @@ namespace gubg { namespace t2 {
         Value,   //Reading an attribute value
         Closing, //Closing a block
     };
+#if GUBG_PLATFORM_OS_ARDUINO
+#else
     std::ostream &operator<<(std::ostream &os, State state)
     {
         switch (state)
@@ -32,6 +38,7 @@ namespace gubg { namespace t2 {
         }
         return os;
     }
+#endif
 
     template <typename Receiver>
     class Parser_crtp
