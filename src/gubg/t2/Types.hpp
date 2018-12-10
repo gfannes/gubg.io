@@ -1,7 +1,7 @@
 #ifndef HEADER_gubg_t2_Types_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_t2_Types_hpp_ALREADY_INCLUDED
 
-#include <cstdint>
+#include "gubg/std/cstdint.hpp"
 
 namespace gubg { namespace t2 { 
 

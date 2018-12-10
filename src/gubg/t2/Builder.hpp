@@ -2,9 +2,8 @@
 #define HEADER_gubg_t2_Builder_hpp_ALREADY_INCLUDED
 
 #include "gubg/t2/Types.hpp"
-#include "gubg/Range.hpp"
 #include "gubg/mss.hpp"
-#include <cassert>
+#include "gubg/std/cassert.hpp"
 
 namespace gubg { namespace t2 { 
 
@@ -26,10 +25,17 @@ namespace gubg { namespace t2 {
                 AGG(state_->ok, string_.add(md_som));
             ++state_->level;
         }
+#if GUBG_PLATFORM_OS_ARDUINO
+        Node(const Node &dying): string_(dying.string_), state_(dying.state_)
+        {
+            dying.state_ = nullptr;
+        }
+#else
         Node(Node &&dying): string_(dying.string_), state_(dying.state_)
         {
             dying.state_ = nullptr;
         }
+#endif
         ~Node()
         {
             commit();
@@ -51,7 +57,11 @@ namespace gubg { namespace t2 {
             assert(!!state_);
             Node n(string_, *state_);
             add_(md_open_tag, tag);
+#if GUBG_PLATFORM_OS_ARDUINO
+            return n;
+#else
             return std::move(n);
+#endif
         }
         Node &attr(Data key, Data value)
         {
@@ -76,6 +86,9 @@ namespace gubg { namespace t2 {
         }
 
         String &string_;
+#if GUBG_PLATFORM_OS_ARDUINO
+        mutable
+#endif
         details::State *state_ = nullptr;
     };
 

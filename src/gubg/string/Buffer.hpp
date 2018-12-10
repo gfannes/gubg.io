@@ -1,8 +1,8 @@
 #ifndef HEADER_gubg_string_Buffer_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_string_Buffer_hpp_ALREADY_INCLUDED
 
+#include "gubg/std/algorithm.hpp"
 #include "gubg/debug.hpp"
-#include <algorithm>
 
 namespace gubg { namespace string { 
 
@@ -42,9 +42,7 @@ namespace gubg { namespace string {
         }
         value_type *grow(size_t nr, value_type ch)
         {
-            S("");
             const auto free = end_ - current_;
-            L(C(free));
             if (free < nr)
                 return nullptr;
             auto ptr = current_;

@@ -1,23 +1,27 @@
 root.book("gubg/io", fun(b){
-    b.recipe("func", fun(r){
-        r.add("src", "gubg/**.hpp")
-        r.add("src", "gubg/**.cpp")
-        if (my(OS) == OS.Linux){
-            r.library("stdc++fs")
-        } else {
-            r.remove("src", "gubg/file/Descriptor.cpp")
-            r.library("Ws2_32")
-        }
-        r.depends_on("std/func")
-        r.depends_on("math/func")
+    b.recipe("hpp", fun(rcp){
+        rcp.add("src", "gubg/**.hpp")
     })
 
-    b.recipe("ut", fun(r){
-        r.add("test/src", "**.cpp")
-        if (my(OS) == OS.Windows){
-            r.remove("test/src", "**/Descriptor*")
+    b.recipe("func", fun(rcp){
+        rcp.add("src", "gubg/**.cpp")
+        if (my(OS) == OS.Linux){
+            rcp.library("stdc++fs")
+        } else {
+            rcp.remove("src", "gubg/file/Descriptor.cpp")
+            rcp.library("Ws2_32")
         }
-        r.depends_on("func")
-        r.depends_on("catch/func")
+        rcp.depends_on("hpp")
+        rcp.depends_on("std/func")
+        rcp.depends_on("math/func")
+    })
+
+    b.recipe("ut", fun(rcp){
+        rcp.add("test/src", "**.cpp")
+        if (my(OS) == OS.Windows){
+            rcp.remove("test/src", "**/Descriptor*")
+        }
+        rcp.depends_on("func")
+        rcp.depends_on("catch/func")
     })
 })
