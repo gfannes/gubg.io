@@ -1,7 +1,7 @@
 #ifndef HEADER_gubg_t2_Builder_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_t2_Builder_hpp_ALREADY_INCLUDED
 
-#include <gubg/t2/Types.hpp>
+#include "gubg/t2/Types.hpp"
 #include "gubg/Range.hpp"
 #include "gubg/mss.hpp"
 #include <cassert>
