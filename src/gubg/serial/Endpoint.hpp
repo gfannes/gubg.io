@@ -12,8 +12,8 @@ namespace gubg { namespace serial {
     {
         unsigned int baud_rate = 0;
         unsigned int char_size = 8;
-        unsigned int stop_bits = 2;
-        Parity parity = Parity::Odd;
+        unsigned int stop_bits = 1;
+        Parity parity = Parity::None;
     };
 
     class Endpoint

@@ -12,11 +12,29 @@ namespace gubg { namespace log {
         {
             auto &parent = parent_meyers_();
             if (!!parent)
+            {
+                parent->open_block();
+                prim_ = parent->prim_;
+            }
+            print_indent_();
+            prim_.print('[');
+            prim_.print(name);
+            prim_.print(']');
+            ++level_();
+            parent_ = parent;
+            parent = this;
+        }
+        template <typename Target>
+        Scope(Target &target, const char *name)
+        {
+            prim_.setup(target);
+            auto &parent = parent_meyers_();
+            if (!!parent)
                 parent->open_block();
             print_indent_();
-            print('[');
-            print(name);
-            print(']');
+            prim_.print('[');
+            prim_.print(name);
+            prim_.print(']');
             ++level_();
             parent_ = parent;
             parent = this;
@@ -28,31 +46,32 @@ namespace gubg { namespace log {
             if (has_block_)
             {
                 print_indent_();
-                print('}');
+                prim_.print('}');
             }
-            println();
+            prim_.println();
         }
 
         template <typename T>
         void attr(const char *name, const T &v)
         {
-            print('(');
-            print(name);
-            print(':');
-            print(v);
-            print(')');
+            prim_.print('(');
+            prim_.print(name);
+            prim_.print(':');
+            prim_.print(v);
+            prim_.print(')');
         }
 
         void open_block()
         {
             if (has_block_)
                 return;
-            print('{');
-            println();
+            prim_.print('{');
+            prim_.println();
             has_block_ = true;
         }
 
     private:
+        Primitive prim_;
         bool has_block_ = false;
         Scope *parent_ = nullptr;
 
@@ -67,11 +86,11 @@ namespace gubg { namespace log {
             static unsigned int s_level_ = 0;
             return s_level_;
         }
-        static void print_indent_()
+        void print_indent_()
         {
             const auto level = level_();
             for (auto i = 0u; i < level; ++i)
-                print("  ");
+                prim_.print("  ");
         }
     };
 

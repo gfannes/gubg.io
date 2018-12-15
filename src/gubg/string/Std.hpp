@@ -12,6 +12,8 @@ namespace gubg { namespace string {
 
         Std(std::string &str): str_(str) {}
 
+        void clear() {str_.clear();}
+
         bool empty() const {return str_.empty();}
         size_t size() const {return str_.size();}
 

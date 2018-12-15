@@ -11,25 +11,53 @@
 namespace gubg { namespace log { 
 
 #if GUBG_PLATFORM_OS_ARDUINO
-    template <typename T>
-    void print(const T &v)
+    class Primitive
     {
-        Serial.print(v);
-    }
-    inline void println()
-    {
-        Serial.print("\r\n");
-    }
+    public:
+        Primitive(): hws_(&Serial) {}
+
+        template <typename Target>
+        void setup(Target &tgt)
+        {
+            hws_ = &tgt;
+        }
+
+        template <typename T>
+        void print(const T &v)
+        {
+            hws_->print(v);
+        }
+        inline void println()
+        {
+            hws_->print("\r\n");
+        }
+    private:
+        HardwareSerial *hws_ = nullptr;
+    };
 #else
-    template <typename T>
-    void print(const T &v)
+    class Primitive
     {
-        std::cout << v;
-    }
-    inline void println()
-    {
-        std::cout << std::endl;
-    }
+    public:
+        Primitive(): os_(&std::cout) {}
+
+        template <typename Target>
+        void setup(Target &tgt)
+        {
+            os_ = &tgt;
+        }
+
+        template <typename T>
+        void print(const T &v)
+        {
+            (*os_) << v;
+        }
+        inline void println()
+        {
+            (*os_) << std::endl;
+        }
+    private:
+        std::ostream *os_ = nullptr;
+    };
 #endif
 
 } } 
