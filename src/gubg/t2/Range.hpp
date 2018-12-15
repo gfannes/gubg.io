@@ -18,6 +18,17 @@ namespace gubg { namespace t2 {
         {
             return pop_value_(tag, md_open_tag);
         }
+        bool pop_tag(Data wanted_tag)
+        {
+            auto sp = span_;
+            Data tag;
+            if (!pop_value_(tag, md_open_tag) || tag != wanted_tag)
+            {
+                span_ = sp;
+                return false;
+            }
+            return true;
+        }
 
         bool pop_attr(Data &key, Data &value)
         {
@@ -40,8 +51,8 @@ namespace gubg { namespace t2 {
         {
             MSS_BEGIN(bool);
             Byte b;
-            MSS(span_.pop(b));
-            MSS((b & mask_md) == md);
+            MSS_Q(span_.pop(b));
+            MSS_Q((b & mask_md) == md);
             value = (b & mask_data);
             for (; span_.peek(b); span_.pop())
             {
