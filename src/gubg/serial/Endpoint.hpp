@@ -47,6 +47,8 @@ namespace gubg { namespace serial {
             return receive_(offset, (std::byte *)buffer, size);
         }
 
+        bool flush_receive();
+
     private:
         //No copying allowed
         Endpoint(const Endpoint &);

@@ -227,6 +227,20 @@ namespace gubg { namespace serial {
         MSS_END();
     }
 
+    bool Endpoint::flush_receive()
+    {
+        MSS_BEGIN(bool);
+        std::array<std::byte, 1024> buffer;
+        while (true)
+        {
+            size_t offset = 0;
+            MSS(receive(offset, buffer.data(), buffer.size()));
+            if (offset == 0)
+                MSS_RETURN_OK();
+        }
+        MSS_END();
+    }
+
     //Privates
     bool Endpoint::send_(size_t &offset, const std::byte *buffer, size_t size)
     {

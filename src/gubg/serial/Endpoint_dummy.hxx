@@ -45,4 +45,9 @@ namespace gubg { namespace serial {
     {
         return false;
     }
+
+    bool Endpoint::flush_receive()
+    {
+        return false;
+    }
 } } 
