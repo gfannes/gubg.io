@@ -1,10 +1,15 @@
-#ifndef HEADER_gubg_log_hpp_ALREADY_INCLUDED
-#define HEADER_gubg_log_hpp_ALREADY_INCLUDED
+#ifdef TAG
+#undef TAG_1
+#undef TAG_2
+#undef TAG
+#endif
+
+#ifdef ATTR
+#undef ATTR
+#endif
 
 #if gubg_no_log
 #include "gubg/log/macros_noop.hpp"
 #else
 #include "gubg/log/macros.hpp"
-#endif
-
 #endif
