@@ -10,6 +10,7 @@ namespace gubg { namespace t2 {
     class Span
     {
     public:
+        Span() {}
         Span(Byte *begin, Byte *end): begin_(begin), end_(end) {}
         Span(Span &rhs): begin_(rhs.begin_), end_(rhs.end_) {}
 
@@ -29,6 +30,7 @@ namespace gubg { namespace t2 {
     class ConstSpan
     {
     public:
+        ConstSpan() {}
         ConstSpan(const Byte *begin, const Byte *end): begin_(begin), end_(end) {}
         ConstSpan(const ConstSpan &rhs): begin_(rhs.begin_), end_(rhs.end_) {}
         ConstSpan(const Span &rhs): begin_(rhs.begin_), end_(rhs.end_) {}
