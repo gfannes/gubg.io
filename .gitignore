@@ -3,3 +3,4 @@
 *.exe
 *.gnuplot
 CMakeLists.txt
+__pycache__
