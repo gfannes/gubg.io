@@ -7,6 +7,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <array>
 
 #include <sys/stat.h>
 #include <fcntl.h>
