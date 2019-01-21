@@ -278,7 +278,7 @@ struct Descriptor::Pimpl: public enable_shared_from_this<Pimpl>
         MSS(role == Role::Normal);
         MSS(desc != InvalidDesc);
 
-#if GUBG_PLATFORM_OS_LINUX
+#if GUBG_PLATFORM_OS_LINUX || GUBG_PLATFORM_OS_OSX
         const auto s = ::write(desc, &buffer[0], buffer.size());
 #endif
 #if GUBG_PLATFORM_API_MINGW
