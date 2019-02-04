@@ -3,15 +3,36 @@ class Range:
         self.str = str
         self.begin = 0
         self.end = len(str)
+
+    def __repr__(self):
+        return f"[string:Range](b:{self.begin})(e:{self.end}){{{self.str}}}"
+
+    def __str__(self):
+        return self.str[self.begin:self.end]
+
     def save(self):
         sp = Range(self.str)
         sp.begin = self.begin
         sp.end = self.end
         return sp
+
     def restore(self, sp):
         self.str = sp.str
         self.begin = sp.begin
         self.end = sp.end
+
+    def empty(self):
+        return self.begin == self.end
+
+    def size(self):
+        return self.end - self.begin
+
+    def pop_count(self, nr):
+        size = self.size()
+        if nr > size:
+            nr = size
+        self.begin += nr
+
     def pop_char(self, wanted_char=None):
         if self.begin >= self.end:
             return None
@@ -24,6 +45,7 @@ class Range:
             return None
         self.begin += 1
         return char
+
     def pop_until(self, needle):
         ix = self.str.find(needle, self.begin, self.end)
         if ix < 0:
@@ -31,6 +53,7 @@ class Range:
         res = self.str[self.begin:ix]
         self.begin = ix+len(needle)
         return res
+
     def pop_open_close(self, oc):
         o, c = oc[0], oc[1]
         sp = self.save()
@@ -38,11 +61,27 @@ class Range:
             self.restore(sp)
             return None
         res = self.pop_until(c)
-        if not res:
+        if res is None:
             self.restore(sp)
             return None
         return res
-    def __repr__(self):
-        return f"[string:Range](b:{self.begin})(e:{self.end}){{{self.str}}}"
-    def __str__(self):
-        return self.str[self.begin:self.end]
+
+    def strip(self, needles):
+        if self.empty():
+            return False
+
+        def is_needle(pos):
+            if pos >= self.end:
+                return False
+            if needles.find(self.str[pos]) < 0:
+                return False
+            return True
+
+        pos = self.begin
+        while is_needle(pos):
+            pos += 1
+
+        begin = self.begin
+        self.pop_count(pos-begin)
+
+        return self.str[begin:pos]
