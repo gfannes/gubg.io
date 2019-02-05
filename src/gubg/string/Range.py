@@ -55,15 +55,29 @@ class Range:
         return res
 
     def pop_open_close(self, oc):
-        o, c = oc[0], oc[1]
         sp = self.save()
+
+        o, c = oc[0], oc[1]
+
         if not self.pop_char(o):
             self.restore(sp)
             return None
-        res = self.pop_until(c)
+        level = 1
+
+        res = None
+        for ix in range(self.begin, self.end):
+            ch = self.str[ix]
+            if ch == o:
+                level += 1
+            elif ch == c:
+                level -= 1
+                if level == 0:
+                    res = self.str[self.begin:ix]
+                    self.begin = ix+1
+                    break
+
         if res is None:
             self.restore(sp)
-            return None
         return res
 
     def strip(self, needles):
