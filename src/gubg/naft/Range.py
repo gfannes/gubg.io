@@ -3,6 +3,7 @@ from gubg import string
 class Range:
     def __init__(self, str):
         self.strange = string.Range(str)
+        self._whitespace = " \t\n"
 
     def __repr__(self):
         return f"[naft:Range]{{{str(self.strange)}}}"
@@ -10,8 +11,12 @@ class Range:
     def __str__(self):
         return str(self.strange)
 
-    def pop_node(self):
-        return self.strange.pop_open_close("[]")
+    def pop_node(self, wanted=None):
+        self.strange.strip(self._whitespace)
+        node = self.strange.pop_open_close("[]")
+        if wanted is not None:
+            return node == wanted
+        return node
 
     def pop_attrs(self):
         attrs = {}
@@ -32,5 +37,5 @@ class Range:
         if block is None:
             return None
         block = Range(block)
-        block.strange.strip(" \t\n")
+        block.strange.strip(self._whitespace)
         return block
