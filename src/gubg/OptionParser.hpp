@@ -8,13 +8,14 @@
 #include <list>
 #include <sstream>
 #include <memory>
+#include <optional>
 
 namespace gubg
 {
     class OptionParser
     {
         public:
-            enum class ReturnCode {OK, Error, CouldNotFindExecutable, ExpectedMandatoryArgument, };
+            enum class ReturnCode {OK, Error, CouldNotFindExecutable, ExpectedMandatoryArgument, CouldNotFindResponse };
 
             typedef std::list<std::string> Args;
             static Args create_args(int argc, const char **argv);
@@ -23,54 +24,66 @@ namespace gubg
 
             //shorthand example: "h"
             //longhand example: "help"
-			//lambda is called without arguments
+            //lambda is called without arguments
             template <typename Lambda>
-                void add_switch(char shorthand, const std::string &longhand, const std::string &description, Lambda lambda)
-                {
-                    switch_callbacks_[shorthand_(shorthand)] = lambda;
-                    switch_callbacks_[longhand_(longhand)] = lambda;
-                    add_helpline_(shorthand, longhand, description);
-                }
+            void add_switch(char shorthand, const std::string &longhand, const std::string &description, Lambda lambda)
+            {
+                switch_callbacks_[shorthand_(shorthand)] = lambda;
+                switch_callbacks_[longhand_(longhand)] = lambda;
+                add_helpline_(shorthand, longhand, description);
+            }
+
+            void add_response(char shorthand, const std::string & longhand, const std::string & description)
+            {
+                Response r;
+                r.shorthand = shorthand;
+                r.longhand = longhand;
+                response_ = r;
+
+                help_ << " " << shorthand << "\t" << longhand_(longhand) << "\t" << description << std::endl;
+            }
 
             //longhand can be of the form: "<option>" or "<option> <name>"
-			//<name> is optional
-			//lambda is called with <name> or "" as argument
+            //<name> is optional
+            //lambda is called with <name> or "" as argument
             template <typename Lambda>
-                void add_optional(char shorthand, const std::string &longhand, const std::string &description, Lambda lambda)
+            void add_optional(char shorthand, const std::string &longhand, const std::string &description, Lambda lambda)
+            {
+                optional_callbacks_[shorthand_(shorthand)] = lambda;
                 {
-                    optional_callbacks_[shorthand_(shorthand)] = lambda;
-                    {
-                        std::string longOption = longhand;
-                        size_t pos = longOption.find(' ');
-                        if (pos != std::string::npos)
-                            longOption.resize(pos);
-                        optional_callbacks_[longhand_(longOption)] = lambda;
-                    }
-                    add_helpline_(shorthand, longhand, description);
+                    std::string longOption = longhand;
+                    size_t pos = longOption.find(' ');
+                    if (pos != std::string::npos)
+                        longOption.resize(pos);
+                    optional_callbacks_[longhand_(longOption)] = lambda;
                 }
+                add_helpline_(shorthand, longhand, description);
+            }
 
             //longhand has to be of the form: "<option> <name>"
-			//<name> is mandatory
-			//lambda is called with <name> as argument
+            //<name> is mandatory
+            //lambda is called with <name> as argument
             template <typename Lambda>
-                void add_mandatory(char shorthand, const std::string &longhand, const std::string &description, Lambda lambda)
+            void add_mandatory(char shorthand, const std::string &longhand, const std::string &description, Lambda lambda)
+            {
+                mandatory_callbacks_[shorthand_(shorthand)] = lambda;
                 {
-                    mandatory_callbacks_[shorthand_(shorthand)] = lambda;
-                    {
-                        std::string longOption = longhand;
-                        size_t pos = longOption.find(' ');
-                        if (pos != std::string::npos)
-                            longOption.resize(pos);
-                        mandatory_callbacks_[longhand_(longOption)] = lambda;
-                    }
-                    add_helpline_(shorthand, longhand, description);
+                    std::string longOption = longhand;
+                    size_t pos = longOption.find(' ');
+                    if (pos != std::string::npos)
+                        longOption.resize(pos);
+                    mandatory_callbacks_[longhand_(longOption)] = lambda;
                 }
+                add_helpline_(shorthand, longhand, description);
+            }
 
             std::string help() const;
 
             ReturnCode parse(Args &args, bool stripExe = true);
 
         private:
+            bool is_response_(const std::string & arg) const;
+            bool add_response_args_(const std::string & arg, Args & args) const;
             void add_helpline_(char shorthand, const std::string &longhand, const std::string &description);
             static std::string shorthand_(char sh)
             {
@@ -86,7 +99,7 @@ namespace gubg
                 lh.copy(&str[2], lh.size());
                 return str;
             }
-
+            
             std::string caption_;
             std::ostringstream help_;
             typedef std::function<void(void)> VoidCallback;
@@ -96,6 +109,12 @@ namespace gubg
             VoidCallbacks switch_callbacks_;
             StringCallbacks optional_callbacks_;
             StringCallbacks mandatory_callbacks_;
+            struct Response
+            {
+                char shorthand;
+                std::string longhand;
+            };
+            std::optional<Response> response_;
     };
 }
 
