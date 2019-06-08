@@ -26,7 +26,7 @@ namespace gubg {
         unsigned int minutes_ = 0;
     };
 
-    std::ostream &operator<<(std::ostream &os, const Army &army)
+    inline std::ostream &operator<<(std::ostream &os, const Army &army)
     {
         auto total_minutes = army.as_minutes();
         const auto days = total_minutes/60/8; total_minutes -= days*8*60;
