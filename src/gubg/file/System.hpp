@@ -14,6 +14,7 @@ namespace gubg { namespace file {
     {
         MSS_BEGIN(bool);
         std::ifstream fi(name.str(), std::ios::binary | std::ios::ate);
+        MSS(fi.good());
         const auto end_pos = fi.tellg();
         fi.seekg(0);
         const size_t size = end_pos - fi.tellg();
