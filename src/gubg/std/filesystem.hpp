@@ -38,6 +38,7 @@ namespace std {
         inline bool equivalent(const path &lhs, const path &rhs) {return std::experimental::filesystem::equivalent(lhs, rhs);}
         inline bool equivalent(const path &lhs, const path &rhs, std::error_code & ec) {return std::experimental::filesystem::equivalent(lhs, rhs, ec);}
         inline std::size_t hash_value(const path & p) { return std::experimental::filesystem::hash_value(p); }
+        inline std::experimental::filesystem::path canonical(const std::experimental::filesystem::path &p) { return std::experimental::filesystem::canonical(p); }
     }
 } 
 #else
