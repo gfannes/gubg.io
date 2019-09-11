@@ -27,7 +27,7 @@ namespace std {
 #undef L_IMPORT
         inline path current_path() {return std::experimental::filesystem::current_path();}
         inline void current_path(const std::experimental::filesystem::path & path ) {std::experimental::filesystem::current_path(path);}
-        inline std::experimental::filesystem::path absolute(std::experimental::filesystem::path & path ) { return std::experimental::filesystem::absolute(path);}
+        inline std::experimental::filesystem::path absolute(const std::experimental::filesystem::path & path ) { return std::experimental::filesystem::absolute(path);}
         inline bool is_directory(const path &p) {return std::experimental::filesystem::is_directory(p);}
         inline bool is_regular_file(const path &p) {return std::experimental::filesystem::is_regular_file(p);}
         inline bool exists(const path & p) { return std::experimental::filesystem::exists(p); }
