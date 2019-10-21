@@ -23,6 +23,8 @@ namespace gubg { namespace file {
             bool operator==(const Name &rhs) const { return name_ == rhs.name_; }
             bool operator!=(const Name &rhs) const { return name_ != rhs.name_; }
 
+            bool empty() const {return name_.empty();}
+
             Name operator+(const std::string &part) const
             {
                 Name res(name_);

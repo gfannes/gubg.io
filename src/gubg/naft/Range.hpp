@@ -41,6 +41,18 @@ namespace gubg { namespace naft {
             strip_();
             return true;
         }
+        bool pop_tag(std::string &name, std::string &type)
+        {
+            if (!pop_tag(name))
+                return false;
+            const auto ix = name.find(':');
+            if (ix != std::string::npos)
+            {
+                type = name.substr(ix+1);
+                name.resize(ix);
+            }
+            return true;
+        }
         bool pop_tag(Strange &tag)
         {
             if (!strange_.pop_bracket(tag, "[]"))
