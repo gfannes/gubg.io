@@ -81,12 +81,17 @@ namespace app {
             fo << "#ifndef HEADER_" << output_fn_canon << "_ALREADY_INCLUDED\n";
             fo << "#define HEADER_" << output_fn_canon << "_ALREADY_INCLUDED\n";
             fo << "\n";
+            fo << "#include <gubg/Tribool.hpp>\n";
+            fo << "#include <gubg/sedes/Index.hpp>\n";
             fo << "#include <optional>\n";
             fo << "#include <vector>\n";
+            fo << "#include <algorithm>\n";
             fo << "\n";
             catalogue_.each([&](const auto &struc){ declare_struct_(fo, struc); });
             fo << "\n";
             catalogue_.each([&](const auto &struc){ define_struct_(fo, struc); });
+            fo << "\n";
+            define_try_macros_(fo);
             fo << "\n";
             catalogue_.each([&](const auto &struc){ define_dfs_(fo, struc); });
             fo << "\n";
@@ -129,6 +134,29 @@ namespace app {
             struc.each([&](const auto &member){member.accept(add_field);});
             os << "};\n";
         }
+        void define_try_macros_(std::ostream &os)
+        {
+            os << "#define TRY1(my_mix, oper) {\\\n";
+            os << "        auto &index = stack.back(); \\\n";
+            os << "        std::cout << \"TRY1: \" << index << std::endl; \\\n";
+            os << "        if (index.member_ix == my_mix){ \\\n";
+            os << "            std::cout << \"  running\" << std::endl; \\\n";
+            os << "            const gubg::Tribool res = oper; \\\n";
+            os << "            if (!res.is_true()) return res; \\\n";
+            os << "            ++index.member_ix; \\\n";
+            os << "        } \\\n";
+            os << "    }\n";
+            os << "#define TRY2(my_mix, my_aix, oper) {\\\n";
+            os << "        auto &index = stack.back(); \\\n";
+            os << "        std::cout << \"TRY2: \" << index << std::endl; \\\n";
+            os << "        if (index.member_ix == my_mix && index.array_ix == my_aix){ \\\n";
+            os << "            std::cout << \"  running\" << std::endl; \\\n";
+            os << "            const gubg::Tribool res = oper; \\\n";
+            os << "            if (!res.is_true()) return res; \\\n";
+            os << "            ++index.array_ix; \\\n";
+            os << "        } \\\n";
+            os << "    }\n";
+        }
         void define_dfs_(std::ostream &os, const gubg::sedes::Struct &struc)
         {
             using namespace gubg::sedes;
@@ -136,48 +164,60 @@ namespace app {
             {
             public:
                 std::ostream &os;
-                MyVisitor(std::ostream &os): os(os) {}
+                unsigned int &mix;
+                unsigned int &aix;
+                MyVisitor(std::ostream &os, unsigned int &mix, unsigned int &aix): os(os), mix(mix), aix(aix) {}
 
                 void visit(const Field &member) override
                 {
                     if (member.is_primitive())
-                        os << "    if (!ftor.leaf(pod." << member.name << ", \"" << member.name << "\", \"" << member.type << "\")) return false;\n";
+                        os << "    TRY1(" << mix++ << ", ftor.leaf(pod." << member.name << ", \"" << member.name << "\", \"" << member.type << "\"));\n";
                     else
-                        os << "    if (!dfs(pod." << member.name << ", \"" << member.name << "\", ftor)) return false;\n";
+                        os << "    TRY1(" << mix++ << ", dfs(pod." << member.name << ", \"" << member.name << "\", ftor, &stack));\n";
                 }
                 void visit(const Optional &member) override
                 {
-                    os << "    if (!ftor.optional(pod." << member.name << ", true, \"" << member.name << "\", \"" << member.type << "\")) return false;\n";
+                    os << "    TRY1(" << mix++ << ", ftor.optional(pod." << member.name << ", true, \"" << member.name << "\", \"" << member.type << "\"));\n";
                     os << "    if (pod." << member.name << ")\n";
                     if (member.is_primitive())
-                        os << "        if (!ftor.leaf(*pod." << member.name << ", \"" << member.name << "\", \"" << member.type << "\")) return false;\n";
+                        os << "        TRY2(" << mix << ", 0, ftor.leaf(*pod." << member.name << ", \"" << member.name << "\", \"" << member.type << "\"));\n";
                     else
-                        os << "        if (!dfs(*pod." << member.name << ", \"" << member.name << "\", ftor)) return false;\n";
-                    os << "    if (!ftor.optional(pod." << member.name << ", false, \"" << member.name << "\", \"" << member.type << "\")) return false;\n";
+                        os << "        TRY2(" << mix << ", 0, dfs(*pod." << member.name << ", \"" << member.name << "\", ftor), &stack);\n";
+                    os << "    TRY1(" << mix++ << ", (stack.back().array_ix=0,true));\n";
+                    os << "    TRY1(" << mix++ << ", ftor.optional(pod." << member.name << ", false, \"" << member.name << "\", \"" << member.type << "\"));\n";
                 }
                 void visit(const Array &member) override
                 {
-                    os << "    if (!ftor.array(pod." << member.name << ", true, \"" << member.name << "\", \"" << member.type << "\")) return false;\n";
-                    os << "    for (auto &v: pod." << member.name << ")\n";
+                    os << "    TRY1(" << mix++ << ", ftor.array(pod." << member.name << ", true, \"" << member.name << "\", \"" << member.type << "\"));\n";
+                    os << "    for (unsigned int ix = 0; ix < pod." << member.name << ".size(); ++ix)\n";
+                    os << "    {\n";
+                    os << "        auto &v = pod." << member.name << "[ix];\n";
                     if (member.is_primitive())
-                        os << "        if (!ftor.leaf(v, \"" << member.name << "\", \"" << member.type << "\")) return false;\n";
+                        os << "        TRY2(" << mix << ", ix, ftor.leaf(v, \"" << member.name << "\", \"" << member.type << "\"));\n";
                     else
-                        os << "        if (!dfs(v, \"" << member.name << "\", ftor)) return false;\n";
-                    os << "    if (!ftor.array(pod." << member.name << ", false, \"" << member.name << "\", \"" << member.type << "\")) return false;\n";
+                        os << "        TRY2(" << mix << ", ix, dfs(v, \"" << member.name << "\", ftor, &stack));\n";
+                    os << "    }\n";
+                    os << "    TRY1(" << mix++ << ", (stack.back().array_ix=0,true));\n";
+                    os << "    TRY1(" << mix++ << ", ftor.array(pod." << member.name << ", false, \"" << member.name << "\", \"" << member.type << "\"));\n";
                 }
             };
-            MyVisitor my_visitor{os};
+
+            unsigned int mix = 0, aix = 0;
+            MyVisitor my_visitor{os, mix, aix};
 
             os << "template <typename Ftor>\n";
-            os << "bool dfs(" << struc.name << " &pod, const std::string &name, Ftor &&ftor)\n";
+            os << "gubg::Tribool dfs(" << struc.name << " &pod, const std::string &name, Ftor &&ftor, gubg::sedes::Stack *stack_ptr = nullptr)\n";
             os << "{\n";
-            os << "    if (!ftor.enter(pod, name, \"" << struc.name << "\")) return false;\n";
+            os << "    gubg::sedes::Stack local_stack; local_stack.emplace_back();\n";
+            os << "    auto &stack = stack_ptr ? *stack_ptr : local_stack;\n";
+            os << "    if (stack.empty()) return false;\n";
+            os << "    TRY1(" << mix++ << ", ftor.enter(pod, name, \"" << struc.name << "\"));\n";
             os << "    \n";
             struc.each([&](const auto &member){
                     member.accept(my_visitor);
                     os << "    \n";
                     });
-            os << "    if (!ftor.exit(pod, name, \"" << struc.name << "\")) return false;\n";
+            os << "    TRY1(" << mix++ << ", ftor.exit(pod, name, \"" << struc.name << "\"));\n";
             os << "    \n";
             os << "    return true;\n";
             os << "};\n";
