@@ -137,23 +137,19 @@ namespace app {
         void define_try_macros_(std::ostream &os)
         {
             os << "#define TRY1(my_mix, oper) {\\\n";
-            os << "        auto &index = stack.back(); \\\n";
-            os << "        std::cout << \"TRY1: \" << index << std::endl; \\\n";
-            os << "        if (index.member_ix == my_mix){ \\\n";
+            os << "        if (stack[six].member_ix == my_mix){ \\\n";
             os << "            std::cout << \"  running\" << std::endl; \\\n";
             os << "            const gubg::Tribool res = oper; \\\n";
             os << "            if (!res.is_true()) return res; \\\n";
-            os << "            ++index.member_ix; \\\n";
+            os << "            ++stack[six].member_ix; \\\n";
             os << "        } \\\n";
             os << "    }\n";
             os << "#define TRY2(my_mix, my_aix, oper) {\\\n";
-            os << "        auto &index = stack.back(); \\\n";
-            os << "        std::cout << \"TRY2: \" << index << std::endl; \\\n";
-            os << "        if (index.member_ix == my_mix && index.array_ix == my_aix){ \\\n";
+            os << "        if (stack[six].member_ix == my_mix && stack[six].array_ix == my_aix){ \\\n";
             os << "            std::cout << \"  running\" << std::endl; \\\n";
             os << "            const gubg::Tribool res = oper; \\\n";
             os << "            if (!res.is_true()) return res; \\\n";
-            os << "            ++index.array_ix; \\\n";
+            os << "            ++stack[six].array_ix; \\\n";
             os << "        } \\\n";
             os << "    }\n";
         }
@@ -173,7 +169,7 @@ namespace app {
                     if (member.is_primitive())
                         os << "    TRY1(" << mix++ << ", ftor.leaf(pod." << member.name << ", \"" << member.name << "\", \"" << member.type << "\"));\n";
                     else
-                        os << "    TRY1(" << mix++ << ", dfs(pod." << member.name << ", \"" << member.name << "\", ftor, &stack));\n";
+                        os << "    TRY1(" << mix++ << ", dfs(pod." << member.name << ", \"" << member.name << "\", ftor, &stack, six));\n";
                 }
                 void visit(const Optional &member) override
                 {
@@ -182,8 +178,8 @@ namespace app {
                     if (member.is_primitive())
                         os << "        TRY2(" << mix << ", 0, ftor.leaf(*pod." << member.name << ", \"" << member.name << "\", \"" << member.type << "\"));\n";
                     else
-                        os << "        TRY2(" << mix << ", 0, dfs(*pod." << member.name << ", \"" << member.name << "\", ftor), &stack);\n";
-                    os << "    TRY1(" << mix++ << ", (stack.back().array_ix=0,true));\n";
+                        os << "        TRY2(" << mix << ", 0, dfs(*pod." << member.name << ", \"" << member.name << "\", ftor), &stack, six);\n";
+                    os << "    TRY1(" << mix++ << ", (stack[six].array_ix=0,true));\n";
                     os << "    TRY1(" << mix++ << ", ftor.optional(pod." << member.name << ", false, \"" << member.name << "\", \"" << member.type << "\"));\n";
                 }
                 void visit(const Array &member) override
@@ -195,9 +191,9 @@ namespace app {
                     if (member.is_primitive())
                         os << "        TRY2(" << mix << ", ix, ftor.leaf(v, \"" << member.name << "\", \"" << member.type << "\"));\n";
                     else
-                        os << "        TRY2(" << mix << ", ix, dfs(v, \"" << member.name << "\", ftor, &stack));\n";
+                        os << "        TRY2(" << mix << ", ix, dfs(v, \"" << member.name << "\", ftor, &stack, six));\n";
                     os << "    }\n";
-                    os << "    TRY1(" << mix++ << ", (stack.back().array_ix=0,true));\n";
+                    os << "    TRY1(" << mix++ << ", (stack[six].array_ix=0,true));\n";
                     os << "    TRY1(" << mix++ << ", ftor.array(pod." << member.name << ", false, \"" << member.name << "\", \"" << member.type << "\"));\n";
                 }
             };
@@ -206,11 +202,12 @@ namespace app {
             MyVisitor my_visitor{os, mix, aix};
 
             os << "template <typename Ftor>\n";
-            os << "gubg::Tribool dfs(" << struc.name << " &pod, const std::string &name, Ftor &&ftor, gubg::sedes::Stack *stack_ptr = nullptr)\n";
+            os << "gubg::Tribool dfs(" << struc.name << " &pod, const std::string &name, Ftor &&ftor, gubg::sedes::Stack *stack_ptr = nullptr, int six = -1)\n";
             os << "{\n";
-            os << "    gubg::sedes::Stack local_stack; local_stack.emplace_back();\n";
+            os << "    gubg::sedes::Stack local_stack;;\n";
             os << "    auto &stack = stack_ptr ? *stack_ptr : local_stack;\n";
-            os << "    if (stack.empty()) return false;\n";
+            os << "    six++;\n";
+            os << "    stack.resize(six+1);\n";
             os << "    TRY1(" << mix++ << ", ftor.enter(pod, name, \"" << struc.name << "\"));\n";
             os << "    \n";
             struc.each([&](const auto &member){
@@ -218,6 +215,7 @@ namespace app {
                     os << "    \n";
                     });
             os << "    TRY1(" << mix++ << ", ftor.exit(pod, name, \"" << struc.name << "\"));\n";
+            os << "    stack.resize(six);\n";
             os << "    \n";
             os << "    return true;\n";
             os << "};\n";
