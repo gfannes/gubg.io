@@ -3,5 +3,4 @@
 
 TEST_CASE("sedes::Catalogue tests", "[ut][sedes][Catalogue]")
 {
-    REQUIRE(false);
 }
