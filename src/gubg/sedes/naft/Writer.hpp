@@ -48,7 +48,7 @@ namespace gubg { namespace sedes { namespace naft {
         {
             MSS_BEGIN(bool);
             if (oc)
-                indent_(level_++) << "[" << name << ":" << type << "](size:" << obj.size() << "){" << std::endl;
+                indent_(level_++) << "[" << name << ":" << type << "*](size:" << obj.size() << "){" << std::endl;
             else
                 indent_(--level_) << "}" << std::endl;
             MSS_END();
