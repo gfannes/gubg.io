@@ -28,7 +28,7 @@ namespace gubg { namespace sedes {
 
         bool is_primitive() const
         {
-            return type == "float" || type == "int" || type == "char";
+            return type == "float" || type == "int" || type == "char" || type == "bool";
         }
 
         virtual void accept(Visitor &) const = 0;

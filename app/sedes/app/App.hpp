@@ -191,11 +191,26 @@ namespace app {
                     os << "    TRY1(" << mix++ << ", ftor.array(pod." << member.name << ", true, \"" << member.name << "\", \"" << member.type << "\"));\n";
                     os << "    for (unsigned int ix = 0; ix < pod." << member.name << ".size(); ++ix)\n";
                     os << "    {\n";
-                    os << "        auto &v = pod." << member.name << "[ix];\n";
                     if (member.is_primitive())
-                        os << "        TRY2(" << mix << ", ix, ftor.leaf(v, \"" << member.name << "\", \"" << member.type << "\"));\n";
+                    {
+                        if (member.type == "bool")
+                        {
+                            //std::vector<bool> is specialized, we cannot take a reference of std::vector<bool>[ix]
+                            os << "        bool v = pod." << member.name << "[ix];\n";
+                            os << "        TRY2(" << mix << ", ix, ftor.leaf(v, \"" << member.name << "\", \"" << member.type << "\"));\n";
+                            os << "        pod." << member.name << "[ix] = v;\n";
+                        }
+                        else
+                        {
+                            os << "        auto &v = pod." << member.name << "[ix];\n";
+                            os << "        TRY2(" << mix << ", ix, ftor.leaf(v, \"" << member.name << "\", \"" << member.type << "\"));\n";
+                        }
+                    }
                     else
+                    {
+                        os << "        auto &v = pod." << member.name << "[ix];\n";
                         os << "        TRY2(" << mix << ", ix, dfs(v, \"" << member.name << "\", ftor, &stack, six));\n";
+                    }
                     os << "    }\n";
                     os << "    TRY1(" << mix++ << ", (stack[six].array_ix=0,true));\n";
                     os << "    TRY1(" << mix++ << ", ftor.array(pod." << member.name << ", false, \"" << member.name << "\", \"" << member.type << "\"));\n";

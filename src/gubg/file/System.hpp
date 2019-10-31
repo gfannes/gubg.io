@@ -23,6 +23,7 @@ namespace gubg { namespace file {
         MSS_END();
     }
     inline bool read(std::string &content, const std::filesystem::path &name) {return read(content, Name{name});}
+    inline bool read(std::string &content, const std::string &name) {return read(content, Name{name});}
 
     inline bool write(std::string &content, const Name &name)
     {
@@ -32,6 +33,7 @@ namespace gubg { namespace file {
         MSS_END();
     }
     inline bool write(std::string &content, const std::filesystem::path &name) {return write(content, Name{name});}
+    inline bool write(std::string &content, const std::string &name) {return write(content, Name{name});}
 
     inline bool exists(const gubg::file::Name &fn)
     {
