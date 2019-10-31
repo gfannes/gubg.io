@@ -1,6 +1,7 @@
 root.book("gubg/io", fun(b){
     b.recipe("hpp", fun(rcp){
         rcp.add("src", "gubg/**.hpp")
+        rcp.depends_on("algo/hpp")
     })
 
     b.recipe("func", fun(rcp){

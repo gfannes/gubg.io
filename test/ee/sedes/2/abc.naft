@@ -1,0 +1,27 @@
+[A:struct]{
+    [f_bool:field](type:bool)
+    [f_int:field](type:int)
+    [f_float:field](type:float)
+    [f_char:field](type:char)
+    [f_b:field](type:B)
+
+    [o_bool:optional](type:bool)
+    [o_int:optional](type:int)
+    [o_float:optional](type:float)
+    [o_char:optional](type:char)
+    [o_b:optional](type:B)
+
+    [a_bool:array](type:bool)
+    [a_int:array](type:int)
+    [a_float:array](type:float)
+    [a_char:array](type:char)
+    [a_b:array](type:B)
+}
+[B:struct]{
+    [f_int:field](type:int)
+
+    [a_c:array](type:C)
+}
+[C:struct]{
+    [f_int:field](type:int)
+}

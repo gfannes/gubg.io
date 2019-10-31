@@ -22,7 +22,10 @@ namespace app {
             MSS_BEGIN(bool);
 
             if (print_help)
+            {
                 log() << help();
+                return true;
+            }
 
             MSS(!input_fn.empty(), error() << "No input filename given\n");
             MSS(!output_fn.empty(), error() << "No output filename given\n");
@@ -86,6 +89,7 @@ namespace app {
             fo << "#include <optional>\n";
             fo << "#include <vector>\n";
             fo << "#include <algorithm>\n";
+            fo << "#include <iostream>\n";
             fo << "\n";
             catalogue_.each([&](const auto &struc){ declare_struct_(fo, struc); });
             fo << "\n";
@@ -178,7 +182,7 @@ namespace app {
                     if (member.is_primitive())
                         os << "        TRY2(" << mix << ", 0, ftor.leaf(*pod." << member.name << ", \"" << member.name << "\", \"" << member.type << "\"));\n";
                     else
-                        os << "        TRY2(" << mix << ", 0, dfs(*pod." << member.name << ", \"" << member.name << "\", ftor), &stack, six);\n";
+                        os << "        TRY2(" << mix << ", 0, dfs(*pod." << member.name << ", \"" << member.name << "\", ftor, &stack, six));\n";
                     os << "    TRY1(" << mix++ << ", (stack[six].array_ix=0,true));\n";
                     os << "    TRY1(" << mix++ << ", ftor.optional(pod." << member.name << ", false, \"" << member.name << "\", \"" << member.type << "\"));\n";
                 }

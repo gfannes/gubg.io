@@ -2,6 +2,7 @@
 #define HEADER_gubg_sedes_Member_hpp_ALREADY_INCLUDED
 
 #include <memory>
+#include <ostream>
 
 namespace gubg { namespace sedes { 
 
@@ -34,6 +35,11 @@ namespace gubg { namespace sedes {
 
     private:
     };
+    inline std::ostream &operator<<(std::ostream &os, const Member &member)
+    {
+        os << "[:Member](name:" << member.name << ")(type:" << member.type << ")";
+        return os;
+    }
 
     class Field: public Member
     {
