@@ -60,7 +60,7 @@ namespace gubg { namespace sedes { namespace naft {
         std::ostream &os_;
         unsigned int level_ = 0;
 
-        void stream_(char ch) {os_ << (int)ch;}
+        void stream_(char &ch) {os_ << (int)ch;}
         template <typename T>
         void stream_(T v) {os_ << v;}
     };

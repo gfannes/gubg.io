@@ -11,7 +11,7 @@ inline void hr(std::ostream &os, const C &c, unsigned int level = 0)
 {
     indent(os, level++) << "[:C]{\n";
     indent(os, level) << "[f_int](value:" << c.f_int << ")\n";
-    indent(os, --level) << "}";
+    indent(os, --level) << "}\n";
 }
 inline void hr(std::ostream &os, const B &b, unsigned int level = 0)
 {
@@ -19,7 +19,7 @@ inline void hr(std::ostream &os, const B &b, unsigned int level = 0)
     indent(os, level) << "[f_int](value:" << b.f_int << ")\n";
     for (const auto &c: b.a_c)
         hr(indent(os, level), c, level);
-    indent(os, --level) << "}";
+    indent(os, --level) << "}\n";
 }
 inline void hr(std::ostream &os, const A &a, unsigned int level = 0)
 {
@@ -28,8 +28,8 @@ inline void hr(std::ostream &os, const A &a, unsigned int level = 0)
     indent(os, level) << "[f_bool](value:" << a.f_bool << ")\n";
     indent(os, level) << "[f_int](value:" << a.f_int << ")\n";
     indent(os, level) << "[f_float](value:" << a.f_float << ")\n";
-    indent(os, level) << "[f_char](value:" << a.f_char << ")\n";
-    hr(indent(os, level), a.f_b, level);
+    indent(os, level) << "[f_char](value:" << (int)a.f_char << ")\n";
+    hr(os, a.f_b, level);
 
     if (a.o_bool)
         indent(os, level) << "[o_bool](value:" << *a.o_bool << ")\n";
@@ -38,9 +38,9 @@ inline void hr(std::ostream &os, const A &a, unsigned int level = 0)
     if (a.o_float)
         indent(os, level) << "[o_float](value:" << *a.o_float << ")\n";
     if (a.o_char)
-        indent(os, level) << "[o_char](value:" << *a.o_char << ")\n";
+        indent(os, level) << "[o_char](value:" << (int)*a.o_char << ")\n";
     if (a.o_b)
-        hr(indent(os, level), *a.o_b, level);
+        hr(os, *a.o_b, level);
 
     for (const auto &v: a.a_bool)
         indent(os, level) << "[a_bool](value:" << v << ")\n";
@@ -49,12 +49,12 @@ inline void hr(std::ostream &os, const A &a, unsigned int level = 0)
     for (const auto &v: a.a_float)
         indent(os, level) << "[a_float](value:" << v << ")\n";
     for (const auto &v: a.a_char)
-        indent(os, level) << "[a_char](value:" << v << ")\n";
+        indent(os, level) << "[a_char](value:" << (int)v << ")\n";
 
     for (const auto &b: a.a_b)
-        hr(indent(os, level), b, level);
+        hr(os, b, level);
 
-    indent(os, --level) << "}";
+    indent(os, --level) << "}\n";
 }
 
 int main(int argc, const char **argv)

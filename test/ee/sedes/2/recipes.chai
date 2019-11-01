@@ -1,6 +1,13 @@
+include("../../../../")
+include("../../../../../gubg.std")
+include("../../../../../gubg.math")
+include("../../../../../gubg.algo")
+
 cook.recipe("app", TargetType.Executable, fun(rcp){
     rcp.add(".", "main.cpp")
     rcp.add(".", "*.hpp")
     rcp.add("../../../../../gubg.std/src", "**/*.hpp")
     rcp.add("../../../../../gubg.io/src", "**/*.hpp")
+
+    rcp.depends_on("gubg/io/func")
 })
