@@ -4,6 +4,7 @@
 #include "gubg/mss.hpp"
 #include <string>
 #include <fstream>
+#include <array>
 
 namespace gubg { namespace wav { 
 
@@ -55,6 +56,12 @@ namespace gubg { namespace wav {
             for (auto v: sample)
                 stream_value_(v);
             MSS_END();
+        }
+        template <typename Value>
+        bool add_value(Value value)
+        {
+            std::array<Value, 1> sample = {value};
+            return add_sample(sample);
         }
 
     private:
