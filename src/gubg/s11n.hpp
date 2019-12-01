@@ -3,7 +3,7 @@
 
 #include "gubg/s11n/Reader.hpp"
 #include "gubg/s11n/Writer.hpp"
-#include "gubg/file/System.hpp"
+#include "gubg/file/system.hpp"
 #include "gubg/mss.hpp"
 
 namespace gubg { namespace s11n { 
