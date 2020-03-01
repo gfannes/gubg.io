@@ -1,11 +1,9 @@
 #include <gubg/wrap/Encoder.hpp>
-#include <gubg/hex.hpp>
+#include <gubg/wrap/Decoder.hpp>
 #include <catch.hpp>
-#include <iostream>
-#include <iomanip>
 using namespace gubg;
 
-TEST_CASE("wrap::Encoder tests", "[wrap][Encoder]")
+TEST_CASE("wrap::Xcoder tests", "[wrap][Xcoder]")
 {
     struct Scn
     {
@@ -26,15 +24,18 @@ TEST_CASE("wrap::Encoder tests", "[wrap][Encoder]")
     }
 
     wrap::Encoder encoder{scn.som};
-
     wrap::PDU pdu;
-    encoder(pdu, scn.sdu);
+    REQUIRE(encoder(pdu, scn.sdu));
 
+    //Print PDU
     for (auto ch: pdu)
         std::cout << hex(ch) << '-' << ch << ' ';
     std::cout << std::endl;
 
+    //Check PDU has minimal size
     REQUIRE(pdu.size() >= scn.som.size()+scn.sdu.size());
+
+    //Check PDU does not contain SOM
     if (!scn.som.empty())
     {
         const auto som_size = scn.som.size();
@@ -46,4 +47,13 @@ TEST_CASE("wrap::Encoder tests", "[wrap][Encoder]")
             REQUIRE(pdu.substr(ix, som_size) != scn.som);
         }
     }
+
+    wrap::Decoder decoder{scn.som};
+    decoder.process(pdu);
+    for (const auto &error: decoder.errors)
+        std::cout << error << std::endl;
+
+    REQUIRE(decoder.errors.empty());
+    REQUIRE(decoder.received_sdus.size() == 1);
+    REQUIRE(decoder.received_sdus[0] == scn.sdu);
 }
