@@ -9,6 +9,7 @@ TEST_CASE("wrap::Xcoder tests", "[wrap][Xcoder]")
     {
         std::string som;
         wrap::SDU sdu;
+        bool print = true;
     };
 
     Scn scn;
@@ -21,6 +22,7 @@ TEST_CASE("wrap::Xcoder tests", "[wrap][Xcoder]")
         SECTION("data = SOM") { scn.sdu = "SOM"; }
         SECTION("data = SOMSOmSOM") { scn.sdu = "SOMSO\xb2SOM"; }
         SECTION("data = SOmSOMSOm") { scn.sdu = "SO\xb2SOMSO\xb2"; }
+        SECTION("data = 1mb") { scn.sdu = std::string(1024*1024, '?'); scn.print = false; }
     }
 
     wrap::Encoder encoder{scn.som};
@@ -28,9 +30,12 @@ TEST_CASE("wrap::Xcoder tests", "[wrap][Xcoder]")
     REQUIRE(encoder(pdu, scn.sdu));
 
     //Print PDU
-    for (auto ch: pdu)
-        std::cout << hex(ch) << '-' << ch << ' ';
-    std::cout << std::endl;
+    if (scn.print)
+    {
+        for (auto ch: pdu)
+            std::cout << hex(ch) << '-' << ch << ' ';
+        std::cout << std::endl;
+    }
 
     //Check PDU has minimal size
     REQUIRE(pdu.size() >= scn.som.size()+scn.sdu.size());

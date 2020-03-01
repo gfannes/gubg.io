@@ -2,12 +2,15 @@
 #define HEADER_gubg_wrap_Encoder_hpp_ALREADY_INCLUDED
 
 #include <gubg/wrap/types.hpp>
+#include <gubg/wrap/my/Detector.hpp>
 #include <gubg/Range.hpp>
 #include <gubg/mss.hpp>
 #include <vector>
 #include <algorithm>
 #include <cstdint>
 #include <set>
+#include <optional>
+#include <cassert>
 
 namespace gubg { namespace wrap { 
 
@@ -16,19 +19,22 @@ namespace gubg { namespace wrap {
     class Encoder
     {
     public:
-        Encoder(const std::string &som = ""): som_(som)
-        {
-        }
+        Encoder(const std::string &som = ""):
+        som_(som),
+        som_start_detector_(som.substr(0, (som.empty()?0:som.size()-1))),
+        som_last_orig_(som.empty()?'\0':som.back())
+        { }
 
         bool operator()(PDU &pdu, const SDU &sdu)
         {
             MSS_BEGIN(bool);
 
-            MSS(prepare_som_());
+            MSS(check_som_());
 
             compute_raw_size_sdu_(sdu);
 
-            compute_flips_(sdu);
+            compute_flip_bits_(sdu);
+            compute_flips_();
 
             pdu.resize(som_.size()+flips_.size()+size_sdu_.size());
 
@@ -46,35 +52,23 @@ namespace gubg { namespace wrap {
         }
 
     private:
-        bool prepare_som_()
+        bool check_som_()
         {
             MSS_BEGIN(bool);
 
-            if (som_is_prepared_)
-                return true;
-
-            const auto size = som_.size();
-            if (size > 0)
+            if (!som_is_ok_)
             {
-                //SOM without last byte
-                som_start_ = som_;
-                som_start_.resize(size-1);
-
-                //Original and flipped version of the last byte
-                som_last_orig_ = som_[size-1];
-                som_last_flipped_ = ~som_last_orig_;
-
                 //Check that all som bytes and the flipped version of the last byte are different
-                {
-                    std::set<char> byte__presence;
-                    for (auto ch: som_)
-                        byte__presence.insert(ch);
-                    byte__presence.insert(som_last_flipped_);
+                std::set<char> byte__presence;
+                for (auto ch: som_)
+                    byte__presence.insert(ch);
+                byte__presence.insert(som_last_flipped_);
 
-                    MSS(byte__presence.size() == som_.size()+1, std::cout << "Error: SOM characters should be all different, as should be the inverse of the last." << std::endl);
-                }
+                som_is_ok_ = (byte__presence.size() == som_.size()+1);
             }
-            som_is_prepared_ = true;
+            assert(!!som_is_ok_);
+
+            MSS(*som_is_ok_, std::cout << "Error: SOM characters should be all different, as should be the inverse of the last." << std::endl);
 
             MSS_END();
         }
@@ -100,46 +94,44 @@ namespace gubg { namespace wrap {
             std::copy(RANGE(sdu), &size_sdu_[sdu_begin_ix]);
         }
 
-        void compute_flips_(const SDU &sdu)
+        void compute_flip_bits_(const SDU &sdu)
         {
             flip_bits_.resize(0);
-            flips_.resize(0);
 
             if (som_.empty())
                 //User wants no SOM, we will also not include flips_ in the PDU
                 return;
 
-            //Compute flip_bits_, only when the som actually fits in the size_sdu_
-            if (som_.size() <= size_sdu_.size())
+            for (auto &ch: size_sdu_)
             {
-                const std::size_t end_ix = size_sdu_.size()-som_.size()+1;
-                const auto som_start_size = som_start_.size();
-                auto som_start_match_at = [&](std::size_t offset)
+                if (som_start_detector_.found_sequence())
                 {
-                    for (auto ix = 0u; ix < som_start_size; ++ix)
-                        if (som_start_[ix] != size_sdu_[offset+ix])
-                            return false;
-                    return true;
-                };
-                for (auto ix = 0u; ix < end_ix; ++ix)
-                    if (som_start_match_at(ix))
+                    //We found the start of the SOM already, ch is the last char of the SOM
+
+                    if (false) {}
+                    else if (ch == som_last_orig_)
                     {
-                        auto &last_char = size_sdu_[ix+som_start_size];
-                        if (false) {}
-                        else if (last_char == som_last_orig_)
-                        {
-                            //Flip the last byte and indicate we had to flip it
-                            flip_bits_.push_back(true);
-                            last_char = som_last_flipped_;
-                        }
-                        else if (last_char == som_last_flipped_)
-                        {
-                            //Indicate that we have a false-positive match and that
-                            //the decoder should not flip this last byte
-                            flip_bits_.push_back(false);
-                        }
+                        //Flip the last byte and indicate we had to flip it
+                        flip_bits_.push_back(true);
+                        ch = som_last_flipped_;
                     }
+                    else if (ch == som_last_flipped_)
+                    {
+                        //Indicate that we have a false-positive match and that
+                        //the decoder should not flip this last byte
+                        flip_bits_.push_back(false);
+                    }
+                }
+                som_start_detector_(ch);
             }
+        }
+        void compute_flips_()
+        {
+            flips_.resize(0);
+
+            if (som_.empty())
+                //User wants no SOM, we will also not include flips_ in the PDU
+                return;
 
             //Convert the flip_bits_ into the vlc6-coded flips_
             {
@@ -165,10 +157,10 @@ namespace gubg { namespace wrap {
         }
 
         const std::string som_;
-        bool som_is_prepared_ = false;
-        std::string som_start_;
-        char som_last_orig_;
-        char som_last_flipped_;
+        std::optional<bool> som_is_ok_;
+        my::Detector som_start_detector_;
+        const char som_last_orig_ = '\0';
+        const char som_last_flipped_ = ~som_last_orig_;
 
         std::string flips_;
         std::string size_sdu_;
