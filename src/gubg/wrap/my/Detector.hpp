@@ -9,7 +9,8 @@ namespace gubg { namespace wrap { namespace my {
     class Detector
     {
     public:
-        Detector(const std::string &sequence): sequence_(sequence)
+        //Assumes all sequence bytes are different
+        Detector(const std::string &sequence): sequence_(sequence), som_front_(sequence.empty()?'\0':sequence[0])
         {
             reset();
         }
@@ -18,7 +19,7 @@ namespace gubg { namespace wrap { namespace my {
 
         void reset()
         {
-            match_ix_ = 0;
+            match_len_ = 0;
             //An empty sequence always matches
             found_sequence_ = sequence_.empty();
         }
@@ -30,29 +31,49 @@ namespace gubg { namespace wrap { namespace my {
 
             found_sequence_ = false;
 
-            assert(match_ix_ < sequence_.size());
-            if (sequence_[match_ix_] != ch)
+            auto check_for_sequence_match = [&]()
             {
-                //Sequence was broken, restart at the beginning
-                match_ix_ = 0;
-            }
-            else
-            {
-                ++match_ix_;
-
-                if (match_ix_ == sequence_.size())
+                if (match_len_ == sequence_.size())
                 {
-                    //Completet sequence was followed correctly
-                    match_ix_ = 0;
+                    //Complete sequence was found
+                    match_len_ = 0;
                     found_sequence_ = true;
+                }
+            };
+
+            //Check for sequence restart always
+            if (ch == som_front_)
+            {
+                //Found start of sequence
+                match_len_ = 1;
+
+                check_for_sequence_match();
+            }
+            else if (match_len_ > 0)
+            {
+                //At least one byte of the sequence was found
+
+                assert(match_len_ < sequence_.size());
+                if (sequence_[match_len_] == ch)
+                {
+                    //Continuation of sequence
+                    ++match_len_;
+
+                    check_for_sequence_match();
+                }
+                else
+                {
+                    //Sequence was broken, restart at the beginning
+                    reset();
                 }
             }
         }
 
     private:
         const std::string sequence_;
-        std::size_t match_ix_;
+        const char som_front_;
 
+        std::size_t match_len_;
         bool found_sequence_;
     };
 

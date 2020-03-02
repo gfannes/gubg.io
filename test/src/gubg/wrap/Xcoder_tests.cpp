@@ -20,6 +20,9 @@ TEST_CASE("wrap::Xcoder tests", "[wrap][Xcoder]")
         scn.som = "SOM";
         SECTION("data = ABC") { scn.sdu = "ABC"; }
         SECTION("data = SOM") { scn.sdu = "SOM"; }
+        SECTION("data = SSOM") { scn.sdu = "SSOM"; }
+        SECTION("data = SOSOM") { scn.sdu = "SOSOM"; }
+        SECTION("data = SOSOMSSOM") { scn.sdu = "SOSOMSSOM"; }
         SECTION("data = SOMSOmSOM") { scn.sdu = "SOMSO\xb2SOM"; }
         SECTION("data = SOmSOMSOm") { scn.sdu = "SO\xb2SOMSO\xb2"; }
         SECTION("data = 1mb") { scn.sdu = std::string(1024*1024, '?'); scn.print = false; }
