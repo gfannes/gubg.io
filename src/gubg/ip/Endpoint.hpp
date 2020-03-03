@@ -21,6 +21,8 @@ namespace gubg { namespace ip {
         Endpoint(const Address &, std::uint16_t port_hbo);
         Endpoint(const Address &, const Port &);
 
+        static Endpoint localhost(std::uint16_t port_hbo) { return Endpoint(Address{127,0,0,1}, port_hbo); }
+
         void setup(const Address &, const Port &);
 
         struct sockaddr &as_sockaddr() {return sa_;}
