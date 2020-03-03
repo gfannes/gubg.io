@@ -13,20 +13,29 @@ namespace gubg { namespace ip {
 
     Endpoint::Endpoint()
     {
-        setup_(Address{}, 0);
+        setup(Address{}, Port{});
     }
 
     Endpoint::Endpoint(const Address &address)
     {
-        setup_(address, 0);
+        setup(address, Port{});
     }
-    Endpoint::Endpoint(const Address &address, Port port)
+    Endpoint::Endpoint(const Address &address, std::uint16_t port_hbo)
     {
-        setup_(address, port);
+        Port port;
+        port.from_hbo(port_hbo);
+        setup(address, port);
+    }
+    Endpoint::Endpoint(const Address &address, const Port &port)
+    {
+        setup(address, port);
     }
 
-    void Endpoint::setup_(const Address &address, Port port)
+    void Endpoint::setup(const Address &address, const Port &port)
     {
+        address_ = address;
+        port_ = port;
+
         std::memset(&sa_, 0, sizeof(sa_));
 
         switch (address.version())
@@ -35,11 +44,17 @@ namespace gubg { namespace ip {
                 {
                     auto &sin = *(struct sockaddr_in *)(&sa_);
                     sin.sin_family = AF_INET;
-                    sin.sin_port = port;
-                    sin.sin_addr.s_addr = address.as_uint32();
+                    sin.sin_port = port.as_nbo();
+                    sin.sin_addr.s_addr = address.as_nbo();
                 }
                 break;
         }
+    }
+
+    void Endpoint::stream(std::ostream &os) const
+    {
+        os << address_ << std::endl;
+        os << port_ << std::endl;
     }
 
 } } 

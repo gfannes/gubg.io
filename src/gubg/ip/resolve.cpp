@@ -30,7 +30,7 @@ namespace gubg { namespace ip {
         MSS(!!info, return ReturnCode::UnkownHost);
 
         const auto &addr = *(struct sockaddr_in *)info->ai_addr;
-        address.from_uint32(addr.sin_addr.s_addr);
+        address.from_nbo(addr.sin_addr.s_addr);
 
         ::freeaddrinfo(info);
 

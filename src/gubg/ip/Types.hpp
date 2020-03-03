@@ -9,8 +9,6 @@ namespace gubg { namespace ip {
 
     enum class Type {UDP, TCP};
 
-    using Port = std::uint16_t;
-
 } } 
 
 #endif

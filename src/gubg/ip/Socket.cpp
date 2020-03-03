@@ -1,8 +1,9 @@
-#include "gubg/ip/Socket.hpp"
-#include "gubg/mss.hpp"
+#include <gubg/ip/Socket.hpp>
+#include <gubg/ip/my/descriptor.hpp>
+#include <gubg/mss.hpp>
 #include <cassert>
 
-#include "gubg/platform.h"
+#include <gubg/platform.h>
 #if GUBG_PLATFORM_API_WIN32
 #include <winsock2.h>
 #else
@@ -14,32 +15,9 @@
 
 namespace gubg { namespace ip { 
 
-    namespace  { 
-        int to_domain(Version version)
-        {
-            switch (version)
-            {
-                case Version::V4: return PF_INET;
-                case Version::V6: return PF_INET6;
-            }
-            assert(false);
-            return -1;
-        }
-        int to_type(Type type)
-        {
-            switch (type)
-            {
-                case Type::UDP: return SOCK_DGRAM;
-                case Type::TCP: return SOCK_STREAM;
-            }
-            assert(false);
-            return -1;
-        }
-    } 
-
     Socket::Socket(Type type, Version version)
     {
-        setup(type, version);
+        create(type, version);
     }
     Socket::Socket(Socket &&dying): descriptor_(dying.descriptor_), is_blocking_(dying.is_blocking_), type_(dying.type_), version_(dying.version_)
     {
@@ -63,72 +41,132 @@ namespace gubg { namespace ip {
         return *this;
     }
 
-    bool Socket::setup(Type type, Version version)
+    //Getters
+    Type Socket::type() const
+    {
+        return type_;
+    }
+    Version Socket::version() const
+    {
+        return version_;
+    }
+    bool Socket::is_blocking() const
+    {
+        return is_blocking_;
+    }
+
+    //Setters
+    Socket &Socket::set_blocking(bool b)
+    {
+        is_blocking_ = b;
+        if (my::is_valid(descriptor_))
+            my::set_blocking(descriptor_, is_blocking_);
+        return *this;
+    }
+
+    bool Socket::valid() const
+    {
+        return my::is_valid(descriptor_);
+    }
+
+    bool Socket::create(Type type, Version version, int descr)
     {
         close();
 
         type_ = type;
         version_ = version;
-        is_blocking_ = true;
-        descriptor_ = ::socket(to_domain(version_), to_type(type_), 0);
+
+        if (my::is_valid(descr))
+            descriptor_ = descr;
+        else
+            descriptor_ = my::create_socket(type_, version_);
+
+        set_blocking(is_blocking_);
 
         return valid();
     }
-
-    bool Socket::valid() const
-    {
-        return descriptor_ != -1;
-    }
-
     void Socket::close()
     {
-        if (descriptor_ == -1)
-            return;
-#if GUBG_PLATFORM_API_WIN32
-        ::closesocket(descriptor_);
-#else
-        ::close(descriptor_);
-#endif
-        descriptor_ = -1;
-        is_blocking_ = true;
+        if (my::is_valid(descriptor_))
+        {
+            my::close_socket(descriptor_);
+            descriptor_ = -1;
+        }
     }
 
-    ReturnCode Socket::get_blocking(bool &block) const
+    ReturnCode Socket::reuse_address(bool b)
     {
-        MSS_BEGIN(ReturnCode);
-        MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
-        block = is_blocking_;
-        MSS_END();
-    }
-    ReturnCode Socket::set_blocking(bool block)
-    {
-        MSS_BEGIN(ReturnCode);
-        MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
-#if GUBG_PLATFORM_API_WIN32
-        u_long mode = !block;
-        ::ioctlsocket(descriptor_, FIONBIO, &mode);
-#else
-        auto flags = ::fcntl(descriptor_, F_GETFL, 0);
-        if (block)
-            flags &= ~O_NONBLOCK;
-        else
-            flags |= O_NONBLOCK;
-        ::fcntl(descriptor_, F_SETFL, flags);
-#endif
-        is_blocking_ = block;
-        MSS_END();
+        return my::reuse_address(descriptor_, b);
     }
 
     ReturnCode Socket::bind(const Endpoint &ep)
     {
+        return my::bind(descriptor_, ep.as_sockaddr());
+    }
+
+    ReturnCode Socket::listen()
+    {
+        return my::listen(descriptor_);
+    }
+
+    ReturnCode Socket::accept(Socket &peer_socket, Endpoint &peer_ep)
+    {
         MSS_BEGIN(ReturnCode);
-        MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
-        const auto status = ::bind(descriptor_, &ep.as_sockaddr(), sizeof(sockaddr));
-        MSS(status != -1, return ReturnCode::CouldNotBind);
+
+        int peer_descr = -1;
+        Address peer_address;
+        Port peer_port;
+        MSS(my::accept(descriptor_, peer_descr, peer_address, peer_port));
+
+        peer_socket.create(type_, version_, peer_descr);
+        peer_ep.setup(peer_address, peer_port);
+
         MSS_END();
     }
 
-    ReturnCode Socket::sendto(unsigned int &sent, const void *buffer, unsigned int size, const Endpoint &ep)
+    ReturnCode Socket::connect(const Endpoint &ep)
+    {
+        return my::connect(descriptor_, ep.as_sockaddr());
+    }
+
+    ReturnCode Socket::is_connected()
+    {
+        return my::is_connected(descriptor_);
+    }
+
+    ReturnCode Socket::send(const void *buffer, std::size_t size, std::size_t &offset)
+    {
+        MSS_BEGIN(ReturnCode);
+
+        unsigned int nr_sent;
+        switch (const auto rc = my::send(descriptor_, nr_sent, buffer, size))
+        {
+            case ReturnCode::OK:
+                offset += nr_sent;
+                break;
+            default: MSS(rc); break;
+        }
+
+        MSS_END();
+    }
+
+    ReturnCode Socket::recv(void *buffer, std::size_t size, std::size_t &offset)
+    {
+        MSS_BEGIN(ReturnCode);
+
+        unsigned int nr_received;
+        switch (const auto rc = my::recv(descriptor_, nr_received, buffer, size))
+        {
+            case ReturnCode::OK:
+                offset += nr_received;
+                break;
+            default: MSS(rc); break;
+        }
+
+        MSS_END();
+    }
+
+    ReturnCode Socket::sendto(unsigned int &nr_sent, const void *buffer, unsigned int size, const Endpoint &ep)
     {
         MSS_BEGIN(ReturnCode);
         MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
@@ -138,11 +176,10 @@ namespace gubg { namespace ip {
         const auto status = ::sendto(descriptor_, buffer, size, 0, &ep.as_sockaddr(), sizeof(sockaddr));
 #endif
         MSS(status != -1, return ReturnCode::CouldNotSend);
-        sent = status;
+        nr_sent = status;
         MSS_END();
     }
-
-    ReturnCode Socket::recvfrom(unsigned int &recv, void *buffer, unsigned int size, Endpoint &ep)
+    ReturnCode Socket::recvfrom(unsigned int &nr_received, void *buffer, unsigned int size, Endpoint &ep)
     {
         MSS_BEGIN(ReturnCode);
         MSS(descriptor_ != -1, return ReturnCode::InvalidDescriptor);
@@ -159,7 +196,7 @@ namespace gubg { namespace ip {
             {
                 /* case EAGAIN: */
                 case EWOULDBLOCK:
-                    recv = 0;
+                    nr_received = 0;
                     return ReturnCode::WouldBlock;
                     break;
                 default:
@@ -169,7 +206,7 @@ namespace gubg { namespace ip {
         }
         else
         {
-            recv = status;
+            nr_received = status;
         }
         MSS_END();
     }

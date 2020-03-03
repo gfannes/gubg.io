@@ -7,11 +7,21 @@ namespace gubg { namespace ip {
     {
         OK,
         Error,
+
         InvalidDescriptor,
         UnkownHost,
+
+        CouldNotSetSockOpt,
+
         CouldNotBind,
+        CouldNotListen,
+        CouldNotReuseAddress,
+        CouldNotAccept,
+        CouldNotConnect,
+        CouldNotCheckConnection,
         CouldNotSend,
         CouldNotReceive,
+
         WouldBlock,
     };
 

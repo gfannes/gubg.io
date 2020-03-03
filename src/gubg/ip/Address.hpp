@@ -25,8 +25,8 @@ namespace gubg { namespace ip {
 
         void stream(std::ostream &) const;
 
-        void from_uint32(std::uint32_t addr);
-        std::uint32_t as_uint32() const;
+        void from_nbo(std::uint32_t addr_nbo);
+        std::uint32_t as_nbo() const;
 
         bool operator==(const Address &rhs) const;
         bool operator!=(const Address &rhs) const {return !operator==(rhs);}

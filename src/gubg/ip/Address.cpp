@@ -38,19 +38,20 @@ namespace gubg { namespace ip {
         os << ")";
     }
 
-    void Address::from_uint32(std::uint32_t addr)
+    void Address::from_nbo(std::uint32_t addr_nbo)
     {
         version_ = Version::V4;
         auto part = v4_parts_.begin();
-        *part++ = (addr & 0xff); addr >>= 8;
-        *part++ = (addr & 0xff); addr >>= 8;
-        *part++ = (addr & 0xff); addr >>= 8;
-        *part++ = (addr & 0xff); addr >>= 8;
+        *part++ = (addr_nbo & 0xff); addr_nbo >>= 8;
+        *part++ = (addr_nbo & 0xff); addr_nbo >>= 8;
+        *part++ = (addr_nbo & 0xff); addr_nbo >>= 8;
+        *part++ = (addr_nbo & 0xff); addr_nbo >>= 8;
     }
 
-    std::uint32_t Address::as_uint32() const
+    std::uint32_t Address::as_nbo() const
     {
         std::uint32_t addr = 0;
+        //Note: reverse iteration
         auto part = v4_parts_.rbegin();
         addr <<= 8; addr |= *part++;
         addr <<= 8; addr |= *part++;
