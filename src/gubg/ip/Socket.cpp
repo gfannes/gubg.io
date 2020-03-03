@@ -138,13 +138,17 @@ namespace gubg { namespace ip {
     {
         MSS_BEGIN(ReturnCode);
 
-        unsigned int nr_sent;
-        switch (const auto rc = my::send(descriptor_, nr_sent, buffer, size))
+        if (offset < size)
         {
-            case ReturnCode::OK:
-                offset += nr_sent;
-                break;
-            default: MSS(rc); break;
+            unsigned int nr_sent;
+            auto ptr = (const char *)buffer;
+            switch (const auto rc = my::send(descriptor_, nr_sent, ptr+offset, size-offset))
+            {
+                case ReturnCode::OK:
+                    offset += nr_sent;
+                    break;
+                default: MSS(rc); break;
+            }
         }
 
         MSS_END();
@@ -154,13 +158,17 @@ namespace gubg { namespace ip {
     {
         MSS_BEGIN(ReturnCode);
 
-        unsigned int nr_received;
-        switch (const auto rc = my::recv(descriptor_, nr_received, buffer, size))
+        if (offset < size)
         {
-            case ReturnCode::OK:
-                offset += nr_received;
-                break;
-            default: MSS(rc); break;
+            unsigned int nr_received;
+            auto ptr = (char *)buffer;
+            switch (const auto rc = my::recv(descriptor_, nr_received, ptr+offset, size-offset))
+            {
+                case ReturnCode::OK:
+                    offset += nr_received;
+                    break;
+                default: MSS(rc); break;
+            }
         }
 
         MSS_END();

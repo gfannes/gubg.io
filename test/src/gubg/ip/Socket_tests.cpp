@@ -160,7 +160,7 @@ TEST_CASE("ip::Socket accept-connect", "[ut][ip][Socket][accept][connect]")
 
     {
         const std::string send_request = "request";
-        std::size_t offset = 0;
+        std::size_t offset = 1;
         REQUIRE(client.send(send_request.data(), send_request.size(), offset) == ip::ReturnCode::OK);
         std::cout << "Client: sent request \"" << send_request << "\"" << std::endl;
         REQUIRE(offset == send_request.size());
@@ -186,5 +186,7 @@ TEST_CASE("ip::Socket accept-connect", "[ut][ip][Socket][accept][connect]")
         REQUIRE(client.recv(&recv_answer[0], recv_answer.size(), offset) == ip::ReturnCode::OK);
         recv_answer.resize(offset);
         std::cout << "Client: received answer \"" << recv_answer << "\"" << std::endl;
+
+        REQUIRE(recv_answer == "tseuqe");
     }
 }
