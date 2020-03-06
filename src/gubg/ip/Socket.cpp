@@ -116,7 +116,11 @@ namespace gubg { namespace ip {
         int peer_descr = -1;
         Address peer_address;
         Port peer_port;
-        MSS(my::accept(descriptor_, peer_descr, peer_address, peer_port));
+        switch (const auto rc = my::accept(descriptor_, peer_descr, peer_address, peer_port))
+        {
+            case ReturnCode::WouldBlock: return rc; break;
+            default: MSS(rc); break;
+        }
 
         peer_socket.create(type_, version_, peer_descr);
         peer_ep.setup(peer_address, peer_port);
@@ -167,6 +171,7 @@ namespace gubg { namespace ip {
                 case ReturnCode::OK:
                     offset += nr_received;
                     break;
+                case ReturnCode::WouldBlock: return rc; break;
                 default: MSS(rc); break;
             }
         }

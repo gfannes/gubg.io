@@ -30,6 +30,11 @@ TEST_CASE("ip::tcp ClientServer tests", "[ut][ip][tcp][ClientServer]")
         }
         else
         {
+            std::cout << "  scon: " << scon << std::endl;
+            REQUIRE(scon.process());
+            for (const auto &msg: scon.received_msgs)
+                std::cout << "Received: " << msg << std::endl;
+            scon.received_msgs.clear();
         }
 
         if (!ccon.established())
@@ -39,6 +44,9 @@ TEST_CASE("ip::tcp ClientServer tests", "[ut][ip][tcp][ClientServer]")
         }
         else
         {
+            std::cout << "  ccon: " << ccon << std::endl;
+            REQUIRE(ccon.send("abc"));
+            REQUIRE(ccon.process());
         }
     }
 }

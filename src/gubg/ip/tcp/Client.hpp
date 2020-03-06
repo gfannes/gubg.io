@@ -16,6 +16,36 @@ namespace gubg { namespace ip { namespace tcp {
         ReturnCode process(Connection &connection)
         {
             MSS_BEGIN(ReturnCode);
+            switch (connection.state_)
+            {
+                case Connection::State::Unconnected:
+                    connection.socket.create(Type::TCP, Version::V4);
+                    MSS(server_ep_.valid());
+                    switch (const auto rc = connection.socket.connect(server_ep_))
+                    {
+                        case ReturnCode::OK:
+                            MSS(connection.change_state_(Connection::State::Connected));
+                            break;
+                        case ReturnCode::WouldBlock:
+                            MSS(connection.change_state_(Connection::State::Connecting));
+                            break;
+                        default:
+                            MSS(rc);
+                            break;
+                    }
+                    break;
+                case Connection::State::Connecting:
+                    switch (const auto rc = connection.socket.is_connected())
+                    {
+                        case ReturnCode::WouldBlock: return ReturnCode::OK; break;
+                        default: MSS(rc); break;
+                    }
+                    connection.peer_ep_ = server_ep_;
+                    MSS(connection.change_state_(Connection::State::Connected));
+                    break;
+                case Connection::State::Connected:
+                    break;
+            }
             MSS_END();
         }
 

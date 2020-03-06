@@ -12,6 +12,14 @@
 
 namespace gubg { namespace ip { 
 
+    bool Address::valid() const
+    {
+        for (auto part: v4_parts_)
+            if (part != 0)
+                return true;
+        return false;
+    }
+
     Address Address::localhost()
     {
         return Address{127,0,0,1};

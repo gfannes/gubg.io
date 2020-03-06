@@ -9,6 +9,8 @@ namespace gubg { namespace ip {
     class Port
     {
     public:
+        bool valid() const {return hbo_ != 0;}
+
         //Host byte order
         void from_hbo(std::uint16_t addr_hbo);
         std::uint16_t as_hbo() const;

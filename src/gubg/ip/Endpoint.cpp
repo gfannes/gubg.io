@@ -31,6 +31,11 @@ namespace gubg { namespace ip {
         setup(address, port);
     }
 
+    bool Endpoint::valid() const
+    {
+        return address_.valid() && port_.valid();
+    }
+
     void Endpoint::setup(const Address &address, const Port &port)
     {
         address_ = address;
