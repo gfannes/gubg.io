@@ -5,6 +5,7 @@
 #include <gubg/platform.h>
 #if GUBG_PLATFORM_API_WIN32
 #include <winsock2.h>
+#include <stdint.h>
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -12,6 +13,15 @@
 #include <unistd.h>
 #endif
 #include <fcntl.h>
+
+#if GUBG_PLATFORM_API_WIN32
+typedef int socklen_t;
+typedef char * buffer_type;
+typedef const char * const_buffer_type;
+#else
+typedef void * buffer_type;
+typedef const void * const_buffer_type;
+#endif
 
 namespace gubg { namespace ip { namespace my { 
 
@@ -62,11 +72,8 @@ namespace gubg { namespace ip { namespace my {
 
         MSS(is_valid(descr), return ReturnCode::InvalidDescriptor);
 
-#if GUBG_PLATFORM_API_WIN32
-        const auto status = ::setsockopt(descr, level, optname, (const char*)&v, sizeof(v));
-#else
-        const auto status = ::setsockopt(descr, level, optname, (const void*)&v, sizeof(v));
-#endif
+        const auto status = ::setsockopt(descr, level, optname, (const_buffer_type)&v, sizeof(v));
+        
         MSS(status != -1, return ReturnCode::CouldNotSetSockOpt);
 
         MSS_END();
@@ -237,7 +244,7 @@ namespace gubg { namespace ip { namespace my {
 
         MSS(is_valid(descr), return ReturnCode::InvalidDescriptor);
 
-        const auto status = ::send(descr, buffer, size, 0);
+        const auto status = ::send(descr, (const_buffer_type)buffer, size, 0);
         if (status == -1)
         {
             if (last_error_is_would_block())
@@ -255,7 +262,7 @@ namespace gubg { namespace ip { namespace my {
 
         MSS(is_valid(descr), return ReturnCode::InvalidDescriptor);
 
-        const auto status = ::recv(descr, buffer, size, 0);
+        const auto status = ::recv(descr, (buffer_type)buffer, size, 0);
         if (status == -1)
         {
             if (last_error_is_would_block())
