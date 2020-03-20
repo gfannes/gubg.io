@@ -20,11 +20,11 @@ namespace gubg { namespace ip {
 
     void Port::from_nbo(std::uint16_t port_nbo)
     {
-        hbo_ = ::ntohs(port_nbo);
+        hbo_ = ntohs(port_nbo);
     }
     std::uint16_t Port::as_nbo() const
     {
-        return ::htons(hbo_);
+        return htons(hbo_);
     }
 
     bool Port::operator==(const Port &rhs) const
