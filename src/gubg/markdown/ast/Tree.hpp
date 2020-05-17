@@ -8,13 +8,17 @@ namespace gubg { namespace markdown { namespace ast {
 
     enum class Type
     {
-        Text, Title, List, Link,
+        Section, Title, Text, List, Link,
     };
 
     struct Data
     {
         Type type = Type::Text;
         std::string content;
+
+        Data() {}
+        Data(Type type): type(type) {}
+        Data(Type type, const std::string &content): type(type), content(content) {}
     };
 
     using Forest = gubg::tree::Forest<Data>;

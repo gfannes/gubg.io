@@ -11,12 +11,11 @@ TEST_CASE("markdown::ast::Tree tests", "[ut][markdown][ast][Tree]")
 
     SECTION("title")
     {
-       auto node = forest.find(forest.size(), true);
-       REQUIRE(!!node);
-       node->value.type = ast::Type::Title;
-       node->value.content = "My title";
+       auto &doc = forest.append(ast::Type::Section);
 
-       auto node = forest.find(forest.size(), true);
+       doc.childs.append(ast::Type::Title, "My title");
+       doc.childs.append(ast::Type::Text, "text1");
+       doc.childs.append(ast::Type::Text, "text2");
     }
 
     std::ostringstream oss;
