@@ -38,6 +38,13 @@ namespace gubg {
         Strange &operator=(const std::string &);
         Strange &operator=(std::string &&);
 
+        void swap(Strange &rhs)
+        {
+            std::swap(data_, rhs.data_);
+            std::swap(s_, rhs.s_);
+            std::swap(l_, rhs.l_);
+        }
+
         bool empty() const;
         size_t size() const;
         std::string str() const;

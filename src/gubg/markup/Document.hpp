@@ -9,6 +9,8 @@ namespace gubg { namespace markup {
     class Document
     {
     public:
+        void clear() {*this = Document{};}
+
         template <typename Ftor>
         void each(Ftor &&ftor) const
         {
