@@ -35,6 +35,22 @@ namespace gubg { namespace file {
     inline bool write(const std::string &content, const std::filesystem::path &name) {return write(content, Name{name});}
     inline bool write(const std::string &content, const std::string &name) {return write(content, Name{name});}
 
+    inline void remove_empty_directories(const std::filesystem::path &dir)
+    {
+        for (auto entry: std::filesystem::directory_iterator{dir})
+        {
+            const auto fp = entry.path();
+
+            if (!std::filesystem::is_directory(fp))
+                continue;
+
+            remove_empty_directories(fp);
+        }
+
+        std::error_code ec;
+        std::filesystem::remove(dir, ec);
+    }
+
     inline bool exists(const gubg::file::Name &fn)
     {
         MSS_BEGIN(bool);
