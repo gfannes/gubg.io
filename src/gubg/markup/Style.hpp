@@ -8,6 +8,7 @@ namespace gubg { namespace markup {
         bool bold = false;
         bool italic = false;
         unsigned int attention = 0;
+        bool done = false;
     };
 
 } } 
