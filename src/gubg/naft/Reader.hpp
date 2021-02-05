@@ -100,7 +100,7 @@ namespace gubg { namespace naft {
 
         bool pop_info_(Info &info)
         {
-            MSS_BEGIN(bool, "");
+            MSS_BEGIN(bool);
             auto &block = top_().block;
             MSS_Q(block.pop_tag(info.tag));
             block.pop_attrs(info.attrs);

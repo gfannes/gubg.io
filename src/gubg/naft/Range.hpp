@@ -78,20 +78,28 @@ namespace gubg { namespace naft {
             return true;
         }
 
+        bool pop_attr(std::string &key, std::string &value)
+        {
+            Strange kv;
+            if (!strange_.pop_bracket(kv, "()"))
+                return false;
+
+            strip_();
+
+            value.clear();
+            if (kv.pop_until(key, ':'))
+                kv.pop_all(value);
+            else
+                kv.pop_all(key);
+
+            return true;
+        }
         void pop_attrs(Attrs &attrs)
         {
             Strange kv;
             std::string k,v;
-            while (strange_.pop_bracket(kv, "()"))
-            {
-                strip_();
-                v.clear();
-                if (kv.pop_until(k, ':'))
-                    kv.pop_all(v);
-                else
-                    kv.pop_all(k);
+            while (pop_attr(k, v))
                 attrs.emplace(k, v);
-            }
         }
         Attrs pop_attrs()
         {
