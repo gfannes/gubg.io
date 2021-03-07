@@ -5,90 +5,64 @@
 #include <string>
 #include <fstream>
 #include <array>
+#include <vector>
+#include <cstdint>
 
 namespace gubg { namespace wav { 
 
     class Writer
     {
     public:
-        Writer(const std::string &filename, unsigned int nr_channels, unsigned int samplerate): fn_(filename), nr_channels_(nr_channels), samplerate_(samplerate), of_(filename, std::ios::binary | std::ios::out)
-        {
-            {
-                of_ << "RIFF";
-                riff_size_pos_ = of_.tellp();
-                of_ << "????";
-                of_ << "WAVE";
-            }
+        ~Writer() {close();}
 
-            {
-                of_ << "fmt ";
-                const auto size_pos = of_.tellp();
-                of_ << "????";
-                stream16_(1);
-                stream16_(nr_channels_);
-                stream32_(samplerate_);
-                const unsigned int bits_per_sample = 24;
-                const unsigned int block_align = (nr_channels_*bits_per_sample)/8;
-                stream32_(samplerate_*block_align);
-                stream16_(block_align);
-                stream16_(bits_per_sample);
+        bool valid() const {return fo_.is_open();}
 
-                stream_size_(size_pos);
-            }
+        bool open(const std::string &filename, unsigned int block_size, unsigned int channel_count, unsigned int sample_rate, unsigned int bit_depth = 24);
+        void close();
 
-            {
-                of_ << "data";
-                data_size_pos_ = of_.tellp();
-                of_ << "????";
-            }
-        }
-        ~Writer()
-        {
-            stream_size_(data_size_pos_);
-            stream_size_(riff_size_pos_);
-        }
+        bool write_mono(const float *src);
 
-        template <typename Sample>
-        bool add_sample(const Sample &sample)
+        template <typename Ftor>
+        bool write_block(Ftor &&ftor)
         {
             MSS_BEGIN(bool);
-            MSS(sample.size() == nr_channels_);
-            for (auto v: sample)
-                stream_value_(v);
+            MSS(valid());
+            for (auto chix = 0u; chix < channel_count_; ++chix)
+            {
+                const float *ptr = ftor(chix);
+                MSS(setup_mono_(ptr, chix));
+            }
+            fo_.write((const char *)byte_buffer_.data(), byte_buffer_.size());
             MSS_END();
-        }
-        template <typename Value>
-        bool add_value(Value value)
-        {
-            std::array<Value, 1> sample = {value};
-            return add_sample(sample);
         }
 
     private:
+        bool setup_mono_(const float *src, unsigned int chix);
+
         void stream16_(unsigned int v)
         {
-            of_.put(v & 0xff); v >>= 8;
-            of_.put(v & 0xff); v >>= 8;
+            fo_.put(v & 0xff); v >>= 8;
+            fo_.put(v & 0xff); v >>= 8;
         }
         void stream24_(unsigned int v)
         {
-            of_.put(v & 0xff); v >>= 8;
-            of_.put(v & 0xff); v >>= 8;
-            of_.put(v & 0xff); v >>= 8;
+            fo_.put(v & 0xff); v >>= 8;
+            fo_.put(v & 0xff); v >>= 8;
+            fo_.put(v & 0xff); v >>= 8;
         }
         void stream32_(unsigned int v)
         {
-            of_.put(v & 0xff); v >>= 8;
-            of_.put(v & 0xff); v >>= 8;
-            of_.put(v & 0xff); v >>= 8;
-            of_.put(v & 0xff); v >>= 8;
+            fo_.put(v & 0xff); v >>= 8;
+            fo_.put(v & 0xff); v >>= 8;
+            fo_.put(v & 0xff); v >>= 8;
+            fo_.put(v & 0xff); v >>= 8;
         }
         void stream_size_(std::ofstream::pos_type pos)
         {
-            const auto current_pos = of_.tellp();
-            of_.seekp(pos);
+            const auto current_pos = fo_.tellp();
+            fo_.seekp(pos);
             stream32_(current_pos-pos-4);
-            of_.seekp(current_pos);
+            fo_.seekp(current_pos);
         }
         void stream_value_(float v)
         {
@@ -97,12 +71,14 @@ namespace gubg { namespace wav {
             stream24_(vv);
         }
 
-        const std::string fn_;
-        const unsigned int nr_channels_;
-        const unsigned int samplerate_;
-        std::ofstream of_;
+        std::ofstream fo_;
+        unsigned int sample_rate_ = 0;
+        unsigned int channel_count_ = 0;
+        unsigned int block_size_ = 0;
+        unsigned int bit_depth_ = 0;
         std::ofstream::pos_type riff_size_pos_;
         std::ofstream::pos_type data_size_pos_;
+        std::vector<std::uint8_t> byte_buffer_;
     };
 
 } } 
