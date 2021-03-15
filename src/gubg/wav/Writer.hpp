@@ -36,6 +36,20 @@ namespace gubg { namespace wav {
             MSS_END();
         }
 
+        template <typename Sample>
+        bool add_sample(const Sample &sample)
+        {
+            MSS_BEGIN(bool);
+            MSS(block_size_ == 1);
+            float flt;
+            auto lambda = [&](auto chix){
+                flt = sample[chix];
+                return &flt;
+            };
+            MSS(write_block(lambda));
+            MSS_END();
+        }
+
     private:
         bool setup_mono_(const float *src, unsigned int chix);
 
