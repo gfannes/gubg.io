@@ -69,6 +69,10 @@ namespace gubg { namespace wav {
         MSS_END();
     }
 
+    unsigned int Reader::block_size() const
+    {
+        return block_size_;
+    }
     unsigned int Reader::block_count() const
     {
         return block_count_;

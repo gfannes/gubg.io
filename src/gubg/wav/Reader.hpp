@@ -19,6 +19,7 @@ namespace gubg { namespace wav {
 
         bool load(const std::string &filepath, unsigned int block_size);
 
+        unsigned int block_size() const;
         unsigned int block_count() const;
 
         bool read_block(unsigned int block_ix, float *dst);

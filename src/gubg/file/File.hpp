@@ -9,6 +9,8 @@
 
 namespace gubg { namespace file {
 
+    //Represents a filepath
+    //TODO: replace all occurences with std::filesystem::path
     class File
     {
         private:

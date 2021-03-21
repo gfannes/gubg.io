@@ -20,6 +20,8 @@ namespace gubg { namespace wav {
         bool open(const std::string &filename, unsigned int block_size, unsigned int channel_count, unsigned int sample_rate, unsigned int bit_depth = 24);
         void close();
 
+        unsigned int block_size() const;
+
         bool write_mono(const float *src);
 
         template <typename Ftor>

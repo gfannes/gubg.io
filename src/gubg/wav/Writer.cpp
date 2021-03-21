@@ -59,6 +59,11 @@ namespace gubg { namespace wav {
         }
     }
 
+    unsigned int Writer::block_size() const
+    {
+        return block_size_;
+    }
+
     bool Writer::write_mono(const float *src)
     {
         MSS_BEGIN(bool);
