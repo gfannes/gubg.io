@@ -1,6 +1,7 @@
 #ifndef HEADER_gubg_bit_oor_Codec_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_bit_oor_Codec_hpp_ALREADY_INCLUDED
 
+#include <gubg/bit/oor/util.hpp>
 #include <cstdint>
 #include <array>
 
@@ -22,7 +23,7 @@ namespace gubg { namespace bit { namespace oor {
         }
 
     private:
-        static constexpr std::size_t MaxBW = sizeof(T)*8u;
+        static constexpr auto MaxBW = util::MaxBW<T>;
 
         struct Params
         {
@@ -32,14 +33,11 @@ namespace gubg { namespace bit { namespace oor {
 
         void find_optimal_param_(Params &optimal_params) const
         {
-            for (std::size_t params = MaxBW; params >= 1; --params)
+            unsigned int cumul = 0u;
+            for (std::size_t bw = MaxBW; bw >= 1; --bw)
             {
+                cumul += bw__count_[bw];
             }
-        }
-
-        std::size_t bitcount_(std::size_t bw) const
-        {
-            return 0;
         }
 
         void compute_statistics_(const T *data, std::size_t size)
@@ -47,7 +45,7 @@ namespace gubg { namespace bit { namespace oor {
             std::fill(bw__count_.begin(), bw__count_.end(), T{});
             for (auto ix = 0u; ix < size; ++ix)
             {
-                const auto bw = bitwidth_(data[ix]);
+                const auto bw = util::bitwidth(data[ix]);
                 ++bw__count_[bw];
             }
 
@@ -55,17 +53,6 @@ namespace gubg { namespace bit { namespace oor {
             for (auto bw = 0u; bw < bw__count_.size(); ++bw)
                 std::cout << bw << " " << bw__count_[bw] << std::endl;
 #endif
-        }
-        std::size_t bitwidth_(T v)
-        {
-            if (v == ~T{})
-                return MaxBW;
-            ++v;
-            v >>= 1;
-            std::size_t bw = 1u;
-            for (; !!v; ++bw)
-                v >>= 1;
-            return bw;
         }
 
         std::array<std::size_t, MaxBW+1> bw__count_;
