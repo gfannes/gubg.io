@@ -2,6 +2,7 @@
 #define HEADER_gubg_hr_hpp_ALREADY_INCLUDED
 
 #include "gubg/OnlyOnce.hpp"
+#include <gubg/hex.hpp>
 #include <sstream>
 #include <vector>
 #include <array>
@@ -33,6 +34,13 @@ namespace gubg {
             return oss.str();
         }
     template <typename T>
+        std::string hr_hex(const T &t)
+        {
+            std::ostringstream oss;
+            oss << hex(t);
+            return oss.str();
+        }
+    template <typename T>
         std::string hr(const std::vector<T> &vec)
         {
             std::ostringstream oss;
@@ -40,6 +48,17 @@ namespace gubg {
             OnlyOnce skipComma;
             for (const auto &v: vec)
                 oss << (skipComma() ? "" : ", ") << hr(v);
+            oss << '}';
+            return oss.str();
+        }
+    template <typename T>
+        std::string hr_hex(const std::vector<T> &vec)
+        {
+            std::ostringstream oss;
+            oss << '{';
+            OnlyOnce skipComma;
+            for (const auto &v: vec)
+                oss << (skipComma() ? "" : ", ") << hr_hex(v);
             oss << '}';
             return oss.str();
         }

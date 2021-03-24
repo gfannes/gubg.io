@@ -1,12 +1,12 @@
-#ifndef HEADER_gubg_bits_Writer_hpp_ALREADY_INCLUDED
-#define HEADER_gubg_bits_Writer_hpp_ALREADY_INCLUDED
+#ifndef HEADER_gubg_bit_Writer_hpp_ALREADY_INCLUDED
+#define HEADER_gubg_bit_Writer_hpp_ALREADY_INCLUDED
 
 #include <cstdint>
 #include <vector>
 #include <array>
 #include <cassert>
 
-namespace gubg { namespace bits { 
+namespace gubg { namespace bit { 
 
     class Writer
     {
@@ -16,27 +16,26 @@ namespace gubg { namespace bits {
             setup_masks_();
         }
 
-        std::size_t size() const {return bits_.size();}
+        std::size_t bit_size() const  {return bits_.size();}
+        std::size_t byte_size() const {return (bit_size()+7u)/8u;}
 
         void one()       { bits_.emplace_back(masks_[mask_ix_()]); }
         void zero()      { bits_.emplace_back(0u); }
         void bit(bool b) { bits_.emplace_back(b ? masks_[mask_ix_()] : 0u); }
 
-        template <std::size_t BitCount, typename UInt>
-        void uint(const UInt v)
+        template <typename UInt>
+        void uint(const UInt v, std::size_t bit_count = sizeof(UInt))
         {
-            if (BitCount == 0)
-                return;
-            UInt mask = (1u << (BitCount-1));
-            for (auto ix = 0u; ix < BitCount; ++ix, mask >>= 1)
+            UInt mask = 1u;
+            for (auto ix = 0u; ix < bit_count; ++ix, mask <<= 1)
                 bit(v & mask);
         }
 
         template <typename Bytes>
         void to_bytes(Bytes &bytes)
         {
-            const auto full_bytes = size()/8;
-            const auto last_bits = size()%8;
+            const auto full_bytes = bit_size()/8;
+            const auto last_bits = bit_size()%8;
 
             bytes.resize(full_bytes + !!last_bits);
 
@@ -64,7 +63,7 @@ namespace gubg { namespace bits {
         }
         std::size_t mask_ix_() const
         {
-            return size() & 0xff;
+            return bit_size() & 0x07;
         }
 
         std::array<std::uint8_t, 8> masks_;
