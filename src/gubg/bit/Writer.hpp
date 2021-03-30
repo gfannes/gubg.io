@@ -54,6 +54,15 @@ namespace gubg { namespace bit {
             assert(bit == bits_.end());
         }
 
+        template <typename Bits>
+        void to_bits(Bits &bits)
+        {
+            const auto size = bits_.size();
+            bits.resize(size);
+            for (auto ix = 0u; ix < size; ++ix)
+                bits[ix] = !!bits_[ix];
+        }
+
     private:
         void setup_masks_()
         {

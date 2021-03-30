@@ -20,5 +20,5 @@ TEST_CASE("bit::oor::util tests", "[ut][bit][oor][util]")
     REQUIRE(util::bitwidth<std::uint8_t>(128) == 8);
 
     REQUIRE(util::bitwidth<std::uint8_t>(254) == 8);
-    REQUIRE(util::bitwidth<std::uint8_t>(255) == 8);
+    REQUIRE(util::bitwidth<std::uint8_t>(255) == 9);
 }

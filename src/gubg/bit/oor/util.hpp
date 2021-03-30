@@ -15,7 +15,7 @@ namespace gubg { namespace bit { namespace oor { namespace util {
     std::size_t bitwidth(T v)
     {
         if (v == Max<T>)
-            return MaxBW<T>;
+            return MaxBW<T>+1;
         ++v;
         v >>= 1;
         std::size_t bw = 1u;
