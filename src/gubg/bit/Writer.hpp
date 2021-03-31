@@ -16,6 +16,11 @@ namespace gubg { namespace bit {
             setup_masks_();
         }
 
+        void clear()
+        {
+            bits_.clear();
+        }
+
         std::size_t bit_size() const  {return bits_.size();}
         std::size_t byte_size() const {return (bit_size()+7u)/8u;}
 

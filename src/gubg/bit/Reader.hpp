@@ -25,8 +25,6 @@ namespace gubg { namespace bit {
 
             MSS_BEGIN(bool);
 
-            MSS(!!ptr);
-
             bits_.resize(size*8u);
             ix_ = 0u;
             for (auto ix = 0u; ix < size; ++ix)
