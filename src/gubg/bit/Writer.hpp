@@ -28,6 +28,17 @@ namespace gubg { namespace bit {
         void zero()      { bits_.emplace_back(0u); }
         void bit(bool b) { bits_.emplace_back(b ? masks_[mask_ix_()] : 0u); }
 
+        void ones(unsigned int count)
+        {
+            for (auto ix = 0u; ix < count; ++ix)
+                one();
+        }
+        void zeros(unsigned int count)
+        {
+            for (auto ix = 0u; ix < count; ++ix)
+                zero();
+        }
+
         template <typename UInt>
         void uint(const UInt v, std::size_t bit_count = sizeof(UInt))
         {
