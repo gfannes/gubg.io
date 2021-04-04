@@ -4,6 +4,7 @@
 #include <gubg/bit/Writer.hpp>
 #include <gubg/bit/Reader.hpp>
 #include <gubg/bit/sign/codec.hpp>
+#include <gubg/ilog.hpp>
 #include <type_traits>
 #include <cassert>
 
@@ -12,9 +13,14 @@ namespace gubg { namespace bit { namespace gr {
     struct Metadata
     {
         unsigned int remainder_bw = 0;
+
+        Metadata() {}
+        Metadata(unsigned int remainder_bw): remainder_bw(remainder_bw) {}
     };
 
-    template <typename T>
+    enum class Type {Normal, Exponential};
+
+    template <typename T, Type MyType>
     class Codec
     {
     private:
@@ -48,15 +54,34 @@ namespace gubg { namespace bit { namespace gr {
         {
             writer.uint(u, md.remainder_bw);
             u >>= md.remainder_bw;
-            writer.ones(u);
-            writer.zero();
+            if constexpr (MyType == Type::Normal)
+            {
+                writer.ones(u);
+                writer.zero();
+            }
+            if constexpr (MyType == Type::Exponential)
+            {
+                const unsigned int quotient_bw = ilog2(u);
+                writer.ones(quotient_bw);
+                writer.zero();
+                writer.uint(u, quotient_bw);
+            }
         }
 
         void decode_(UInt &u, const Metadata &md, Reader &reader)
         {
             T remainder;
             reader.uint(remainder, md.remainder_bw);
-            for (u = 0u; reader.one(); ++u) { }
+            if constexpr (MyType == Type::Normal)
+            {
+                for (u = 0u; reader.one(); ++u) { }
+            }
+            if constexpr (MyType == Type::Exponential)
+            {
+                unsigned int quotient_bw = 0u;
+                for (quotient_bw = 0u; reader.one(); ++quotient_bw) { }
+                reader.uint(u, quotient_bw);
+            }
             u <<= md.remainder_bw;
             u |= remainder;
         }
