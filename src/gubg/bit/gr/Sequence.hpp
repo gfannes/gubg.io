@@ -8,12 +8,9 @@
 
 namespace gubg { namespace bit { namespace gr { 
 
-    template <typename T, Type MyType>
+    template <Type MyType>
     class Sequence
     {
-    private:
-        static constexpr bool is_signed = std::is_signed_v<T>;
-
     public:
         Sequence()
         {
@@ -29,21 +26,26 @@ namespace gubg { namespace bit { namespace gr {
 
         std::size_t count() const {return count_;}
 
+        template <typename T>
         void encode(Writer &writer, T v)
         {
+            constexpr bool is_signed = std::is_signed_v<T>;
             if constexpr (!is_signed)
                 encode_(writer, v);
             if constexpr (is_signed)
                 encode_(writer, sign::encode(v));
         }
+        template <typename T>
         void encode(Writer &writer, const T *ptr, std::size_t size)
         {
             for (auto ix = 0u; ix < size; ++ix)
                 encode(writer, ptr[ix]);
         }
 
+        template <typename T>
         void decode(T &v, Reader &reader)
         {
+            constexpr bool is_signed = std::is_signed_v<T>;
             if constexpr (!is_signed)
                 decode_(v, reader);
             if constexpr (is_signed)
@@ -53,6 +55,7 @@ namespace gubg { namespace bit { namespace gr {
                 v = sign::decode(u);
             }
         }
+        template <typename T>
         void decode(T *ptr, std::size_t size, Reader &reader)
         {
             for (auto ix = 0u; ix < size; ++ix)
@@ -60,7 +63,7 @@ namespace gubg { namespace bit { namespace gr {
         }
 
     private:
-        using UInt = std::make_unsigned_t<T>;
+        using UInt = unsigned int;
 
         void encode_(Writer &writer, UInt u)
         {

@@ -32,7 +32,7 @@ TEMPLATE_TEST_CASE("bit::gr::Sequence tests", "[ut][bit][gr][Sequence]", unsigne
         const bool encode_one = !(how&0b01);
         const bool decode_one = !(how&0b10);
 
-        gr::Sequence<TestType, gr::Type::Exponential> s;
+        gr::Sequence<gr::Type::Exponential> s;
         Writer writer;
 
         if (encode_one)
