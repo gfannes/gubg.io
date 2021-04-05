@@ -1,6 +1,7 @@
 #ifndef HEADER_gubg_bit_gr_Codec_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_bit_gr_Codec_hpp_ALREADY_INCLUDED
 
+#include <gubg/bit/gr/Type.hpp>
 #include <gubg/bit/Writer.hpp>
 #include <gubg/bit/Reader.hpp>
 #include <gubg/bit/sign/codec.hpp>
@@ -17,8 +18,6 @@ namespace gubg { namespace bit { namespace gr {
         Metadata() {}
         Metadata(unsigned int remainder_bw): remainder_bw(remainder_bw) {}
     };
-
-    enum class Type {Normal, Exponential};
 
     template <typename T, Type MyType>
     class Codec
