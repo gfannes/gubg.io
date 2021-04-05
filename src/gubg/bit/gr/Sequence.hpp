@@ -11,6 +11,9 @@ namespace gubg { namespace bit { namespace gr {
     template <typename T, Type MyType>
     class Sequence
     {
+    private:
+        static constexpr bool is_signed = std::is_signed_v<T>;
+
     public:
         Sequence()
         {
@@ -28,9 +31,10 @@ namespace gubg { namespace bit { namespace gr {
 
         void encode(Writer &writer, T v)
         {
-            codec_.encode(writer, enc_md_, v);
-            enc_md_.remainder_bw = ilog2(v);
-            ++count_;
+            if constexpr (!is_signed)
+                encode_(writer, v);
+            if constexpr (is_signed)
+                encode_(writer, sign::encode(v));
         }
         void encode(Writer &writer, const T *ptr, std::size_t size)
         {
@@ -40,9 +44,14 @@ namespace gubg { namespace bit { namespace gr {
 
         void decode(T &v, Reader &reader)
         {
-            codec_.decode(v, dec_md_, reader);
-            dec_md_.remainder_bw = ilog2(v);
-            --count_;
+            if constexpr (!is_signed)
+                decode_(v, reader);
+            if constexpr (is_signed)
+            {
+                UInt u;
+                decode_(u, reader);
+                v = sign::decode(u);
+            }
         }
         void decode(T *ptr, std::size_t size, Reader &reader)
         {
@@ -51,9 +60,24 @@ namespace gubg { namespace bit { namespace gr {
         }
 
     private:
+        using UInt = std::make_unsigned_t<T>;
+
+        void encode_(Writer &writer, UInt u)
+        {
+            codec_.encode(writer, enc_md_, u);
+            enc_md_.remainder_bw = ilog2(u);
+            ++count_;
+        }
+        void decode_(UInt &u, Reader &reader)
+        {
+            codec_.decode(u, dec_md_, reader);
+            dec_md_.remainder_bw = ilog2(u);
+            --count_;
+        }
+
         Metadata enc_md_;
         Metadata dec_md_;
-        Codec<T, MyType> codec_;
+        Codec<UInt, MyType> codec_;
         unsigned int count_ = 0u;
     };
 

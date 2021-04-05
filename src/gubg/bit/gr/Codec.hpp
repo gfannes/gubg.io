@@ -28,22 +28,22 @@ namespace gubg { namespace bit { namespace gr {
     public:
         void encode(Writer &writer, const Metadata &md, T v)
         {
-            if constexpr (is_signed)
-                encode_(writer, md, sign::encode(v));
             if constexpr (!is_signed)
                 encode_(writer, md, v);
+            if constexpr (is_signed)
+                encode_(writer, md, sign::encode(v));
         }
 
         void decode(T &v, const Metadata &md, Reader &reader)
         {
+            if constexpr (!is_signed)
+                decode_(v, md, reader);
             if constexpr (is_signed)
             {
                 UInt u;
                 decode_(u, md, reader);
                 v = sign::decode(u);
             }
-            if constexpr (!is_signed)
-                decode_(v, md, reader);
         }
 
     private:

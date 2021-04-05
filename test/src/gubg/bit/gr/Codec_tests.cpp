@@ -50,10 +50,8 @@ namespace  {
     }
 } 
 
-TEST_CASE("bit::gr::Codec tests", "[ut][bit][gr][Codec]")
+TEMPLATE_TEST_CASE("bit::gr::Codec tests", "[ut][bit][gr][Codec]", unsigned int, int)
 {
-    REQUIRE(test<unsigned int, gr::Type::Normal>());
-    REQUIRE(test<         int, gr::Type::Normal>());
-    REQUIRE(test<unsigned int, gr::Type::Exponential>());
-    REQUIRE(test<         int, gr::Type::Exponential>());
+    REQUIRE(test<TestType, gr::Type::Normal>());
+    REQUIRE(test<TestType, gr::Type::Exponential>());
 }

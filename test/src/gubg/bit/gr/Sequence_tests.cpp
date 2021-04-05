@@ -4,7 +4,7 @@
 #include <iostream>
 using namespace gubg::bit;
 
-TEMPLATE_TEST_CASE("bit::gr::Sequence tests", "[ut][bit][gr][Sequence]", unsigned int)
+TEMPLATE_TEST_CASE("bit::gr::Sequence tests", "[ut][bit][gr][Sequence]", unsigned int, int)
 {
     struct Scn
     {
@@ -15,15 +15,22 @@ TEMPLATE_TEST_CASE("bit::gr::Sequence tests", "[ut][bit][gr][Sequence]", unsigne
     SECTION("no data")
     {
     }
-    SECTION("with data")
+    SECTION("unsigned data")
     {
         scn.data = {0u, 1u, 2u, 3u, 1024u*1024u, 3u, 2u, 1u, 0u};
+    }
+    if constexpr (std::is_same_v<TestType, int>)
+    {
+        SECTION("signed data")
+        {
+            scn.data = {0, -1, 2, -3, 1024*1024, 3, -2, 1, 0};
+        }
     }
 
     for (auto how = 0u; how < 4; ++how)
     {
-        const bool encode_one = how&0b01;
-        const bool decode_one = how&0b10;
+        const bool encode_one = !(how&0b01);
+        const bool decode_one = !(how&0b10);
 
         gr::Sequence<TestType, gr::Type::Exponential> s;
         Writer writer;
