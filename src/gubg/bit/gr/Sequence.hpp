@@ -22,6 +22,7 @@ namespace gubg { namespace bit { namespace gr {
             enc_md_.remainder_bw = remainder_bw;
             dec_md_.remainder_bw = remainder_bw;
             count_ = 0u;
+            std::cout << std::endl;
         }
 
         std::size_t count() const {return count_;}
@@ -50,7 +51,7 @@ namespace gubg { namespace bit { namespace gr {
                 decode_(v, reader);
             if constexpr (is_signed)
             {
-                UInt u;
+                unsigned int u;
                 decode_(u, reader);
                 v = sign::decode(u);
             }
@@ -63,24 +64,42 @@ namespace gubg { namespace bit { namespace gr {
         }
 
     private:
-        using UInt = unsigned int;
-
-        void encode_(Writer &writer, UInt u)
+        void update_remainder_(unsigned int &remainder, unsigned int u)
+        {
+            const auto optimal_remainder = ilog2(u);
+            if constexpr (MyType == Type::Normal)
+            {
+                if (optimal_remainder >= remainder)
+                    remainder = optimal_remainder;
+                else if (remainder > 2)
+                    --remainder;
+            }
+            if constexpr (MyType == Type::Exponential)
+            {
+                if (optimal_remainder >= remainder)
+                    remainder = optimal_remainder;
+                else
+                    --remainder;
+                    /* remainder = optimal_remainder; */
+            }
+            std::cout << remainder << ", ";
+        }
+        void encode_(Writer &writer, unsigned int u)
         {
             codec_.encode(writer, enc_md_, u);
-            enc_md_.remainder_bw = ilog2(u);
+            update_remainder_(enc_md_.remainder_bw, u);
             ++count_;
         }
-        void decode_(UInt &u, Reader &reader)
+        void decode_(unsigned int &u, Reader &reader)
         {
             codec_.decode(u, dec_md_, reader);
-            dec_md_.remainder_bw = ilog2(u);
+            update_remainder_(dec_md_.remainder_bw, u);
             --count_;
         }
 
         Metadata enc_md_;
         Metadata dec_md_;
-        Codec<UInt, MyType> codec_;
+        Codec<unsigned int, MyType> codec_;
         unsigned int count_ = 0u;
     };
 
