@@ -68,7 +68,7 @@ namespace gubg { namespace file {
     }
 
     template <typename Callback>
-        bool each_entry(Callback cb, const std::filesystem::path &dir, bool skip_hidden = true)
+        bool each_entry(Callback cb, const std::filesystem::path &dir, bool skip_hidden = true, bool skip_symlink = true)
         {
             MSS_BEGIN(bool);
             if (std::filesystem::is_directory(dir))
@@ -76,6 +76,8 @@ namespace gubg { namespace file {
                 for (const auto &path: std::filesystem::directory_iterator(dir))
                 {
                     if (skip_hidden && is_hidden(path))
+                        continue;
+                    if (skip_symlink && std::filesystem::is_symlink(path))
                         continue;
                     if (!cb(path))
                         break;
