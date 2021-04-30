@@ -104,23 +104,16 @@ namespace gubg { namespace file {
     template <typename Callback>
         bool each_recursive(Callback cb) { return each_recursive(cb, std::filesystem::current_path()); }
 
+    //Recursive traversal of folder using std::regex
     template <typename Callback>
-        bool each_regex(const std::string &pattern, Callback cb, std::filesystem::path dir)
+        bool each_regex(const std::regex &pattern_re, Callback cb, const std::filesystem::path &dir)
         {
             MSS_BEGIN(bool);
-            dir.make_preferred();
-            std::string pattern_full_str = dir.string();
-            //lexically_normal() does not exist on VS 2017
-            if (!pattern_full_str.empty() && pattern_full_str[pattern_full_str.size()-1] != std::filesystem::path::preferred_separator)
-                pattern_full_str.push_back(std::filesystem::path::preferred_separator);
-            string_algo::substitute<std::string>(pattern_full_str, pattern_full_str, "\\", "\\\\");
-            pattern_full_str += pattern;
-            L(C(pattern_full_str));
-            std::regex re(pattern_full_str);
+
             auto recursor = [&](const std::filesystem::path &fn)
             {
                 L(C(fn));
-                if (std::regex_match(fn.string(), re))
+                if (std::regex_match(fn.string(), pattern_re))
                 {
                     L("\tthis file matches the search pattern");
                     MSS(cb(fn));
@@ -128,18 +121,48 @@ namespace gubg { namespace file {
                 return true;
             };
             each_recursive(recursor, dir);
+
             MSS_END();
         }
+    //Start in current folder
     template <typename Callback>
-        bool each_regex(const std::string &pattern, Callback cb) { return each_regex(pattern, cb, std::filesystem::current_path()); }
+        bool each_regex(const std::regex &pattern_re, Callback cb) { return each_regex(pattern_re, cb, std::filesystem::current_path()); }
 
+    //Recursive traversal of folder using std::string
     template <typename Callback>
-        bool each_glob(const std::string &pattern, Callback cb, const std::filesystem::path &dir)
+        bool each_regex(const std::string &pattern_str, Callback cb, std::filesystem::path dir)
         {
             MSS_BEGIN(bool);
-            L(C(pattern));
 
-            std::string pattern_re = pattern;
+            //Add trailing '/'
+            dir += std::filesystem::path::preferred_separator;
+
+            //Create consistent separators
+            dir.make_preferred();
+
+            //Remove all './', '../' and double separators
+            std::string pattern_full_str = dir.lexically_normal().string();
+
+            pattern_full_str += pattern_str;
+
+            L(C(pattern_full_str));
+            std::regex re(pattern_full_str);
+
+            MSS(each_regex(re, cb, dir));
+
+            MSS_END();
+        }
+    //Start in current folder
+    template <typename Callback>
+        bool each_regex(const std::string &pattern_str, Callback cb) { return each_regex(pattern_str, cb, std::filesystem::current_path()); }
+
+    template <typename Callback>
+        bool each_glob(const std::string &pattern_str, Callback cb, const std::filesystem::path &dir)
+        {
+            MSS_BEGIN(bool);
+            L(C(pattern_str));
+
+            std::string pattern_re = pattern_str;
 
             if (std::filesystem::path::preferred_separator == '\\')
                 string_algo::substitute(pattern_re, pattern_re, std::string("/"), std::string("\\\\"));
@@ -150,14 +173,14 @@ namespace gubg { namespace file {
 
             //Replace \0 with *
             string_algo::substitute(pattern_re, pattern_re, std::string("\0", 1), std::string("*"));
-            L(C(pattern)C(pattern_re)C(dir));
+            L(C(pattern_str)C(pattern_re)C(dir));
 
             MSS(each_regex(pattern_re, cb, dir));
 
             MSS_END();
         }
     template <typename Callback>
-        bool each_glob(const std::string &pattern, Callback cb) { return each_glob(pattern, cb, std::filesystem::current_path()); }
+        bool each_glob(const std::string &pattern_str, Callback cb) { return each_glob(pattern_str, cb, std::filesystem::current_path()); }
 
 } } 
 
