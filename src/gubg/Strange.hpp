@@ -101,6 +101,7 @@ namespace gubg {
         bool pop_line(Strange &line);
 
         void ltrim(const char ch);
+        void rtrim(const char ch);
 
         bool pop_lsb(std::uint8_t &);
         bool pop_lsb(std::uint16_t &);

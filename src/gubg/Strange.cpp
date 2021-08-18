@@ -200,10 +200,16 @@ namespace gubg {
                 break;
             if (0 == std::memcmp(str.data(), s_, s))
             {
+                //We found a match at this location
                 res.data_ = data_;
                 res.s_ = sp.s_;
                 res.l_ = s_-res.s_;
                 return true;
+            }
+            else
+            {
+                //No full match was found, we forward to the next character and try again
+                forward_(1);
             }
         }
         *this = sp;
@@ -527,6 +533,11 @@ namespace gubg {
     {
         while (!empty() && ch == front())
             pop_front();
+    }
+    void Strange::rtrim(const char ch)
+    {
+        while (!empty() && ch == back())
+            pop_back();
     }
 
     Strange::Position Strange::position() const

@@ -136,6 +136,20 @@ TEST_CASE("gubg::Strange creation from std::string == abc tests", "[ut][Strange]
 			REQUIRE(rr.str() == "a");
 			REQUIRE(r.str() == "bc");
 		}
+		SECTION("ac")
+		{
+			REQUIRE(!r.pop_to(rr, "ac"));
+			REQUIRE(rr.empty());
+			REQUIRE(r.str() == "abc");
+		}
+		SECTION("ac in abcacef")
+		{
+            const std::string str = "abcacef";
+            r = str;
+			REQUIRE(r.pop_to(rr, "ac"));
+			REQUIRE(rr.str() == "abc");
+			REQUIRE(r.str() == "acef");
+		}
 	}
     SECTION("diff_to() with Strange")
     {
@@ -523,4 +537,36 @@ TEST_CASE("gubg::Strange position tests", "[ut][Strange]")
     REQUIRE(exp.position.ix == position.ix);
     REQUIRE(exp.position.line == position.line);
     REQUIRE(exp.position.column == position.column);
+}
+TEST_CASE("gubg::Strange trim tests", "[ut][Strange][trim]")
+{
+    struct Scn
+    {
+        std::string content;
+    };
+    struct Exp
+    {
+        std::string trimmed;
+    };
+    
+    Scn scn;
+    Exp exp;
+
+    SECTION("empty") { }
+    SECTION("a b c")
+    {
+        exp.trimmed = "a b c";
+        SECTION("left 1") { scn.content = std::string(" ")+exp.trimmed; }
+        SECTION("left 2") { scn.content = std::string("  ")+exp.trimmed; }
+        SECTION("right 1") { scn.content = exp.trimmed+std::string(" "); }
+        SECTION("right 2") { scn.content = exp.trimmed+std::string("  "); }
+        SECTION("left 1 right 1") { scn.content = std::string(" ")+exp.trimmed+std::string(" "); }
+    }
+
+    gubg::Strange strange{scn.content};
+
+    strange.ltrim(' ');
+    strange.rtrim(' ');
+
+    REQUIRE(strange.str() == exp.trimmed);
 }
