@@ -78,6 +78,7 @@ namespace gubg { namespace file {
                 if (skip_symlink && std::filesystem::is_symlink(path))
                     continue;
                 if (is_hidden(path))
+                {
                     if (std::filesystem::is_directory(path))
                     {
                         if (skip_hidden_folder)
@@ -88,6 +89,7 @@ namespace gubg { namespace file {
                         if (skip_hidden_file)
                             continue;
                     }
+                }
                 if (!cb(path))
                     break;
             }
