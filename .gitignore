@@ -4,3 +4,4 @@
 *.gnuplot
 CMakeLists.txt
 __pycache__
+extern/

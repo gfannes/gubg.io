@@ -28,6 +28,10 @@ root.book("gubg/io", fun(b){
     })
 })
 
+root.recipe("termcolor", fun(rcp){
+    rcp.add("extern/termcolor/include", "termcolor/*.hpp")
+})
+
 root.book("sedes", fun(b){
     b.recipe("exe", TargetType.Executable, fun(rcp){
         rcp.add("app/sedes", "**.cpp")
