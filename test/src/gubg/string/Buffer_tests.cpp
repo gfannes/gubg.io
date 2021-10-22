@@ -1,6 +1,7 @@
-#include "catch.hpp"
-#include "gubg/string/Buffer.hpp"
-#include "gubg/Range_macro.hpp"
+#include <gubg/string/Buffer.hpp>
+#include <gubg/Range_macro.hpp>
+#include <catch.hpp>
+#include <array>
 
 namespace  { 
     using String = gubg::string::Buffer<char>;

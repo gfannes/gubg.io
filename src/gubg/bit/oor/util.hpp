@@ -1,7 +1,7 @@
 #ifndef HEADER_gubg_bit_oor_util_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_bit_oor_util_hpp_ALREADY_INCLUDED
 
-#include <cstdint>
+#include <cstddef>
 
 namespace gubg { namespace bit { namespace oor { namespace util { 
 

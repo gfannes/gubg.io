@@ -79,6 +79,7 @@ namespace gubg { namespace xml { namespace builder {
                             os_ << std::endl << std::string(2*indent_, ' ');
                         os_ << "</" << name_ << ">";
                         break;
+                    default: break;
                 }
             }
 
