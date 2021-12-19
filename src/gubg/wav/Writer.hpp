@@ -21,9 +21,11 @@ namespace gubg { namespace wav {
         void close();
 
         unsigned int block_size() const;
+        unsigned int channel_count() const;
 
         bool write_mono(const float *src);
 
+        //ftor(chix) should return a pointer to the data
         template <typename Ftor>
         bool write_block(Ftor &&ftor)
         {

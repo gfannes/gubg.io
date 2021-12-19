@@ -64,6 +64,11 @@ namespace gubg { namespace wav {
         return block_size_;
     }
 
+    unsigned int Writer::channel_count() const
+    {
+        return channel_count_;
+    }
+
     bool Writer::write_mono(const float *src)
     {
         MSS_BEGIN(bool);
@@ -93,7 +98,7 @@ namespace gubg { namespace wav {
         switch (bit_depth_)
         {
             case 16:
-                for (auto six = 0u; six < block_size_; ++six, dst += bytes_per_sample)
+                for (auto six = 0u; six < block_size_; ++six, dst += block_align)
                 {
                     std::int32_t v = src[six];
                     dst[0] = v;
@@ -101,7 +106,7 @@ namespace gubg { namespace wav {
                 }
                 break;
             case 24:
-                for (auto six = 0u; six < block_size_; ++six, dst += bytes_per_sample)
+                for (auto six = 0u; six < block_size_; ++six, dst += block_align)
                 {
                     std::int32_t v = src[six];
                     dst[0] = v;
