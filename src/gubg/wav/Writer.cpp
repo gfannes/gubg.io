@@ -69,7 +69,7 @@ namespace gubg { namespace wav {
         return channel_count_;
     }
 
-    bool Writer::write_mono(const float *src)
+    bool Writer::write_mono(const float *src, float factor)
     {
         MSS_BEGIN(bool);
 
@@ -77,7 +77,7 @@ namespace gubg { namespace wav {
 
         MSS(channel_count_ == 1, std::cout << "Error: only mono files are supported for write_mono()" << std::endl);
 
-        MSS(setup_mono_(src, 0u));
+        MSS(setup_mono_(src, 0u, factor));
 
         fo_.write((const char *)byte_buffer_.data(), byte_buffer_.size());
 
@@ -85,7 +85,7 @@ namespace gubg { namespace wav {
     }
 
     //Privates
-    bool Writer::setup_mono_(const float *src, unsigned int chix)
+    bool Writer::setup_mono_(const float *src, unsigned int chix, float factor)
     {
         MSS_BEGIN(bool);
 
@@ -100,7 +100,9 @@ namespace gubg { namespace wav {
             case 16:
                 for (auto six = 0u; six < block_size_; ++six, dst += block_align)
                 {
-                    std::int32_t v = src[six];
+                    std::int32_t v = src[six]*factor;
+                    v = std::max<std::int32_t>(v, -32768);
+                    v = std::min<std::int32_t>(v, 32767);
                     dst[0] = v;
                     v >>= 8; dst[1] = v;
                 }
@@ -108,7 +110,9 @@ namespace gubg { namespace wav {
             case 24:
                 for (auto six = 0u; six < block_size_; ++six, dst += block_align)
                 {
-                    std::int32_t v = src[six];
+                    std::int32_t v = src[six]*factor;
+                    v = std::max<std::int32_t>(v, -8388608);
+                    v = std::min<std::int32_t>(v, 8388607);
                     dst[0] = v;
                     v >>= 8; dst[1] = v;
                     v >>= 8; dst[2] = v;
@@ -118,6 +122,7 @@ namespace gubg { namespace wav {
                 MSS(false, std::cout << "Error: unsupported bit depth " << bit_depth_ << std::endl);
                 break;
         }
+
         MSS_END();
     }
 

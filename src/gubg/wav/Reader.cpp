@@ -78,7 +78,7 @@ namespace gubg { namespace wav {
         return block_count_;
     }
 
-    bool Reader::read_block(unsigned int block_ix, float *dst)
+    bool Reader::read_block(unsigned int block_ix, float *dst, float factor)
     {
         MSS_BEGIN(bool);
 
@@ -107,7 +107,7 @@ namespace gubg { namespace wav {
                     v <<= 8; v |= src[0];
                     v <<= 16;
                     v >>= 16;
-                    dst[six] = v;
+                    dst[six] = v*factor;
                 }
                 break;
             case 24:
@@ -118,7 +118,7 @@ namespace gubg { namespace wav {
                     v <<= 8; v |= src[0];
                     v <<= 8;
                     v >>= 8;
-                    dst[six] = v;
+                    dst[six] = v*factor;
                 }
                 break;
             default:

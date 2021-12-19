@@ -1,7 +1,7 @@
 #ifndef HEADER_gubg_wav_Writer_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_wav_Writer_hpp_ALREADY_INCLUDED
 
-#include "gubg/mss.hpp"
+#include <gubg/mss.hpp>
 #include <string>
 #include <fstream>
 #include <array>
@@ -23,25 +23,25 @@ namespace gubg { namespace wav {
         unsigned int block_size() const;
         unsigned int channel_count() const;
 
-        bool write_mono(const float *src);
+        bool write_mono(const float *src, float factor = 1.0f);
 
         //ftor(chix) should return a pointer to the data
         template <typename Ftor>
-        bool write_block(Ftor &&ftor)
+        bool write_block(Ftor &&ftor, float factor = 1.0f)
         {
             MSS_BEGIN(bool);
             MSS(valid());
             for (auto chix = 0u; chix < channel_count_; ++chix)
             {
                 const float *ptr = ftor(chix);
-                MSS(setup_mono_(ptr, chix));
+                MSS(setup_mono_(ptr, chix, factor));
             }
             fo_.write((const char *)byte_buffer_.data(), byte_buffer_.size());
             MSS_END();
         }
 
         template <typename Sample>
-        bool add_sample(const Sample &sample)
+        bool add_sample(const Sample &sample, float factor = 1.0f)
         {
             MSS_BEGIN(bool);
             MSS(block_size_ == 1);
@@ -50,12 +50,12 @@ namespace gubg { namespace wav {
                 flt = sample[chix];
                 return &flt;
             };
-            MSS(write_block(lambda));
+            MSS(write_block(lambda, factor));
             MSS_END();
         }
 
     private:
-        bool setup_mono_(const float *src, unsigned int chix);
+        bool setup_mono_(const float *src, unsigned int chix, float factor);
 
         void stream16_(unsigned int v)
         {

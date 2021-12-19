@@ -22,7 +22,7 @@ namespace gubg { namespace wav {
         unsigned int block_size() const;
         unsigned int block_count() const;
 
-        bool read_block(unsigned int block_ix, float *dst);
+        bool read_block(unsigned int block_ix, float *dst, float factor = 1.0f);
 
     private:
         std::ifstream fi_;
