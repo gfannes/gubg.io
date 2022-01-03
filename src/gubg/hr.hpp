@@ -1,7 +1,8 @@
 #ifndef HEADER_gubg_hr_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_hr_hpp_ALREADY_INCLUDED
 
-#include "gubg/OnlyOnce.hpp"
+#include <gubg/OnlyOnce.hpp>
+#include <gubg/Range.hpp>
 #include <gubg/hex.hpp>
 #include <sstream>
 #include <vector>
@@ -81,6 +82,18 @@ namespace gubg {
             oss << '{';
             OnlyOnce skipComma;
             for (const auto &v: ary)
+                oss << (skipComma() ? "" : ", ") << hr(v);
+            oss << '}';
+            return oss.str();
+        }
+
+    template <typename It>
+        std::string hr(const Range<It> &range)
+        {
+            std::ostringstream oss;
+            oss << '{';
+            OnlyOnce skipComma;
+            for (const auto &v: range)
                 oss << (skipComma() ? "" : ", ") << hr(v);
             oss << '}';
             return oss.str();
