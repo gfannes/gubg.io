@@ -43,21 +43,19 @@ namespace gubg { namespace s11n {
 
             auto sp = range_.savepoint();
 
-            Strange tag;
-            if (!range_.pop_tag(tag))
+            Reader rdr;
+            if (!range_.pop_tag(rdr.tag_))
             {
                 L("No naft tag found");
                 return false;
             }
 
-            if (!details::is_same(wanted_tag, tag))
+            if (!details::is_same(wanted_tag, rdr.tag_))
             {
                 L("Tags are different");
                 return false;
             }
 
-            Reader rdr;
-            rdr.tag_ = tag.str();
             range_.pop_attrs(rdr.attrs_);
             range_.pop_block(rdr.range_);
 
@@ -114,7 +112,7 @@ namespace gubg { namespace s11n {
         }
         bool text(Strange &strange)
         {
-            return range_.pop_text(strange);
+            return range_.pop_text_unescaped(strange);
         }
 
         void stream(std::ostream &os) const

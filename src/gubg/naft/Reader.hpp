@@ -22,7 +22,7 @@ namespace gubg { namespace naft {
             SavePoint sp(*this);
             Info info;
             MSS(pop_info_(info));
-            auto tag = info.tag;
+            Strange tag{info.tag};
             Strange name;
             MSS(tag.pop_until(name, ':') || tag.pop_all(name));
             MSS(name.str() == expected_name);
@@ -36,7 +36,7 @@ namespace gubg { namespace naft {
             SavePoint sp(*this);
             Info info;
             MSS(pop_info_(info));
-            auto tag = info.tag;
+            Strange tag{info.tag};
             Strange dump;
             MSS(tag.pop_until(dump, ':'));
             MSS(tag.str() == expected_type);
@@ -93,7 +93,7 @@ namespace gubg { namespace naft {
 
         struct Info
         {
-            Strange tag;
+            std::string tag;
             Attrs attrs;
             Range block;
         };

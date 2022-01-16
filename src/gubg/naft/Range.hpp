@@ -38,6 +38,7 @@ namespace gubg { namespace naft {
         {
             if (!strange_.pop_bracket(tag, "[]"))
                 return false;
+            descape_node_(tag);
             strip_();
             return true;
         }
@@ -45,6 +46,7 @@ namespace gubg { namespace naft {
         {
             if (!pop_tag(name))
                 return false;
+            descape_node_(name);
             const auto ix = name.find(':');
             if (ix != std::string::npos)
             {
@@ -53,7 +55,8 @@ namespace gubg { namespace naft {
             }
             return true;
         }
-        bool pop_tag(Strange &tag)
+        //@warning: tag is not descaped
+        bool pop_tag_unescaped(Strange &tag)
         {
             if (!strange_.pop_bracket(tag, "[]"))
                 return false;
@@ -63,13 +66,13 @@ namespace gubg { namespace naft {
         bool pop_tag(const std::string &tag)
         {
             auto sp = strange_;
-            std::string tmp;
-            if (!strange_.pop_bracket(tmp, "[]"))
+            if (!strange_.pop_bracket(tmp_, "[]"))
             {
                 strange_ = sp;
                 return false;
             }
-            if (tmp != tag)
+            descape_node_(tmp_);
+            if (tmp_ != tag)
             {
                 strange_ = sp;
                 return false;
@@ -80,17 +83,20 @@ namespace gubg { namespace naft {
 
         bool pop_attr(std::string &key, std::string &value)
         {
-            Strange kv;
-            if (!strange_.pop_bracket(kv, "()"))
+            if (!strange_.pop_bracket(tmp_, "()"))
                 return false;
+            descape_attr_(tmp_);
+            Strange kv{tmp_};
 
-            strip_();
-
-            value.clear();
             if (kv.pop_until(key, ':'))
                 kv.pop_all(value);
             else
+            {
                 kv.pop_all(key);
+                value.clear();
+            }
+
+            strip_();
 
             return true;
         }
@@ -129,9 +135,10 @@ namespace gubg { namespace naft {
         {
             std::string res;
             strange_.pop_until(res, '[') || strange_.pop_all(res);
+            descape_text_(res);
             return res;
         }
-        bool pop_text(Strange &strange)
+        bool pop_text_unescaped(Strange &strange)
         {
             return strange_.pop_until(strange, '[') || strange_.pop_all(strange);
         }
@@ -139,8 +146,10 @@ namespace gubg { namespace naft {
         bool pop_name(const std::string &name)
         {
             auto sp = strange_;
-            Strange tag, dump;
-            if (!pop_tag(tag) || !tag.pop_if(name) || !(tag.empty() || tag.pop_if(':')))
+            if (!pop_tag(tmp_)
+                || name != tmp_.substr(0, name.size()) //!tmp_.starts_with(name)
+                || !(tmp_.size() == name.size() || tmp_[name.size()] == ':') //if tmp_ is longer than name, it should continue with ':'
+                )
             {
                 strange_ = sp;
                 return false;
@@ -156,8 +165,13 @@ namespace gubg { namespace naft {
 
             //Pop the type
             {
-                Strange tag;
-                if (!pop_tag(tag) || !tag.pop_until(dump, ':') || !tag.pop_if(type) || !tag.empty())
+                if (!pop_tag(tmp_))
+                {
+                    strange_ = sp;
+                    return false;
+                }
+                Strange tag{tmp_};
+                if (!tag.pop_until(dump, ':') || !tag.pop_if(type) || !tag.empty())
                 {
                     strange_ = sp;
                     return false;
@@ -175,8 +189,13 @@ namespace gubg { namespace naft {
 
             //Pop the type
             {
-                Strange tag;
-                if (!pop_tag(tag) || !tag.pop_until(dump, ':') || !tag.pop_if(type) || !tag.empty())
+                if (!pop_tag(tmp_))
+                {
+                    strange_ = sp;
+                    return false;
+                }
+                Strange tag{tmp_};
+                if (!tag.pop_until(dump, ':') || !tag.pop_if(type) || !tag.empty())
                 {
                     strange_ = sp;
                     return false;
@@ -213,7 +232,54 @@ namespace gubg { namespace naft {
         void strip_() {strange_.strip(whitespace_());}
         void strip_(Strange &strange) {strange.strip(whitespace_());}
 
+        static void descape_node_(std::string &str) {descape_<'[', ']'>(str);}
+        static void descape_attr_(std::string &str) {descape_<'(', ')'>(str);}
+        static void descape_text_(std::string &str)
+        {
+            for (auto ix = 0u; ix < str.size(); ++ix)
+            {
+                if (str[ix] == '{' && (str.size()-ix >= 3) && (str[ix+2] == '}'))
+                {
+                    switch (str[ix+1])
+                    {
+                        case '<': str[ix] = '{'; str.erase(ix+1, 2); break;
+                        case '>': str[ix] = '}'; str.erase(ix+1, 2); break;
+                        case '(': str[ix] = '['; str.erase(ix+1, 2); break;
+                        case ')': str[ix] = ']'; str.erase(ix+1, 2); break;
+                        default: break;
+                    }
+                }
+            }
+        }
+
+        template <char o, char c>
+        static void descape_(std::string &str)
+        {
+            for (auto ix = 0u; ix < str.size(); ++ix)
+            {
+                if (str[ix] == o && (str.size()-ix >= 3) && (str[ix+2] == c))
+                {
+                    switch (str[ix+1])
+                    {
+                        case '<': str[ix] = o; str.erase(ix+1, 2); break;
+                        case '>': str[ix] = c; str.erase(ix+1, 2); break;
+                        default: break;
+                    }
+                }
+                else if (str[ix] == '{' && (str.size()-ix >= 3) && (str[ix+2] == '}'))
+                {
+                    switch (str[ix+1])
+                    {
+                        case '<': str[ix] = '{'; str.erase(ix+1, 2); break;
+                        case '>': str[ix] = '}'; str.erase(ix+1, 2); break;
+                        default: break;
+                    }
+                }
+            }
+        }
+
         Strange strange_;
+        std::string tmp_;
     };
 
     inline std::ostream &operator<<(std::ostream &os, const Range &range)
