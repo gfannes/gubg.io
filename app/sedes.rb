@@ -38,8 +38,10 @@ module Sedes
             end
             ary.reverse()
         end
-        def write(language, fo, level)
-            raise("Expected write() to be implemented for #{self.class}")
+        def visit(guest)
+            guest.open(self)
+            @childs.each{|name, item|item.visit(guest)}
+            guest.close(self)
         end
 
         private
@@ -68,11 +70,6 @@ module Sedes
             end
             ns
         end
-        def write(language, fo, level)
-            @childs.each do |name, item|
-                item.write(language, fo, level)
-            end
-        end
     end
 
     class Mod < Item
@@ -98,40 +95,30 @@ module Sedes
         def typedef(name, type)
             @childs[name] = Typedef.new(name, type, parent: self)
         end
-        def write(language, fo, level)
-            case language
-            when :cpp
-                fo.puts("#{Sedes::indent(level)}namespace #{@name} {")
-                @childs.each do |name, item|
-                    item.write(language, fo, level+2)
-                end
-                fo.puts("#{Sedes::indent(level)}}")
-            else raise("Unsupported language #{language}")
-            end
-        end
     end
 
-    class Field
-        attr_reader(:name, :type)
-        def initialize(name, type)
-            @name, @type = name, type
+    class Field < Item
+        attr_reader(:type)
+        def initialize(name, type, parent:)
+            super(name, parent: parent)
+            @type = type
         end
     end
     class Single < Field
-        def initialize(name, type)
-            super(name, type)
-        end
-        def write(language, fo, level)
-            fo.puts("#{Sedes::indent(level)}#{type()} #{name()};")
+        def initialize(name, type, parent:)
+            super(name, type, parent: parent)
         end
     end
     class Array < Field
-        def initialize(name, type, size)
-            super(name, type)
+        attr_reader(:size)
+        def initialize(name, type, size, parent:)
+            super(name, type, parent: parent)
             @size = size
         end
-        def write(language, fo, level)
-            fo.puts("#{Sedes::indent(level)}#{type()} #{name()}[#{@size}];")
+    end
+    class Vector < Field
+        def initialize(name, type, parent:)
+            super(name, type, parent: parent)
         end
     end
 
@@ -142,23 +129,15 @@ module Sedes
 
         def single(name, type)
             raise("tuple #{hr_name()} already has field #{name}") if @childs.has_key?(name)
-            @childs[name] = Single.new(name, type)
+            @childs[name] = Single.new(name, type, parent: self)
         end
         def array(name, type, size)
             raise("tuple #{hr_name()} already has field #{name}") if @childs.has_key?(name)
-            @childs[name] = Array.new(name, type, size)
+            @childs[name] = Array.new(name, type, size, parent: self)
         end
-
-        def write(language, fo, level)
-            case language
-            when :cpp
-                fo.puts("#{Sedes::indent(level)}struct #{@name}{")
-                @childs.each do |name, field|
-                    field.write(language, fo, level+1)
-                end
-                fo.puts("#{Sedes::indent(level)}};")
-            else raise("Unsupported language #{language}")
-            end
+        def vector(name, type)
+            raise("tuple #{hr_name()} already has field #{name}") if @childs.has_key?(name)
+            @childs[name] = Vector.new(name, type, parent: self)
         end
 
         private
@@ -167,15 +146,47 @@ module Sedes
     end
 
     class Typedef < Item
+        attr_reader(:type)
         def initialize(name, type, parent:)
             super(name, parent: parent)
             @type = type
         end
-        def write(language, fo, level)
-            case language
-            when :cpp
-                fo.puts("#{Sedes::indent(level)}using #{@name} = #{@type};")
-            else raise("Unsupported language #{language}")
+    end
+
+    class CppWriter
+        def initialize(fo)
+            @fo = fo
+            @level = 0
+        end
+        def indent()
+            '  '*@level
+        end
+        def write(msg)
+            @fo.puts(indent()+msg)
+        end
+
+        def open(item)
+            case item
+            when Root    then write("#pragma once"); write("#include <array>"); write("#include <vector>")
+            when Mod     then write("namespace #{item.name()} {"); @level += 1
+            when Tuple   then write("struct #{item.name()} {"); @level += 1
+            when Typedef then write("using #{item.name()} = #{item.type()};")
+            when Single  then write("#{item.type()} #{item.name()};")
+            when Array   then write("std::array<#{item.type()}, #{item.size()}> #{item.name()};")
+            when Vector  then write("std::vector<#{item.type()}> #{item.name()};")
+            else puts("open #{item.class}")
+            end
+        end
+        def close(item)
+            case item
+            when Root
+            when Mod     then @level -= 1; write("}")
+            when Tuple   then @level -= 1; write("};")
+            when Typedef
+            when Single
+            when Array
+            when Vector
+            else puts("close #{item.class}")
             end
         end
     end
@@ -186,7 +197,7 @@ $context = $root
 
 def method_missing(method, *args, **kwargs, &block)
     case method
-    when :mod, :tuple, :typedef, :single, :array
+    when :mod, :tuple, :typedef, :single, :array, :vector
         $context.send(method, *args, **kwargs, &block)
     end
 end
@@ -200,6 +211,6 @@ end
 
 if fp = options[:output]
     File.open(fp, "w") do |fo|
-        $root.write(:cpp, fo, 0)
+        $root.visit(Sedes::CppWriter.new(fo))
     end
 end

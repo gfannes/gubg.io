@@ -16,4 +16,7 @@ mod(:gubg) do
     tuple(:a3) do
         array(:values, :float, 3)
     end
+    tuple(:vec) do
+        vector(:values, :float)
+    end
 end
