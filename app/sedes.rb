@@ -18,98 +18,177 @@ end.parse!()
 log = ->(level, msg){puts(msg) if options[:verbose] >= level}
 log.(1, options)
 
-$context = nil
+module Sedes
+    def self.indent(level)
+        '  '*level
+    end
 
-class Namespace
-    attr_reader(:name, :parent)
-    def initialize(name, parent: nil)
-        @name, @parent = name, parent
-        @namespaces = {}
-        @types = {}
-    end
-    def namespace(*names, &block)
-        raise("Expected at least on namespace name") if names.empty?()
-        name, rest = names[0], names[1..]
-        ns = @namespaces[name] = Namespace.new(name, parent: self)
-        if rest.empty?()
-            block.call(ns) if block_given?()
-        else
-            ns = ns.namespace(*names, &block)
+    class Item
+        attr_reader(:name, :parent)
+        def initialize(name, parent:)
+            @name, @parent = name, parent
+            @childs = {}
         end
-        ns
-    end
-    def tuple(name, &block)
-        t = @types.fetch(name){|name|@types[name] = Tuple.new(name, namespace: self)}
-        block.call(t) if block_given?()
-        t
-    end
-    def all_types()
-        ary = @types.values()
-        @namespaces.each do |name, namespace|
-            ary += namespace.all_types()
-        end
-        ary
-    end
-    def to_a()
-        ary = []
-        p = self
-        while p.parent()
-            ary << p.name()
-            p = p.parent()
-        end
-        ary.reverse()
-    end
-end
-
-class Type
-    attr_reader(:name, :namespace)
-    def initialize(name, namespace: nil)
-        @name, @namespace = name, namespace
-        @namespace = namespace
-    end
-    def hr_name()
-        @namespace*"::"+"::#{@name}"
-    end
-end
-
-class Tuple < Type
-    def initialize(name, namespace: nil)
-        super(name, namespace: namespace)
-        @types = {}
-    end
-    def int(name)
-        add_primitive(name, :int)
-    end
-    def float(name)
-        add_primitive(name, :float)
-    end
-    def write(language, fo)
-        case language
-        when :cpp
-            fo.puts("    struct #{@name}{")
-            @types.each do |name, type|
-                fo.puts("        #{type} #{name}{};")
+        def path()
+            ary = []
+            p = self
+            while p.parent()
+                ary << p.name()
+                p = p.parent()
             end
-            fo.puts("    };")
-        else raise("Unsupported language #{language}")
+            ary.reverse()
+        end
+        def write(language, fo, level)
+            raise("Expected write() to be implemented for #{self.class}")
+        end
+
+        private
+        def context_call(new_context, &block)
+            if block_given?()
+                orig_context = $context
+                $context = new_context
+                block.call($context)
+                $context = orig_context
+            end
         end
     end
 
-    private
-    def add_primitive(name, type)
-        raise("tuple #{hr_name()} already has field #{name}") if @types.has_key?(name)
-        @types[name] = type
+    class Root < Item
+        def initialize()
+            super(:"", parent: nil)
+        end
+        def mod(*names, &block)
+            raise("Expected at least on mod name") if names.empty?()
+            name, rest = names[0], names[1..]
+            ns = @childs[name] = Mod.new(name, parent: self)
+            if rest.empty?()
+                context_call(ns, &block)
+            else
+                ns = ns.mod(*rest, &block)
+            end
+            ns
+        end
+        def write(language, fo, level)
+            @childs.each do |name, item|
+                item.write(language, fo, level)
+            end
+        end
+    end
+
+    class Mod < Item
+        def initialize(name, parent:)
+            super(name, parent: parent)
+        end
+        def mod(*names, &block)
+            raise("Expected at least on mod name") if names.empty?()
+            name, rest = names[0], names[1..]
+            ns = @childs[name] = Mod.new(name, parent: self)
+            if rest.empty?()
+                context_call(ns, &block)
+            else
+                ns = ns.mod(*rest, &block)
+            end
+            ns
+        end
+        def tuple(name, &block)
+            t = @childs.fetch(name){|name|@childs[name] = Tuple.new(name, parent: self)}
+            context_call(t, &block)
+            t
+        end
+        def typedef(name, type)
+            @childs[name] = Typedef.new(name, type, parent: self)
+        end
+        def write(language, fo, level)
+            case language
+            when :cpp
+                fo.puts("#{Sedes::indent(level)}namespace #{@name} {")
+                @childs.each do |name, item|
+                    item.write(language, fo, level+2)
+                end
+                fo.puts("#{Sedes::indent(level)}}")
+            else raise("Unsupported language #{language}")
+            end
+        end
+    end
+
+    class Field
+        attr_reader(:name, :type)
+        def initialize(name, type)
+            @name, @type = name, type
+        end
+    end
+    class Single < Field
+        def initialize(name, type)
+            super(name, type)
+        end
+        def write(language, fo, level)
+            fo.puts("#{Sedes::indent(level)}#{type()} #{name()};")
+        end
+    end
+    class Array < Field
+        def initialize(name, type, size)
+            super(name, type)
+            @size = size
+        end
+        def write(language, fo, level)
+            fo.puts("#{Sedes::indent(level)}#{type()} #{name()}[#{@size}];")
+        end
+    end
+
+    class Tuple < Item
+        def initialize(name, parent:)
+            super(name, parent: parent)
+        end
+
+        def single(name, type)
+            raise("tuple #{hr_name()} already has field #{name}") if @childs.has_key?(name)
+            @childs[name] = Single.new(name, type)
+        end
+        def array(name, type, size)
+            raise("tuple #{hr_name()} already has field #{name}") if @childs.has_key?(name)
+            @childs[name] = Array.new(name, type, size)
+        end
+
+        def write(language, fo, level)
+            case language
+            when :cpp
+                fo.puts("#{Sedes::indent(level)}struct #{@name}{")
+                @childs.each do |name, field|
+                    field.write(language, fo, level+1)
+                end
+                fo.puts("#{Sedes::indent(level)}};")
+            else raise("Unsupported language #{language}")
+            end
+        end
+
+        private
+        def add_primitive_(name, type)
+        end
+    end
+
+    class Typedef < Item
+        def initialize(name, type, parent:)
+            super(name, parent: parent)
+            @type = type
+        end
+        def write(language, fo, level)
+            case language
+            when :cpp
+                fo.puts("#{Sedes::indent(level)}using #{@name} = #{@type};")
+            else raise("Unsupported language #{language}")
+            end
+        end
     end
 end
 
-$global_namespace = Namespace.new(:"")
-$context = $global_namespace
+$root = Sedes::Root.new()
+$context = $root
 
-def namespace(*parts, &block)
-    orig_context = $context
-    ns = $context.namespace(*parts, &block)
-    $context = orig_context
-    ns
+def method_missing(method, *args, **kwargs, &block)
+    case method
+    when :mod, :tuple, :typedef, :single, :array
+        $context.send(method, *args, **kwargs, &block)
+    end
 end
 
 options[:inputs].each do |fp|
@@ -119,18 +198,8 @@ options[:inputs].each do |fp|
     load(fp_resolved)
 end
 
-all_types = $global_namespace.all_types()
-all_types.each do |type|
-    puts()
-    pp(type)
-end
-
 if fp = options[:output]
     File.open(fp, "w") do |fo|
-        all_types.each do |type|
-            fo.puts("namespace #{type.namespace().to_a()*'::'} {")
-            type.write(:cpp, fo)
-            fo.puts("}")
-        end
+        $root.write(:cpp, fo, 0)
     end
 end

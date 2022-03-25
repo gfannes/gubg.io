@@ -1,14 +1,19 @@
-namespace(:gubg) do |ns|
-    ns.tuple(:nil)
+mod(:gubg) do
+    typedef(:myint, :int)
 
-    ns.tuple(:i3) do |t|
-        t.int(:x)
-        t.int(:y)
-        t.int(:z)
+    tuple(:nil)
+
+    tuple(:i3) do
+        single(:x, :int)
+        single(:y, :int)
+        single(:z, :int)
     end
-    ns.tuple(:f3) do |t|
-        t.float(:x)
-        t.float(:y)
-        t.float(:z)
+    tuple(:f3) do
+        single(:x, :float)
+        single(:y, :float)
+        single(:z, :float)
+    end
+    tuple(:a3) do
+        array(:values, :float, 3)
     end
 end
