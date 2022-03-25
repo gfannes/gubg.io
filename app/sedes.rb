@@ -171,8 +171,8 @@ module Sedes
             when Mod     then write("namespace #{item.name()} {"); @level += 1
             when Tuple   then write("struct #{item.name()} {"); @level += 1
             when Typedef then write("using #{item.name()} = #{item.type()};")
-            when Single  then write("#{item.type()} #{item.name()};")
-            when Array   then write("std::array<#{item.type()}, #{item.size()}> #{item.name()};")
+            when Single  then write("#{item.type()} #{item.name()}{};")
+            when Array   then write("std::array<#{item.type()}, #{item.size()}> #{item.name()}{};")
             when Vector  then write("std::vector<#{item.type()}> #{item.name()};")
             else puts("open #{item.class}")
             end
