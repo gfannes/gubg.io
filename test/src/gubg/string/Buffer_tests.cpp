@@ -10,7 +10,7 @@ namespace  {
 TEST_CASE("string::Buffer tests", "[ut][string][Buffer]")
 {
     std::array<char, 4> buffer;
-    String string{RANGE(buffer)};
+    String string(RANGE(buffer));
 
     SECTION("fresh")
     {
