@@ -32,12 +32,10 @@ root.recipe("termcolor", fun(rcp){
     rcp.add("extern/termcolor/include", "termcolor/*.hpp")
 })
 
-root.book("sedes", fun(b){
-    b.recipe("exe", TargetType.Executable, fun(rcp){
-        rcp.add("app/sedes", "**.cpp")
-        rcp.add("app/sedes", "**.hpp")
+root.recipe("sedes", TargetType.Executable, fun(rcp){
+    rcp.add("app/sedes", "**.cpp")
+    rcp.add("app/sedes", "**.hpp")
 
-        rcp.depends_on("gubg/std/func")
-        rcp.depends_on("gubg/io/func")
+    rcp.depends_on("gubg/std/func")
+    rcp.depends_on("gubg/io/func")
     })
-})
