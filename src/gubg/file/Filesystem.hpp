@@ -1,10 +1,11 @@
 #ifndef HEADER_gubg_file_Filesystem_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_file_Filesystem_hpp_ALREADY_INCLUDED
 
-#include "gubg/file/File.hpp"
-#include "gubg/file/Codes.hpp"
-#include "gubg/mss.hpp"
+#include <gubg/file/File.hpp>
+#include <gubg/file/Codes.hpp>
+#include <gubg/mss.hpp>
 #include <string>
+#include <filesystem>
 #include <vector>
 
 namespace gubg { namespace file {
@@ -14,6 +15,8 @@ namespace gubg { namespace file {
 
     //Reads the content of a File
     ReturnCode read(std::string &content, const File &);
+    ReturnCode read(std::string &content, const std::filesystem::path &);
+    ReturnCode read(std::string &content, const std::string &);
     ReturnCode read(std::vector<File> &, const File &);
 
     //Write a file

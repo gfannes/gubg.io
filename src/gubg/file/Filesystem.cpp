@@ -39,12 +39,27 @@ ReturnCode gubg::file::read(string &content, const File &file)
 {
     MSS_BEGIN(ReturnCode);
     MSS(on_fail(File::Unknown == file.type() || File::Regular ==  file.type(), ReturnCode::ExpectedRegular));
-    ifstream fi(file.name(), ios_base::in | ios_base::binary | ios_base::ate);
+    MSS(read(content, file.name()));
+    MSS_END();
+}
+
+ReturnCode gubg::file::read(string &content, const std::filesystem::path &fp)
+{
+    MSS_BEGIN(ReturnCode);
+    MSS(on_fail(std::filesystem::is_regular_file(fp), ReturnCode::ExpectedRegular));
+    MSS(read(content, fp.string()));
+    MSS_END();
+}
+
+ReturnCode gubg::file::read(string &content, const std::string &filename)
+{
+    MSS_BEGIN(ReturnCode);
+    std::ifstream fi(filename, ios_base::in | ios_base::binary | ios_base::ate);
     MSS(on_fail(bool(fi), ReturnCode::CouldNotOpenFile));
-    const auto fileSize = fi.tellg();
-    content.resize(fileSize);
+    const auto byte_size = fi.tellg();
+    content.resize(byte_size);
     fi.seekg(0);
-    fi.read(&content[0], fileSize);
+    fi.read(&content[0], byte_size);
     MSS_END();
 }
 

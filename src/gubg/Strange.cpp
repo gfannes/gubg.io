@@ -289,6 +289,31 @@ namespace gubg {
         res = s.str();
         return true;
     }
+    bool Strange::pop_until_any(Strange &res, const std::string &str, bool inclusive)
+    {
+        assert(invariants_());
+        if (empty())
+            return false;
+        for (size_t i = 0; i < l_; ++i)
+            if (str.find(s_[i]) != std::string::npos)
+            {
+                res.data_ = data_;
+                res.s_ = s_;
+                res.l_ = i + (inclusive ? 1 : 0);
+                forward_(i+1);
+                return true;
+            }
+
+        return false;
+    }
+    bool Strange::pop_until_any(std::string &res, const std::string &str, bool inclusive)
+    {
+        Strange s;
+        if (!pop_until_any(s, str, inclusive))
+            return false;
+        res = s.str();
+        return true;
+    }
     bool Strange::pop_decimal(long &res)
     {
         assert(invariants_());
