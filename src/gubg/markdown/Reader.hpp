@@ -1,0 +1,53 @@
+#ifndef HEADER_gubg_markdown_Reader_hpp_ALREADY_INCLUDED
+#define HEADER_gubg_markdown_Reader_hpp_ALREADY_INCLUDED
+
+#include <gubg/Strange.hpp>
+
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace gubg { namespace markdown { 
+
+	class Reader
+	{
+	public:
+		struct Item
+		{
+			enum What {Heading, Bullet, Text, Image, Link};
+			What what;
+			bool is_open;
+			unsigned int level;
+			std::string str;
+
+			void clear() {*this = Item{};}
+			void heading(unsigned int level, bool is_open);
+			void bullet(unsigned int level, bool is_open);
+			void text(const std::string &str);
+		};
+
+		std::optional<std::string> error;
+
+		Reader(){}
+		Reader(std::string text){setup_(std::move(text));}
+
+		void setup(std::string text){setup_(std::move(text));}
+
+		bool operator()(Item &);
+
+	private:
+		gubg::Strange strange_;
+		std::vector<Item> stack_;
+
+		void setup_(std::string &&text);
+		void error_(const std::string &msg);
+
+		bool heading_(Item &item);
+		bool bullet_(Item &item);
+
+		bool stack_has_geq_(Item::What what, unsigned int level) const;
+	};
+
+} } 
+
+#endif

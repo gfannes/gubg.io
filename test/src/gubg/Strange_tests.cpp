@@ -538,6 +538,7 @@ TEST_CASE("gubg::Strange position tests", "[ut][Strange]")
     REQUIRE(exp.position.line == position.line);
     REQUIRE(exp.position.column == position.column);
 }
+
 TEST_CASE("gubg::Strange trim tests", "[ut][Strange][trim]")
 {
     struct Scn
@@ -570,3 +571,48 @@ TEST_CASE("gubg::Strange trim tests", "[ut][Strange][trim]")
 
     REQUIRE(strange.str() == exp.trimmed);
 }
+
+TEST_CASE("gubg::Strange strip tests", "[ut][Strange][strip]")
+{
+    struct Scn
+    {
+        std::string content;
+    };
+    struct Exp
+    {
+    	unsigned int count_a = 0;
+    	unsigned int count_abc = 0;
+    };
+    
+    Scn scn;
+    Exp exp;
+
+    SECTION("") { }
+    SECTION("a")
+    {
+    	scn.content = "a";
+    	exp.count_a = 1;
+    	exp.count_abc = 1;
+    }
+    SECTION("aa")
+    {
+    	scn.content = "aa";
+    	exp.count_a = 2;
+    	exp.count_abc = 2;
+    }
+    SECTION("aacada")
+    {
+    	scn.content = "aacada";
+    	exp.count_a = 2;
+    	exp.count_abc = 4;
+    }
+
+    {
+    	gubg::Strange strange{scn.content};
+    	REQUIRE(strange.strip('a') == exp.count_a);
+    }
+    {
+    	gubg::Strange strange{scn.content};
+    	REQUIRE(strange.strip("abc") == exp.count_abc);
+    }
+}	

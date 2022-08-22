@@ -90,25 +90,27 @@ namespace gubg {
         return nullptr != std::memchr(s_, ch, l_);
     }
 
-    bool Strange::strip(char ch)
+    unsigned int Strange::strip(char ch)
     {
-        if (!pop_if(ch))
-            return false;
-        while (pop_if(ch)){}
-        return true;
+        unsigned int count = 0;
+        for (; !empty(); pop_front())
+        {
+            if (front() != ch)
+                break;
+            ++count;
+        }
+        return count;
     }
-    bool Strange::strip(const std::string &chars)
+    unsigned int Strange::strip(const std::string &chars)
     {
-        if (empty())
-            return false;
-        if (chars.find(front()) == std::string::npos)
-            return false;
-        for (pop_front(); !empty(); pop_front())
+        unsigned int count = 0;
+        for (; !empty(); pop_front())
         {
             if (chars.find(front()) == std::string::npos)
                 break;
+            ++count;
         }
-        return true;
+        return count;
     }
 
     bool Strange::pop_bracket(Strange &res, const std::string &oc)

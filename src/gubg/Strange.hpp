@@ -54,8 +54,8 @@ namespace gubg {
 
         bool contains(char ch) const;
 
-        bool strip(char ch);
-        bool strip(const std::string &chars);
+        unsigned int strip(char ch);
+        unsigned int strip(const std::string &chars);
 
         //Return true if !res.empty()
         bool pop_all(Strange &res);

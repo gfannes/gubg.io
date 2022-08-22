@@ -47,6 +47,8 @@ namespace std {
 #include <filesystem>
 #endif
 
+#if GUBG_PLATFORM_COMPILER_GCC
+#else
 namespace std { 
     template<> struct hash<std::filesystem::path>
     {
@@ -58,6 +60,7 @@ namespace std {
         }
     };
 } 
+#endif
 
 namespace gubg{ namespace filesystem {
 
