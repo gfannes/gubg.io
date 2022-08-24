@@ -1,10 +1,11 @@
 #ifndef HEADER_gubg_file_System_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_file_System_hpp_ALREADY_INCLUDED
 
-#include "gubg/file/Name.hpp"
-#include "gubg/mss.hpp"
-#include "gubg/std/filesystem.hpp"
-#include "gubg/string_algo/substitute.hpp"
+#include <gubg/file/Name.hpp>
+#include <gubg/mss.hpp>
+#include <gubg/std/filesystem.hpp>
+#include <gubg/string_algo/substitute.hpp>
+
 #include <regex>
 #include <fstream>
 
@@ -22,8 +23,14 @@ namespace gubg { namespace file {
         fi.read(&content[0], size);
         MSS_END();
     }
-    inline bool read(std::string &content, const std::filesystem::path &name) {return read(content, Name{name});}
-    inline bool read(std::string &content, const std::string &name) {return read(content, Name{name});}
+    inline bool read(std::string &content, const std::filesystem::path &name)
+    {
+        return read(content, Name{name});
+    }
+    inline bool read(std::string &content, const std::string &name)
+    {
+        return read(content, Name{name});
+    }
 
     inline bool write(const std::string &content, const Name &name)
     {
