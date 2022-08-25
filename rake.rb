@@ -11,11 +11,11 @@ namespace :io do
         end
     end
 
-    task :install do
+    task :install do |t, args|
         require("gubg/build/Cooker")
         cooker = Build::Cooker.new().option("c++.std", 17).output("bin")
 
-        recipes = %w[sedes]
+        recipes = filter_recipes(args, %w[sedes])
         cooker.generate(:ninja, *recipes).ninja()
     end
 end
