@@ -17,10 +17,10 @@ namespace gubg { namespace markdown {
 		this->is_open = is_open;
 		this->level = level;
 	}
-	void Reader::Item::text(const std::string &str)
+	void Reader::Item::line(const std::string &str)
 	{
 		clear();
-		this->what = Text;
+		this->what = Line;
 		this->str = str;
 	}
 
@@ -45,7 +45,7 @@ namespace gubg { namespace markdown {
 		else if (bullet_(item)) { }
 		else if (Strange line; strange_.pop_line(line))
 		{
-			item.text(line.str());
+			item.line(line.str());
 		}
 		else
 		{
@@ -89,6 +89,7 @@ namespace gubg { namespace markdown {
 			}
 
 			item.heading(level, true);
+			strange_.pop_line(item.str);
 			stack_.push_back(item);
 			return true;
 		}
@@ -119,6 +120,7 @@ namespace gubg { namespace markdown {
 			}
 
 			item.bullet(level, true);
+			strange_.pop_line(item.str);
 			stack_.push_back(item);
 			return true;
 		}

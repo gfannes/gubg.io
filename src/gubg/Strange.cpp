@@ -217,6 +217,31 @@ namespace gubg {
         *this = sp;
         return false;
     }
+    bool Strange::pop_to_any(Strange &res, const std::string &str)
+    {
+        assert(invariants_());
+        if (empty())
+            return false;
+        for (size_t i = 0; i < l_; ++i)
+            if (str.find(s_[i]) != std::string::npos)
+            {
+                res.data_ = data_;
+                res.s_ = s_;
+                res.l_ = i;
+                forward_(i);
+                return true;
+            }
+
+        return false;
+    }
+    bool Strange::pop_to_any(std::string &res, const std::string &str)
+    {
+        Strange s;
+        if (!pop_to_any(s, str))
+            return false;
+        res = s.str();
+        return true;
+    }
     bool Strange::diff_to(const Strange &strange)
     {
         if (empty())
@@ -426,6 +451,8 @@ namespace gubg {
         S(nullptr);
         assert(invariants_());
 
+        line.clear();
+
         if (empty())
             return false;
 
@@ -476,6 +503,13 @@ namespace gubg {
         line.l_ = ptr-s_;
         forward_(line.l_+1);
         return true;
+    }
+    bool Strange::pop_line(std::string &line)
+    {
+        Strange l;
+        const bool b = pop_line(l);
+        line = l.str();
+        return b;
     }
 
     template <typename T>

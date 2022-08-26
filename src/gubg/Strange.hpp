@@ -11,6 +11,7 @@
 
 //TODO: the methods that take a Strange& as argument are currently not correct when this argument
 //is the same as the this pointer
+//.@ Clear strange/string argument when pop fails
 
 namespace gubg {
 
@@ -64,6 +65,8 @@ namespace gubg {
         //Does not pop ch or str
         bool pop_to(Strange &res, const char ch);
         bool pop_to(Strange &res, const std::string &str);
+        bool pop_to_any(Strange &res, const std::string &str);
+        bool pop_to_any(std::string &res, const std::string &str);
         //Pops ch too, set inclusive to true if you want ch to be included in res
         bool pop_until(Strange &res, const char ch, bool inclusive = false);
         bool pop_until(std::string &res, const char ch, bool inclusive = false);
@@ -101,6 +104,7 @@ namespace gubg {
         bool pop_if(const std::string &);
 
         bool pop_line(Strange &line);
+        bool pop_line(std::string &line);
 
         void ltrim(const char ch);
         void rtrim(const char ch);

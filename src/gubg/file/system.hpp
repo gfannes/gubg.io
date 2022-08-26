@@ -1,6 +1,7 @@
 #ifndef HEADER_gubg_file_System_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_file_System_hpp_ALREADY_INCLUDED
 
+#include <gubg/file/Filesystem.hpp>
 #include <gubg/file/Name.hpp>
 #include <gubg/mss.hpp>
 #include <gubg/std/filesystem.hpp>
@@ -11,6 +12,8 @@
 
 namespace gubg { namespace file { 
 
+    // .@ Remove these read/write functions, or the ones from Filesystem.hpp
+#if 0
     inline bool read(std::string &content, const Name &name)
     {
         MSS_BEGIN(bool);
@@ -41,6 +44,7 @@ namespace gubg { namespace file {
     }
     inline bool write(const std::string &content, const std::filesystem::path &name) {return write(content, Name{name});}
     inline bool write(const std::string &content, const std::string &name) {return write(content, Name{name});}
+#endif
 
     inline void remove_empty_directories(const std::filesystem::path &dir)
     {

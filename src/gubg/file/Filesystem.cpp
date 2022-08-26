@@ -176,6 +176,24 @@ ReturnCode gubg::file::write(const std::string &content, const File &file)
     MSS(on_fail(bool(fo), ReturnCode::CouldNotWriteFile));
     MSS_END();
 }
+ReturnCode gubg::file::write(const std::string &content, const std::filesystem::path &fp)
+{
+    MSS_BEGIN(ReturnCode);
+    ofstream fo(fp, ios_base::out | ios_base::binary | ios_base::trunc);
+    MSS(on_fail(bool(fo), ReturnCode::CouldNotWriteFile));
+    fo.write(content.data(), content.size());
+    MSS(on_fail(bool(fo), ReturnCode::CouldNotWriteFile));
+    MSS_END();
+}
+ReturnCode write(const std::string &content, const std::string &fp)
+{
+    MSS_BEGIN(ReturnCode);
+    ofstream fo(fp, ios_base::out | ios_base::binary | ios_base::trunc);
+    MSS(on_fail(bool(fo), ReturnCode::CouldNotWriteFile));
+    fo.write(content.data(), content.size());
+    MSS(on_fail(bool(fo), ReturnCode::CouldNotWriteFile));
+    MSS_END();
+}
 
 ReturnCode gubg::file::remove(const File &file)
 {

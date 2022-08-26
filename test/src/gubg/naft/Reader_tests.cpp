@@ -1,5 +1,11 @@
-#include "catch.hpp"
-#include "gubg/naft/Reader.hpp"
+#include <gubg/naft/Reader.hpp>
+
+#include <catch.hpp>
+
+#include <optional>
+#include <sstream>
+
+using namespace gubg;
 
 TEST_CASE("naft::Reader tests", "[ut][naft][Reader]")
 {
@@ -11,57 +17,60 @@ TEST_CASE("naft::Reader tests", "[ut][naft][Reader]")
     };
     struct Exp
     {
-        bool name_ok = false;
-        bool type_ok = false;
+        std::ostringstream repr;
+        std::optional<std::string> error;
     };
 
     Scn scn;
     Exp exp;
 
-    SECTION("empty")
+    SECTION("empty") { }
+    SECTION("whitespace") { scn.str = " \t\n\r\t \n\r"; }
+    SECTION("[a]")
     {
+        scn.str = "[a]";
+        exp.repr << " >>a <<a";
     }
-    SECTION("name")
+    SECTION("[a](b)(c)")
     {
-        scn.str = "[name](a:42.1)(b){}";
-        exp.name_ok = true;
+        scn.str = "[a](b)(c)";
+        exp.repr << " >>a @b @c <<a";
     }
-    SECTION("type")
+    SECTION("[a]t")
     {
-        scn.str = "[:type](a:42.1)(b){}";
-        exp.type_ok = true;
+        scn.str = "[a]t";
+        exp.repr << " >>a <<a t";
+    }
+    SECTION("[a]{t}")
+    {
+        scn.str = "[a]{t}";
+        exp.repr << " >>a t <<a";
+    }
+    SECTION("[a]{[b][c]}")
+    {
+        scn.str = "[a]{[b][c]}";
+        exp.repr << " >>a >>b <<b >>c <<c <<a";
     }
 
-    gubg::naft::Reader reader{scn.str};
+    naft::Reader reader{scn.str};
 
-    bool ok = false;
-    if (!ok)
+    std::ostringstream repr;
+    for (naft::Reader::Item item; reader(item); )
     {
-        ok = reader.pop_name("name");
-        REQUIRE(ok == exp.name_ok);
-    }
-    if (!ok)
-    {
-        ok = reader.pop_type("type");
-        REQUIRE(ok == exp.type_ok);
-    }
-    if (ok)
-    {
-        REQUIRE(reader.has_attr("b"));
+        L(C(item));
+        using What = naft::Reader::Item::What;
+        switch (item.what)
         {
-            std::string v;
-            REQUIRE(reader.get_attr("a", v));
-            REQUIRE(v == "42.1");
-        }
-        {
-            int v;
-            REQUIRE(reader.get_attr("a", v));
-            REQUIRE(v == 42);
-        }
-        {
-            float v;
-            REQUIRE(reader.get_attr("a", v));
-            REQUIRE(v == Approx(42.1));
+            case What::NodeOpen: repr << " >>" << item.text; break;
+            case What::NodeClose: repr << " <<" << item.text; break;
+            case What::Attribute: repr << " @" << item.text; break;
+            case What::Text: repr << " " << item.text; break;
         }
     }
+
+    if (reader.error)
+        std::cout << *reader.error << std::endl;
+    REQUIRE(reader.error == exp.error);
+
+    REQUIRE(repr.str() == exp.repr.str());
 }

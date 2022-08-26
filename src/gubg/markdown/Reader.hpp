@@ -14,7 +14,7 @@ namespace gubg { namespace markdown {
 	public:
 		struct Item
 		{
-			enum What {Heading, Bullet, Text, Image, Link};
+			enum What {Heading, Bullet, Line};
 			What what;
 			bool is_open;
 			unsigned int level;
@@ -23,7 +23,7 @@ namespace gubg { namespace markdown {
 			void clear() {*this = Item{};}
 			void heading(unsigned int level, bool is_open);
 			void bullet(unsigned int level, bool is_open);
-			void text(const std::string &str);
+			void line(const std::string &str);
 		};
 
 		std::optional<std::string> error;

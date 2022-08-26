@@ -105,8 +105,8 @@ TEST_CASE("markdown::Reader tests", "[ut][markdown][Reader]")
 			break;
 
 
-			case markdown::Reader::Item::Text:
-			repr << "[text](" << item.str << ")";
+			case markdown::Reader::Item::Line:
+			repr << "[line](" << item.str << ")";
 			break;
 		}
 	}

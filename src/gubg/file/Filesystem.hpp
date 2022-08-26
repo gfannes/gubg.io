@@ -21,6 +21,8 @@ namespace gubg { namespace file {
 
     //Write a file
     ReturnCode write(const std::string &content, const File &);
+    ReturnCode write(const std::string &content, const std::filesystem::path &);
+    ReturnCode write(const std::string &content, const std::string &);
 
     //Remove a file
     ReturnCode remove(const File &);
