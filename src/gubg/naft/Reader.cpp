@@ -3,6 +3,22 @@
 
 namespace gubg { namespace naft { 
 
+	std::string Reader::Item::key() const
+	{
+		const auto ix = text.find(':');
+		if (ix == std::string::npos)
+			return text;
+		return text.substr(0, ix);
+	}
+
+	std::string Reader::Item::value() const
+	{
+		const auto ix = text.find(':');
+		if (ix == std::string::npos)
+			return "";
+		return text.substr(ix+1);
+	}
+
 	void Reader::setup(const std::string &str)
 	{
 		strange_ = str;

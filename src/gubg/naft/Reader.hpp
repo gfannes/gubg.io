@@ -17,6 +17,9 @@ namespace gubg { namespace naft {
             enum What {NodeOpen, NodeClose, Attribute, Text};
             What what;
             std::string text;
+            
+            std::string key() const;
+            std::string value() const;
         };
 
         std::optional<std::string> error;
