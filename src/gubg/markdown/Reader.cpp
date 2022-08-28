@@ -3,25 +3,23 @@
 
 namespace gubg { namespace markdown { 
 
-	void Reader::Item::heading(unsigned int level, bool is_open)
+	void Reader::Item::heading(unsigned int level)
 	{
 		clear();
-		this->what = Heading;
-		this->is_open = is_open;
+		this->what = HeadingOpen;
 		this->level = level;
 	}
-	void Reader::Item::bullet(unsigned int level, bool is_open)
+	void Reader::Item::bullet(unsigned int level)
 	{
 		clear();
-		this->what = Bullet;
-		this->is_open = is_open;
+		this->what = BulletOpen;
 		this->level = level;
 	}
-	void Reader::Item::line(const std::string &str)
+	void Reader::Item::line(const std::string &text)
 	{
 		clear();
 		this->what = Line;
-		this->str = str;
+		this->text = text;
 	}
 
 	bool Reader::operator()(Item &item)
@@ -35,7 +33,6 @@ namespace gubg { namespace markdown {
 				return false;
 
 			item = stack_.back();
-			item.is_open = false;
 			stack_.pop_back();
 			return true;
 		}
@@ -53,6 +50,25 @@ namespace gubg { namespace markdown {
 		}
 
 		MSS_END();
+	}
+
+	// Helpers
+	std::ostream &operator<<(std::ostream &os, const Reader::Item::What &what)
+	{
+		switch (what)
+		{
+			case Reader::Item::HeadingOpen: os << "HeadingOpen"; break;
+			case Reader::Item::HeadingClose: os << "HeadingClose"; break;
+			case Reader::Item::BulletOpen: os << "BulletOpen"; break;
+			case Reader::Item::BulletClose: os << "BulletClose"; break;
+			case Reader::Item::Line: os << "Line"; break;
+		}
+		return os;
+	}
+	std::ostream &operator<<(std::ostream &os, const Reader::Item &item)
+	{
+		os << "[Item](what:" << item.what << ")(level:" << item.level << ")(text:" << item.text << ")";
+		return os;
 	}
 
 	// Privates
@@ -78,19 +94,19 @@ namespace gubg { namespace markdown {
 		if (const auto level = strange_.strip('#'); level > 0 && strange_.pop_if(' '))
 		{
 			// Close all bullets and headings that are nested deeper
-			if (stack_has_geq_(Item::Bullet, 0) || stack_has_geq_(Item::Heading, level))
+			if (stack_has_geq_(Item::BulletClose, 0) || stack_has_geq_(Item::HeadingClose, level))
 			{
 				item = stack_.back();
-				item.is_open = false;
 				stack_.pop_back();
 
 				strange_ = sp;
 				return true;
 			}
 
-			item.heading(level, true);
-			strange_.pop_line(item.str);
+			item.heading(level);
+			strange_.pop_line(item.text);
 			stack_.push_back(item);
+			stack_.back().what = Item::HeadingClose;
 			return true;
 		}
 
@@ -109,19 +125,19 @@ namespace gubg { namespace markdown {
 			const auto level = star_count + space_count;
 
 			// Close all bullets that are nested deeper
-			if (stack_has_geq_(Item::Bullet, level))
+			if (stack_has_geq_(Item::BulletClose, level))
 			{
 				item = stack_.back();
-				item.is_open = false;
 				stack_.pop_back();
 
 				strange_ = sp;
 				return true;
 			}
 
-			item.bullet(level, true);
-			strange_.pop_line(item.str);
+			item.bullet(level);
+			strange_.pop_line(item.text);
 			stack_.push_back(item);
+			stack_.back().what = Item::BulletClose;
 			return true;
 		}
 

@@ -24,57 +24,62 @@ TEST_CASE("markdown::Reader tests", "[ut][markdown][Reader]")
 		SECTION("h1")
 		{
 			scn.text = "# my heading";
-			exp.repr << "[heading](1){[text](my heading)}";
+			exp.repr << "[heading](1:my heading){}";
 		}
 		SECTION("h2")
 		{
 			scn.text = "## my heading";
-			exp.repr << "[heading](2){[text](my heading)}";
+			exp.repr << "[heading](2:my heading){}";
 		}
 		SECTION("h1h1")
 		{
 			scn.text = "# A\n# B";
-			exp.repr << "[heading](1){[text](A)}[heading](1){[text](B)}";
+			exp.repr << "[heading](1:A){}[heading](1:B){}";
 		}
 		SECTION("h1h2")
 		{
 			scn.text = "# A\n## B";
-			exp.repr << "[heading](1){[text](A)[heading](2){[text](B)}}";
+			exp.repr << "[heading](1:A){[heading](2:B){}}";
 		}
 		SECTION("h1h3")
 		{
 			scn.text = "# A\n### B";
-			exp.repr << "[heading](1){[text](A)[heading](3){[text](B)}}";
+			exp.repr << "[heading](1:A){[heading](3:B){}}";
 		}
 		SECTION("b1")
 		{
 			scn.text = "* A";
-			exp.repr << "[bullet](1){[text](A)}";
+			exp.repr << "[bullet](1:A){}";
 		}
 		SECTION("b1b1")
 		{
 			scn.text = "* A\n* B";
-			exp.repr << "[bullet](1){[text](A)}[bullet](1){[text](B)}";
+			exp.repr << "[bullet](1:A){}[bullet](1:B){}";
 		}
 		SECTION("b1b2 - textile")
 		{
 			scn.text = "* A\n** B";
-			exp.repr << "[bullet](1){[text](A)[bullet](2){[text](B)}}";
+			exp.repr << "[bullet](1:A){[bullet](2:B){}}";
 		}
 		SECTION("b1b2 - markdown space")
 		{
 			scn.text = "* A\n * B";
-			exp.repr << "[bullet](1){[text](A)[bullet](2){[text](B)}}";
+			exp.repr << "[bullet](1:A){[bullet](2:B){}}";
 		}
 		SECTION("b1b2 - markdown tab")
 		{
 			scn.text = "* A\n\t* B";
-			exp.repr << "[bullet](1){[text](A)[bullet](2){[text](B)}}";
+			exp.repr << "[bullet](1:A){[bullet](2:B){}}";
 		}
 		SECTION("h1b1h2")
 		{
 			scn.text = "# A\n* B\n## C";
-			exp.repr << "[heading](1){[text](A)[bullet](1){[text](B)}[heading](2){[text](C)}}";
+			exp.repr << "[heading](1:A){[bullet](1:B){}[heading](2:C){}}";
+		}
+		SECTION("line")
+		{
+			scn.text = "line";
+			exp.repr << "[line](line)";
 		}
 		REQUIRE(!exp.error);
 	}
@@ -90,23 +95,22 @@ TEST_CASE("markdown::Reader tests", "[ut][markdown][Reader]")
 	{
 		switch (item.what)
 		{
-			case markdown::Reader::Item::Heading:
-			if (item.is_open)
-				repr << "[heading](" << item.level << "){";
-			else
-				repr << "}";
+			case markdown::Reader::Item::HeadingOpen:
+			repr << "[heading](" << item.level << ":" << item.text << "){";
+			break;
+			case markdown::Reader::Item::HeadingClose:
+			repr << "}";
 			break;
 
-			case markdown::Reader::Item::Bullet:
-			if (item.is_open)
-				repr << "[bullet](" << item.level << "){";
-			else
-				repr << "}";
+			case markdown::Reader::Item::BulletOpen:
+			repr << "[bullet](" << item.level << ":" << item.text << "){";
 			break;
-
+			case markdown::Reader::Item::BulletClose:
+			repr << "}";
+			break;
 
 			case markdown::Reader::Item::Line:
-			repr << "[line](" << item.str << ")";
+			repr << "[line](" << item.text << ")";
 			break;
 		}
 	}

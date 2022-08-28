@@ -6,6 +6,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <ostream>
 
 namespace gubg { namespace markdown { 
 
@@ -14,16 +15,15 @@ namespace gubg { namespace markdown {
 	public:
 		struct Item
 		{
-			enum What {Heading, Bullet, Line};
+			enum What {HeadingOpen, HeadingClose, BulletOpen, BulletClose, Line};
 			What what;
-			bool is_open;
 			unsigned int level;
-			std::string str;
+			std::string text;
 
 			void clear() {*this = Item{};}
-			void heading(unsigned int level, bool is_open);
-			void bullet(unsigned int level, bool is_open);
-			void line(const std::string &str);
+			void heading(unsigned int level);
+			void bullet(unsigned int level);
+			void line(const std::string &text);
 		};
 
 		std::optional<std::string> error;
@@ -47,6 +47,9 @@ namespace gubg { namespace markdown {
 
 		bool stack_has_geq_(Item::What what, unsigned int level) const;
 	};
+
+	std::ostream &operator<<(std::ostream &, const Reader::Item::What &);
+	std::ostream &operator<<(std::ostream &, const Reader::Item &);
 
 } } 
 
