@@ -28,7 +28,7 @@ namespace gubg { namespace naft {
 
 	bool Reader::operator()(Item &item)
 	{
-		MSS_BEGIN(bool, "");
+		MSS_BEGIN(bool);
 
 		for (bool again = true; again; )
 		{

@@ -91,7 +91,19 @@ namespace gubg { namespace markdown {
 	{
 		const auto sp = strange_;
 
-		if (const auto level = strange_.strip('#'); level > 0 && strange_.pop_if(' '))
+		auto pop_markdown_heading = [&](unsigned int &level){
+			strange_ = sp;
+			level = strange_.strip('#');
+			return level > 0 && strange_.pop_if(' ');
+		};
+		
+		auto pop_textile_heading = [&](unsigned int &level){
+			strange_ = sp;
+			return strange_.pop_if('h') && strange_.pop_decimal(level) && strange_.pop_if('.') && strange_.pop_if(' ');
+		};
+
+		unsigned int level = 0;
+		if (pop_markdown_heading(level) || pop_textile_heading(level))
 		{
 			// Close all bullets and headings that are nested deeper
 			if (stack_has_geq_(Item::BulletClose, 0) || stack_has_geq_(Item::HeadingClose, level))
