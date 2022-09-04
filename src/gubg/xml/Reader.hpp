@@ -2,42 +2,58 @@
 #define HEADER_gubg_xml_Reader_hpp_ALREADY_INCLUDED
 
 #include <gubg/Strange.hpp>
+
 #include <string>
-#include <filesystem>
-#include <optional>
 #include <vector>
+#include <optional>
 
 namespace gubg { namespace xml { 
 
 	class Reader
 	{
 	public:
-		void clear();
-
-		bool from_file(const std::filesystem::path &);
-		bool from_string(const std::string &);
-
-		struct Prolog
+		struct Item
 		{
-			std::string version;
-			std::string encoding;
+			enum Kind {Unset, Prolog, TagOpen, TagClose};
+
+			Kind kind = Kind::Unset;
+
+			std::string tag;
+
+			using Attribute = std::pair<std::string, std::string>;
+			using Attributes = std::vector<Attribute>;
+			Attributes attributes;
 		};
-		std::optional<Prolog> prolog;
+
+		std::optional<std::string> error;
+
+		Reader() {}
+		Reader(const std::string &content) {setup(content);}
+
+		void setup(const std::string &content);
+
+		bool operator()(Item &item);
 
 	private:
-		bool pop_attr_(std::string &key, std::string &value);
-		void pop_whitespace_();
-		bool pop_open_tag_();
-
-		struct NodeDescr
+		struct Error
 		{
-			std::string tag;
-			using Attribute = std::pair<std::string, std::string>;
-			std::vector<Attribute> attributes;
-		};
-		std::vector<NodeDescr> node_stack_;
+			std::optional<std::string> &error;
 
-		gubg::Strange xml_;
+			Error(std::optional<std::string> &error): error(error) {}
+
+			void operator()(const std::string &msg);
+		};
+		Error error_{error};
+		void pop_whitespace_();
+		static void pop_whitespace_(gubg::Strange &);
+		bool pop_prolog_(Item &);
+		static bool pop_attribute_(Item::Attribute &, gubg::Strange &, Error &);
+		static bool unescape_(std::string &, Error &);
+
+		gubg::Strange strange_;
+		std::vector<std::string> tag_stack_;
+		bool emit_top_stack_ = false;
+		bool check_prolog_ = true;
 	};
 
 } } 
