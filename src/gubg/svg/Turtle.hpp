@@ -1,8 +1,8 @@
 #ifndef HEADER_gubg_svg_Turtle_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_svg_Turtle_hpp_ALREADY_INCLUDED
 
-#include "gubg/xml/Builder.hpp"
-#include "gubg/V2.hpp"
+#include <gubg/xml/Writer.hpp>
+#include <gubg/V2.hpp>
 #include <sstream>
 #include <vector>
 
@@ -22,16 +22,10 @@ namespace gubg { namespace svg {
         bool stream(std::ostream &os, unsigned int x_width, unsigned int y_width) const
         {
             MSS_BEGIN(bool);
-            using namespace gubg::xml::builder;
-            {
-                Header header(os);
-                header.attr("version", "1.0");
-                header.attr("encoding", "UTF-8");
-            }
-            {
-                Comment(os) << "Created by gubg" << " (http://www.github.com/gfannes/gubg)";
-            }
-            Tag svg(os, "svg");
+            xml::Writer writer{os};
+            writer.prolog("version", "1.0", "encoding", "UTF-8");
+            writer.comment("Created by gubg (http://www.github.com/gfannes/gubg)");
+            auto svg = writer.tag("svg");
             svg.attr("width", x_width);
             svg.attr("height", y_width);
             {

@@ -1,23 +1,20 @@
-#include "catch.hpp"
-#include "gubg/xml/Builder.hpp"
+#include <gubg/xml/Writer.hpp>
+
+#include <catch.hpp>
+
 #include <fstream>
 #include <sstream>
 
-using namespace gubg::xml::builder;
+using namespace gubg;
 
 TEST_CASE("SVG tests", "[ut][svg]")
 {
     std::ofstream fo("test.svg");
+    xml::Writer writer{fo};
 
-    {
-        Header header(fo);
-        header.attr("version", "1.0");
-        header.attr("encoding", "UTF-8");
-    }
-    {
-        Comment(fo) << "Created by gubg" << " (http://www.github.com/gfannes/gubg)";
-    }
-    Tag svg(fo, "svg");
+    writer.prolog("version", "1.0", "encoding", "UTF-8");
+    writer.comment("Created by gubg (http://www.github.com/gfannes/gubg)");
+    auto svg = writer.tag("svg");
     svg.attr("width", 800);
     svg.attr("height", 600);
     auto g = svg.tag("g");
