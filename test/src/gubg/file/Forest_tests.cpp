@@ -12,7 +12,7 @@ TEST_CASE("file::Forest tests", "[ut][file][Forest]")
     REQUIRE(!gubg_dir.empty());
 
     Forest forest;
-    REQUIRE(is_ok(forest.add(File(gubg_dir+"/ruby"), {"rb"})));
+    REQUIRE(is_ok(forest.add(File(gubg_dir+"/gubg.build"), {"rb"})));
     L("\nAll files");
     for (auto f: forest.allFiles())
         L(f.name());
@@ -21,6 +21,6 @@ TEST_CASE("file::Forest tests", "[ut][file][Forest]")
         L(r.name());
 
     File resolved;
-    REQUIRE(is_ok(forest.resolve(resolved, File("ruby/gubg/shared.rb"))));
+    REQUIRE(is_ok(forest.resolve(resolved, File("gubg.build/src/gubg/shared.rb"))));
     L(resolved.name());
 }
