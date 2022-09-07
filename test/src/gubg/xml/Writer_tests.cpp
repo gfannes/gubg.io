@@ -28,6 +28,21 @@ TEST_CASE("xml::Writer tests", "[ut][xml][Writer]")
         };
         exp.xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
     }
+    SECTION("<a/>")
+    {
+        scn.lambda = [](auto &w){
+            w.tag("a");
+        };
+        exp.xml = "<a/>";
+    }
+    SECTION("<a><b/></b>")
+    {
+        scn.lambda = [](auto &w){
+            auto a = w.tag("a");
+            auto b = a.tag("b");
+        };
+        exp.xml = "<a>\n  <b/>\n</a>";
+    }
 
     std::ostringstream oss;
     xml::Writer writer{oss};

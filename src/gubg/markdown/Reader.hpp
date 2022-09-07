@@ -15,7 +15,9 @@ namespace gubg { namespace markdown {
 	public:
 		struct Item
 		{
-			enum What {HeadingOpen, HeadingClose, BulletOpen, BulletClose, Line};
+			// Heading levels start at 1, Bullet levels at 0
+			// A normal line will be threated as a Bullet level 0
+			enum What {HeadingOpen, HeadingClose, BulletOpen, BulletClose};
 			What what;
 			unsigned int level;
 			std::string text;

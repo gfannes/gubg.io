@@ -35,6 +35,32 @@ namespace gubg { namespace xml { namespace writer {
             dying.state_ = State::Dead;
         }
 
+        ~Tag()
+        {
+            switch (state_)
+            {
+                case Attributes:
+                switch (close_type_)
+                {
+                    case ShortClose:
+                    *os_ << "/>";
+                    break;
+                    case NoShortClose:
+                    *os_ << "></" << name_ << ">";
+                    break;
+                }
+                break;
+
+                case Elements:
+                if (!did_stream_)
+                    *os_ << std::endl << std::string(2*indent_, ' ');
+                *os_ << "</" << name_ << ">";
+                break;
+
+                default: break;
+            }
+        }
+
             template <typename Name>
         Tag &attr(const Name &name, const std::string &value)
         {
@@ -66,29 +92,6 @@ namespace gubg { namespace xml { namespace writer {
             *os_ << t;
             did_stream_ = true;
             return *this;
-        }
-        ~Tag()
-        {
-            switch (state_)
-            {
-                case Attributes:
-                switch (close_type_)
-                {
-                    case ShortClose:
-                    *os_ << "/>";
-                    break;
-                    case NoShortClose:
-                    *os_ << "></" << name_ << ">";
-                    break;
-                }
-                break;
-                case Elements:
-                if (!did_stream_)
-                    *os_ << std::endl << std::string(2*indent_, ' ');
-                *os_ << "</" << name_ << ">";
-                break;
-                default: break;
-            }
         }
 
     private:

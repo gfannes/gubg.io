@@ -79,7 +79,12 @@ TEST_CASE("markdown::Reader tests", "[ut][markdown][Reader]")
 		SECTION("line")
 		{
 			scn.text = "line";
-			exp.repr << "[line](line)";
+			exp.repr << "[bullet](0:line){}";
+		}
+		SECTION("line b1")
+		{
+			scn.text = "line\n* B";
+			exp.repr << "[bullet](0:line){[bullet](1:B){}}";
 		}
 		REQUIRE(!exp.error);
 	}
@@ -107,10 +112,6 @@ TEST_CASE("markdown::Reader tests", "[ut][markdown][Reader]")
 			break;
 			case markdown::Reader::Item::BulletClose:
 			repr << "}";
-			break;
-
-			case markdown::Reader::Item::Line:
-			repr << "[line](" << item.text << ")";
 			break;
 		}
 	}

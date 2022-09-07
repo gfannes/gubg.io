@@ -3,6 +3,7 @@
 
 #include <string>
 #include <optional>
+#include <cstring>
 
 namespace gubg { namespace cli { 
 
@@ -38,6 +39,26 @@ namespace gubg { namespace cli {
 
             try { ui = std::stoul(argv_[argix_]); }
             catch (...) {return false;}
+
+            ++argix_;
+
+            return true;
+        }
+        bool pop(bool &b)
+        {
+            if (argix_ >= argc_)
+                return false;
+
+            auto is = [&](const char *wanted){
+                return std::strcmp(argv_[argix_], wanted) == 0;
+            };
+
+            b = (false
+                || is("y")
+                || is("yes")
+                || is("1")
+                || is("true")
+                );
 
             ++argix_;
 

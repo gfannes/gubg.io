@@ -15,12 +15,6 @@ namespace gubg { namespace markdown {
 		this->what = BulletOpen;
 		this->level = level;
 	}
-	void Reader::Item::line(const std::string &text)
-	{
-		clear();
-		this->what = Line;
-		this->text = text;
-	}
 
 	bool Reader::operator()(Item &item)
 	{
@@ -37,17 +31,9 @@ namespace gubg { namespace markdown {
 			return true;
 		}
 
-		if (false) ;
-		else if (heading_(item)) { }
+		if (heading_(item)) { }
 		else if (bullet_(item)) { }
-		else if (Strange line; strange_.pop_line(line))
-		{
-			item.line(line.str());
-		}
-		else
-		{
-			MSS(false, error_("Could not handle content"));
-		}
+		else { MSS(false, error_("Could not handle content")); }
 
 		MSS_END();
 	}
@@ -61,7 +47,6 @@ namespace gubg { namespace markdown {
 			case Reader::Item::HeadingClose: os << "HeadingClose"; break;
 			case Reader::Item::BulletOpen: os << "BulletOpen"; break;
 			case Reader::Item::BulletClose: os << "BulletClose"; break;
-			case Reader::Item::Line: os << "Line"; break;
 		}
 		return os;
 	}
@@ -132,29 +117,32 @@ namespace gubg { namespace markdown {
 
 		const auto space_count = strange_.strip(" \t");
 		const auto star_count = strange_.strip('*');
+		unsigned int level = 0;
 		if (star_count > 0 && strange_.pop_if(' '))
 		{
-			const auto level = star_count + space_count;
+			level = star_count + space_count;
+		}
+		else
+		{
+			strange_ = sp;
+		}
 
-			// Close all bullets that are nested deeper
-			if (stack_has_geq_(Item::BulletClose, level))
-			{
-				item = stack_.back();
-				stack_.pop_back();
+		// Close all bullets that are nested deeper
+		if (stack_has_geq_(Item::BulletClose, level))
+		{
+			item = stack_.back();
+			stack_.pop_back();
 
-				strange_ = sp;
-				return true;
-			}
-
-			item.bullet(level);
-			strange_.pop_line(item.text);
-			stack_.push_back(item);
-			stack_.back().what = Item::BulletClose;
+			strange_ = sp;
 			return true;
 		}
 
-		strange_ = sp;
-		return false;
+		item.bullet(level);
+		strange_.pop_line(item.text);
+		stack_.push_back(item);
+		stack_.back().what = Item::BulletClose;
+
+		return true;
 	}
 
 	bool Reader::stack_has_geq_(Item::What what, unsigned int level) const
