@@ -5,19 +5,19 @@
 #include "gubg/platform.h"
 #include <fstream>
 
-#define GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM 0
+#define gubg_use_std_experimental_filesystem 0
 #if defined(_MSVC_LANG) && _MSVC_LANG < 201703
-#undef  GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM
-#define GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM 1
+#undef  gubg_use_std_experimental_filesystem
+#define gubg_use_std_experimental_filesystem 1
 #endif
 #if GUBG_PLATFORM_OS_OSX
 #if GUBG_PLATFORM_OS_OSX_VERSION < MAC_OS_X_VERSION_10_15
-#undef  GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM
-#define GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM 1
+#undef  gubg_use_std_experimental_filesystem
+#define gubg_use_std_experimental_filesystem 1
 #endif
 #endif
 
-#if GUBG_USE_STD_EXPERIMENTAL_FILESYSTEM
+#if gubg_use_std_experimental_filesystem
 #include <experimental/filesystem>
 namespace std {
     namespace filesystem { 
@@ -47,8 +47,11 @@ namespace std {
 #include <filesystem>
 #endif
 
-#if GUBG_PLATFORM_COMPILER_GCC
-#else
+#if __clang__ && __clang_major__ <= 13
+#define gubg_inject_std_hash_for_path 1
+#endif
+
+#if gubg_inject_std_hash_for_path
 namespace std { 
     template<> struct hash<std::filesystem::path>
     {
