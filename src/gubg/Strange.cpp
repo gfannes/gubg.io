@@ -389,6 +389,17 @@ namespace gubg {
         forward_(1);
         return true;
     }
+    bool Strange::pop_if_any(const std::string &str)
+    {
+        assert(invariants_());
+        if (empty())
+            return false;
+        const auto ix = str.find(*s_);
+        if (ix == std::string::npos)
+            return false;
+        forward_(1);
+        return true;
+    }
     bool Strange::pop_back_if(const char ch)
     {
         assert(invariants_());

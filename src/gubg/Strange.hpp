@@ -95,6 +95,7 @@ namespace gubg {
         bool pop_float(float &res);
 
         bool pop_if(const char ch);
+        bool pop_if_any(const std::string &);
         bool pop_back_if(const char ch);
         bool pop_front();
         bool pop_back();
