@@ -1,7 +1,7 @@
 #ifndef HEADER_gubg_string_algo_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_string_algo_hpp_ALREADY_INCLUDED
 
-#include "gubg/OnlyOnce.hpp"
+#include <gubg/OnlyOnce.hpp>
 #include <sstream>
 #include <cctype>
 
@@ -96,6 +96,18 @@ namespace gubg { namespace string_algo {
     {
         for (auto &ch: str)
             ch = std::toupper(ch);
+    }
+
+    inline unsigned int strip_right(std::string &str, const std::string &chars)
+    {
+        unsigned int count = 0;
+        for (; !str.empty(); str.pop_back())
+        {
+            if (chars.find(str.back()) == std::string::npos)
+                break;
+            ++count;
+        }
+        return count;
     }
 
 } }

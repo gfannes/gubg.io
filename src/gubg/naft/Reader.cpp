@@ -132,7 +132,7 @@ namespace gubg { namespace naft {
 	// Privates
 	void Reader::pop_whitespace_()
 	{
-		strange_.strip(" \t\n\r");
+		strange_.strip_left(" \t\n\r");
 	}
 
 	bool Reader::error_(const std::string &msg)

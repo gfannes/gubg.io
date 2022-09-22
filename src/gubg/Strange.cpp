@@ -90,7 +90,7 @@ namespace gubg {
         return nullptr != std::memchr(s_, ch, l_);
     }
 
-    unsigned int Strange::strip(char ch)
+    unsigned int Strange::strip_left(char ch)
     {
         unsigned int count = 0;
         for (; !empty(); pop_front())
@@ -101,12 +101,35 @@ namespace gubg {
         }
         return count;
     }
-    unsigned int Strange::strip(const std::string &chars)
+    unsigned int Strange::strip_left(const std::string &chars)
     {
         unsigned int count = 0;
         for (; !empty(); pop_front())
         {
             if (chars.find(front()) == std::string::npos)
+                break;
+            ++count;
+        }
+        return count;
+    }
+
+    unsigned int Strange::strip_right(char ch)
+    {
+        unsigned int count = 0;
+        for (; !empty(); pop_back())
+        {
+            if (back() != ch)
+                break;
+            ++count;
+        }
+        return count;
+    }
+    unsigned int Strange::strip_right(const std::string &chars)
+    {
+        unsigned int count = 0;
+        for (; !empty(); pop_back())
+        {
+            if (chars.find(back()) == std::string::npos)
                 break;
             ++count;
         }
@@ -599,17 +622,6 @@ namespace gubg {
         std::memcpy(dst, s_, nr);
         forward_(nr);
         return true;
-    }
-
-    void Strange::ltrim(const char ch)
-    {
-        while (!empty() && ch == front())
-            pop_front();
-    }
-    void Strange::rtrim(const char ch)
-    {
-        while (!empty() && ch == back())
-            pop_back();
     }
 
     Strange::Position Strange::position() const

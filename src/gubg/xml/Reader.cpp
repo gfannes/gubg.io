@@ -105,7 +105,7 @@ namespace gubg { namespace xml {
 	}
 	void Reader::pop_whitespace_(gubg::Strange &strange)
 	{
-		strange.strip(" \t\n\r");
+		strange.strip_left(" \t\n\r");
 	}
 
 	bool Reader::pop_prolog_(Item &item)

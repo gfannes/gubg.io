@@ -31,6 +31,15 @@ namespace gubg { namespace markdown {
 			return true;
 		}
 
+		if (close_count_ > 0)
+		{
+			MSS(!stack_.empty(), error_("Expected stack_ items when close_count_ > 0"));
+			item = stack_.back();
+			stack_.pop_back();
+			--close_count_;
+			return true;
+		}
+
 		if (heading_(item)) { }
 		else if (bullet_(item)) { }
 		else { MSS(false, error_("Could not handle content")); }
@@ -78,7 +87,7 @@ namespace gubg { namespace markdown {
 
 		auto pop_markdown_heading = [&](unsigned int &level){
 			strange_ = sp;
-			level = strange_.strip('#');
+			level = strange_.strip_left('#');
 			return level > 0 && strange_.pop_if(' ');
 		};
 		
@@ -115,8 +124,8 @@ namespace gubg { namespace markdown {
 	{
 		const auto sp = strange_;
 
-		const auto space_count = strange_.strip(" \t");
-		const auto star_count = strange_.strip('*');
+		const auto space_count = strange_.strip_left(" \t");
+		const auto star_count = strange_.strip_left('*');
 		unsigned int level = 0;
 		if (star_count > 0 && strange_.pop_if(' '))
 		{
@@ -124,6 +133,7 @@ namespace gubg { namespace markdown {
 		}
 		else
 		{
+			// We are reading a Bullet at level 0: reset the stripping we did above
 			strange_ = sp;
 		}
 
@@ -141,6 +151,9 @@ namespace gubg { namespace markdown {
 		strange_.pop_line(item.text);
 		stack_.push_back(item);
 		stack_.back().what = Item::BulletClose;
+		if (item.text.empty())
+			// We close empty lines to ensure that a bulleted list is not interpreted as childs of an empty line
+			close_count_ = 1;
 
 		return true;
 	}

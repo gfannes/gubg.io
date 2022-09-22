@@ -229,8 +229,8 @@ namespace gubg { namespace naft {
             static const std::string whitespace = " \t\n\r";
             return whitespace;
         }
-        void strip_() {strange_.strip(whitespace_());}
-        void strip_(Strange &strange) {strange.strip(whitespace_());}
+        void strip_() {strange_.strip_left(whitespace_());}
+        void strip_(Strange &strange) {strange.strip_left(whitespace_());}
 
         static void descape_node_(std::string &str) {descape_<'[', ']'>(str);}
         static void descape_attr_(std::string &str) {descape_<'(', ')'>(str);}

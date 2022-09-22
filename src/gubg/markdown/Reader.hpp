@@ -40,6 +40,7 @@ namespace gubg { namespace markdown {
 	private:
 		gubg::Strange strange_;
 		std::vector<Item> stack_;
+		unsigned int close_count_ = 0;
 
 		void setup_(std::string &&text);
 		void error_(const std::string &msg);

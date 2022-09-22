@@ -8,6 +8,7 @@
 #include <vector>
 #include <array>
 #include <tuple>
+#include <map>
 #include <set>
 
 #ifdef CHR
@@ -85,6 +86,17 @@ namespace gubg {
                 oss << (skipComma() ? "" : ", ") << hr(v);
             oss << '}';
             return oss.str();
+        }
+
+    template <typename Key, typename T>
+        std::string hr(const std::map<Key, T> &m)
+        {
+            std::string str;
+            str += "{";
+            for (const auto &[k,v]: m)
+                str += "\n\t" + hr(k) + ": " + hr(v);
+            str += "\n}";
+            return str;
         }
 
     template <typename It>

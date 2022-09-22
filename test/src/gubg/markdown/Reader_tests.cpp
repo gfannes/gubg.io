@@ -86,6 +86,11 @@ TEST_CASE("markdown::Reader tests", "[ut][markdown][Reader]")
 			scn.text = "line\n* B";
 			exp.repr << "[bullet](0:line){[bullet](1:B){}}";
 		}
+		SECTION("empty line b1")
+		{
+			scn.text = "\n* B";
+			exp.repr << "[bullet](0:){}[bullet](1:B){}";
+		}
 		REQUIRE(!exp.error);
 	}
 	// SECTION("negative")

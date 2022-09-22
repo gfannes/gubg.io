@@ -55,8 +55,10 @@ namespace gubg {
 
         bool contains(char ch) const;
 
-        unsigned int strip(char ch);
-        unsigned int strip(const std::string &chars);
+        unsigned int strip_left(char ch);
+        unsigned int strip_left(const std::string &chars);
+        unsigned int strip_right(char ch);
+        unsigned int strip_right(const std::string &chars);
 
         //Return true if !res.empty()
         bool pop_all(Strange &res);
@@ -106,9 +108,6 @@ namespace gubg {
 
         bool pop_line(Strange &line);
         bool pop_line(std::string &line);
-
-        void ltrim(const char ch);
-        void rtrim(const char ch);
 
         bool pop_lsb(std::uint8_t &);
         bool pop_lsb(std::uint16_t &);

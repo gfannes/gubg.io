@@ -548,40 +548,7 @@ TEST_CASE("gubg::Strange position tests", "[ut][Strange]")
     REQUIRE(exp.position.column == position.column);
 }
 
-TEST_CASE("gubg::Strange trim tests", "[ut][Strange][trim]")
-{
-    struct Scn
-    {
-        std::string content;
-    };
-    struct Exp
-    {
-        std::string trimmed;
-    };
-    
-    Scn scn;
-    Exp exp;
-
-    SECTION("empty") { }
-    SECTION("a b c")
-    {
-        exp.trimmed = "a b c";
-        SECTION("left 1") { scn.content = std::string(" ")+exp.trimmed; }
-        SECTION("left 2") { scn.content = std::string("  ")+exp.trimmed; }
-        SECTION("right 1") { scn.content = exp.trimmed+std::string(" "); }
-        SECTION("right 2") { scn.content = exp.trimmed+std::string("  "); }
-        SECTION("left 1 right 1") { scn.content = std::string(" ")+exp.trimmed+std::string(" "); }
-    }
-
-    gubg::Strange strange{scn.content};
-
-    strange.ltrim(' ');
-    strange.rtrim(' ');
-
-    REQUIRE(strange.str() == exp.trimmed);
-}
-
-TEST_CASE("gubg::Strange strip tests", "[ut][Strange][strip]")
+TEST_CASE("gubg::Strange strip_left/strip_right tests", "[ut][Strange][strip_left][strip_right]")
 {
     struct Scn
     {
@@ -618,10 +585,21 @@ TEST_CASE("gubg::Strange strip tests", "[ut][Strange][strip]")
 
     {
     	gubg::Strange strange{scn.content};
-    	REQUIRE(strange.strip('a') == exp.count_a);
+    	REQUIRE(strange.strip_left('a') == exp.count_a);
     }
     {
     	gubg::Strange strange{scn.content};
-    	REQUIRE(strange.strip("abc") == exp.count_abc);
+    	REQUIRE(strange.strip_left("abc") == exp.count_abc);
+    }
+
+    std::string reverse_content = scn.content;
+    std::reverse(reverse_content.begin(), reverse_content.end());
+    {
+    	gubg::Strange strange{reverse_content};
+    	REQUIRE(strange.strip_right('a') == exp.count_a);
+    }
+    {
+    	gubg::Strange strange{reverse_content};
+    	REQUIRE(strange.strip_right("abc") == exp.count_abc);
     }
 }	
