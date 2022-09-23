@@ -1,6 +1,8 @@
 #include <gubg/naft/Reader.hpp>
 #include <gubg/mss.hpp>
 
+#include <cstring>
+
 namespace gubg { namespace naft { 
 
 	std::string Reader::Item::key() const
@@ -17,6 +19,16 @@ namespace gubg { namespace naft {
 		if (ix == std::string::npos)
 			return "";
 		return text.substr(ix+1);
+	}
+
+	bool Reader::Item::key(const std::string &wanted) const
+	{
+		auto ix = text.find(':');
+		if (ix == std::string::npos)
+			ix = text.size();
+		if (ix != wanted.size())
+			return false;
+		return std::strncmp(text.data(), wanted.data(), ix) == 0;
 	}
 
 	void Reader::setup(const std::string &str)

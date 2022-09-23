@@ -1,7 +1,7 @@
 #ifndef HEADER_gubg_naft_Document_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_naft_Document_hpp_ALREADY_INCLUDED
 
-#include "gubg/naft/Node.hpp"
+#include <gubg/naft/Node.hpp>
 #include <ostream>
 
 namespace gubg { namespace naft {

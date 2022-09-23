@@ -20,6 +20,8 @@ namespace gubg { namespace naft {
             
             std::string key() const;
             std::string value() const;
+
+            bool key(const std::string &wanted) const;
         };
 
         std::optional<std::string> error;
