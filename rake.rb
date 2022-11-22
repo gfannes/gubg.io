@@ -37,7 +37,7 @@ namespace :sedes do
                 when 2
                     sh "sedes -i abc.naft -o abc.hpp"
                     sh "cat abc.hpp"
-                    cooker = GUBG::Build::Cooker.new
+                    cooker = Gubg::Build::Cooker.new
                     cooker.option("c++.std", 17).generate(:ninja, "app").ninja()
 
                     %w[empty optional array].each do |what|
