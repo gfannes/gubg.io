@@ -4,8 +4,8 @@ here = File.dirname(__FILE__)
 
 namespace :io do
 	task :prepare do
-		Dir.chdir(GUBG.mkdir(here, "extern")) do
-			GUBG.git_clone('https://github.com/ikalnytskyi', 'termcolor') do
+		Dir.chdir(Gubg.mkdir(here, "extern")) do
+			Gubg.git_clone('https://github.com/ikalnytskyi', 'termcolor') do
                 sh "git pull --rebase"
             end
         end
@@ -26,7 +26,7 @@ namespace :sedes do
         test_cases = (0...3).to_a
         test_cases.each do |tc|
             base = "test/ee/sedes"
-            Dir.chdir(GUBG.mkdir(here, base, tc)) do
+            Dir.chdir(Gubg.mkdir(here, base, tc)) do
                 case tc
                 when 0
                     sh "sedes -h"
