@@ -3,10 +3,13 @@
 #include <gubg/mss.hpp>
 #include <gubg/naft/Document.hpp>
 
+#include <oof.h>
+
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
 
+#include <iostream>
 #include <optional>
 
 namespace gubg { namespace tui {
@@ -15,7 +18,7 @@ namespace gubg { namespace tui {
     {
         std::optional<struct termios> old;
 
-        Pimpl()
+        Pimpl(const Config &config)
         {
             if (::tcgetattr(0, &old.emplace()) != 0)
                 old.reset();
@@ -28,21 +31,44 @@ namespace gubg { namespace tui {
                 // Do not echo each typed character
                 my.c_lflag &= ~ECHO;
 
-                my.c_cc[VMIN] = 1;
-                my.c_cc[VTIME] = 0;
+                if (config.timeout)
+                {
+                    my.c_cc[VMIN] = 1;
+                    my.c_cc[VTIME] = 0;
+                }
+                else
+                {
+                    my.c_cc[VMIN] = 0;
+                    my.c_cc[VTIME] = 1;
+                }
 
                 ::tcsetattr(0, TCSANOW, &my);
             }
+
+            std::cout << oof::cursor_visibility(false) << std::flush;
         }
         ~Pimpl()
         {
             if (old)
                 ::tcsetattr(0, TCSADRAIN, &old.value());
+
+            std::cout << oof::cursor_visibility(true) << std::flush;
         }
     };
 
-    Terminal::Terminal(): pimpl_(new Pimpl{})
+    Terminal::Terminal(const Config &config)
+        : pimpl_(new Pimpl{config})
     {
+    }
+
+    Terminal::Terminal()
+        : Terminal(Config{})
+    {
+    }
+
+    Terminal::Terminal(Terminal &&dying)
+    {
+        pimpl_.swap(dying.pimpl_);
     }
 
     Terminal::~Terminal()
@@ -62,13 +88,26 @@ namespace gubg { namespace tui {
         MSS_END();
     }
 
-    bool Terminal::read(char &ch)
+    bool Terminal::read(std::optional<char> &ch)
     {
         MSS_BEGIN(bool);
 
-        MSS(::read(0, &ch, 1) > 0);
+        const auto rc = ::read(0, &ch.emplace(), 1);
+        MSS(rc >= 0);
+        if (rc == 0)
+            ch.reset();
 
         MSS_END();
+    }
+
+    void Terminal::clear()
+    {
+        std::cout << oof::clear_screen() << std::flush;
+    }
+
+    void Terminal::print(const std::string &str, const Position &pos, int max_size)
+    {
+        std::cout << oof::position(pos.row, pos.col) << str.substr(0, max_size >= 0 ? max_size : std::string::npos) << std::flush;
     }
 
     std::ostream &operator<<(std::ostream &os, const Terminal::CharSize &size)
