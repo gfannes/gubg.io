@@ -15,7 +15,8 @@ TEST_CASE("", "[ut][tui][Terminal]")
 
     t.clear();
 
-    t.print("kaka", {10, 10}, 3);
+    for (auto i = 0u; i < 10; ++i)
+        t.print("kaka", {i, 10}, tui::Style::attention(i), 3);
 
     if (true)
     {

@@ -1,6 +1,8 @@
 #ifndef HEADER_gubg_tui_Terminal_hpp_ALREAD_INCLUDED
 #define HEADER_gubg_tui_Terminal_hpp_ALREAD_INCLUDED
 
+#include <gubg/tui/Style.hpp>
+
 #include <memory>
 #include <optional>
 #include <ostream>
@@ -41,7 +43,7 @@ namespace gubg { namespace tui {
 
         void clear();
 
-        void print(const std::string &, const Position &, int max_size = -1);
+        void print(std::string_view, const Position &, const Style & = {}, int max_size = -1);
 
     private:
         struct Pimpl;

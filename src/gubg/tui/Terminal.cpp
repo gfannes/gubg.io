@@ -52,7 +52,7 @@ namespace gubg { namespace tui {
             if (old)
                 ::tcsetattr(0, TCSADRAIN, &old.value());
 
-            std::cout << oof::cursor_visibility(true) << std::flush;
+            std::cout << oof::cursor_visibility(true) << oof::reset_formatting() << std::flush;
         }
     };
 
@@ -105,9 +105,9 @@ namespace gubg { namespace tui {
         std::cout << oof::clear_screen() << std::flush;
     }
 
-    void Terminal::print(const std::string &str, const Position &pos, int max_size)
+    void Terminal::print(std::string_view str, const Position &pos, const Style &style, int max_size)
     {
-        std::cout << oof::position(pos.row, pos.col) << str.substr(0, max_size >= 0 ? max_size : std::string::npos) << std::flush;
+        std::cout << oof::position(pos.row, pos.col) << style << str.substr(0, max_size >= 0 ? max_size : std::string::npos) << std::flush;
     }
 
     std::ostream &operator<<(std::ostream &os, const Terminal::CharSize &size)
