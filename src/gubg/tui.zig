@@ -1,8 +1,10 @@
 const std = @import("std");
 
 pub const Error = error{
+    Unknown,
     TCGetAttr,
     TCSetAttr,
+    IOCtl,
 };
 
 pub const Terminal = struct {
@@ -43,6 +45,22 @@ pub const Terminal = struct {
 
     pub fn deinit(self: *Self) void {
         _ = std.c.tcsetattr(0, platform.TCSA.NOW, &self.termios);
+    }
+
+    const CharSize = struct {
+        width: u32 = 0,
+        height: u32 = 0,
+    };
+    pub fn get_charsize() Error!CharSize {
+        var sz: platform.winsize = undefined;
+
+        if (std.c.ioctl(0, platform.T.IOCGWINSZ, &sz) != 0)
+            return Error.IOCtl;
+
+        return CharSize{
+            .width = sz.ws_col,
+            .height = sz.ws_row,
+        };
     }
 
     pub fn read_char(_: *Self) ?u8 {
