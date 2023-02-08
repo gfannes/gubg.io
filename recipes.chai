@@ -16,9 +16,6 @@ root.book("gubg/io", fun(b){
         rcp.depends_on("hpp")
         rcp.depends_on("std/func")
         rcp.depends_on("math/func")
-
-        rcp.add("src", "oof.cpp")
-        rcp.depends_on("oof")
     })
 
     b.recipe("ut", fun(rcp){
@@ -33,10 +30,6 @@ root.book("gubg/io", fun(b){
 
 root.recipe("termcolor", fun(rcp){
     rcp.add("extern/termcolor/include", "termcolor/*.hpp")
-})
-
-root.recipe("oof", fun(rcp){
-    rcp.add("extern/oof", "oof.h")
 })
 
 root.recipe("sedes", TargetType.Executable, fun(rcp){
