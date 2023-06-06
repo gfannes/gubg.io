@@ -7,7 +7,7 @@ namespace gubg {
 
 	std::ostream &Logger::os(int level)
 	{
-		return (level >= this->level ? std::cout : devnull);
+		return (this->level >= level ? std::cout : devnull);
 	}
 	std::ostream &Logger::error()
 	{

@@ -3,7 +3,6 @@
 
 #include <string>
 #include <optional>
-#include <cstring>
 
 namespace gubg { namespace cli { 
 
@@ -13,57 +12,10 @@ namespace gubg { namespace cli {
         template <typename Int>
         Range(Int argc, const char **argv): argc_(argc), argv_(argv) {}
 
-        bool pop(std::string &str)
-        {
-            if (argix_ >= argc_)
-                return false;
-            str = argv_[argix_++];
-            return true;
-        }
-        bool pop(int &i)
-        {
-            if (argix_ >= argc_)
-                return false;
-
-            try { i = std::stol(argv_[argix_]); }
-            catch (...) {return false;}
-                
-            ++argix_;
-
-            return true;
-        }
-        bool pop(unsigned int &ui)
-        {
-            if (argix_ >= argc_)
-                return false;
-
-            try { ui = std::stoul(argv_[argix_]); }
-            catch (...) {return false;}
-
-            ++argix_;
-
-            return true;
-        }
-        bool pop(bool &b)
-        {
-            if (argix_ >= argc_)
-                return false;
-
-            auto is = [&](const char *wanted){
-                return std::strcmp(argv_[argix_], wanted) == 0;
-            };
-
-            b = (false
-                || is("y")
-                || is("yes")
-                || is("1")
-                || is("true")
-                );
-
-            ++argix_;
-
-            return true;
-        }
+        bool pop(std::string &str);
+        bool pop(int &i);
+        bool pop(unsigned int &ui);
+        bool pop(bool &b);
 
         template <typename T>
         bool pop(std::optional<T> &opt)
