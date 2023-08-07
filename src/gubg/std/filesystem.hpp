@@ -50,7 +50,7 @@ namespace std {
 #if __clang__ && __clang_major__ <= 13
 #define gubg_inject_std_hash_for_path 1
 #endif
-#if __GNUC__ && __GNUC__ <= 11
+#if __GNUC__ && __GNUC__ <= 11 && __GNUC_MINOR__ <= 3
 #define gubg_inject_std_hash_for_path 1
 #endif
 
