@@ -1,4 +1,5 @@
 #include <gubg/cli/Range.hpp>
+
 #include <cstring>
 
 namespace gubg { namespace cli {
@@ -8,42 +9,6 @@ namespace gubg { namespace cli {
         if (argix_ >= argc_)
             return false;
         str = argv_[argix_++];
-        return true;
-    }
-
-    bool Range::pop(int &i)
-    {
-        if (argix_ >= argc_)
-            return false;
-
-        try
-        {
-            i = std::stol(argv_[argix_]);
-        } catch (...)
-        {
-            return false;
-        }
-
-        ++argix_;
-
-        return true;
-    }
-
-    bool Range::pop(unsigned int &ui)
-    {
-        if (argix_ >= argc_)
-            return false;
-
-        try
-        {
-            ui = std::stoul(argv_[argix_]);
-        } catch (...)
-        {
-            return false;
-        }
-
-        ++argix_;
-
         return true;
     }
 

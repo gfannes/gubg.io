@@ -1,23 +1,44 @@
 #ifndef HEADER_gubg_cli_Range_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_cli_Range_hpp_ALREADY_INCLUDED
 
-#include <string>
+#include <charconv>
+#include <concepts>
+#include <cstring>
 #include <optional>
+#include <string>
 
-namespace gubg { namespace cli { 
+namespace gubg { namespace cli {
 
     class Range
     {
     public:
-        template <typename Int>
-        Range(Int argc, const char **argv): argc_(argc), argv_(argv) {}
+        template<typename Int>
+        Range(Int argc, const char **argv)
+            : argc_(argc), argv_(argv)
+        {}
 
         bool pop(std::string &str);
-        bool pop(int &i);
-        bool pop(unsigned int &ui);
         bool pop(bool &b);
 
-        template <typename T>
+        template<std::integral T>
+        bool pop(T &v)
+        {
+            if (argix_ >= argc_)
+                return false;
+
+            const char *arg = argv_[argix_];
+            const auto size = std::strlen(arg);
+
+            auto res = std::from_chars(arg, arg + size, v);
+            if (res.ptr == arg)
+                return false;
+
+            ++argix_;
+
+            return true;
+        }
+
+        template<typename T>
         bool pop(std::optional<T> &opt)
         {
             if (argix_ >= argc_)
@@ -28,10 +49,10 @@ namespace gubg { namespace cli {
 
     private:
         const unsigned int argc_;
-        const char ** const argv_;
+        const char **const argv_;
         unsigned int argix_ = 0;
     };
 
-} }
+}} // namespace gubg::cli
 
 #endif

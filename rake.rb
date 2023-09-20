@@ -13,7 +13,7 @@ namespace :io do
 
     task :install do |t, args|
         require("gubg/build/Cooker")
-        cooker = Build::Cooker.new().option("c++.std", 17).output("bin")
+        cooker = Build::Cooker.new().option("c++.std", 20).output("bin")
 
         recipes = filter_recipes(args, %w[sedes])
         cooker.generate(:ninja, *recipes).ninja()
@@ -38,7 +38,7 @@ namespace :sedes do
                     sh "sedes -i abc.naft -o abc.hpp"
                     sh "cat abc.hpp"
                     cooker = Gubg::Build::Cooker.new
-                    cooker.option("c++.std", 17).generate(:ninja, "app").ninja()
+                    cooker.option("c++.std", 20).generate(:ninja, "app").ninja()
 
                     %w[empty optional array].each do |what|
                         hr_fn = {a: "hr.#{what}.a.txt", b: "hr.#{what}.b.txt"}
