@@ -4,6 +4,7 @@
 #include <fstream>
 #include <array>
 #include <cassert>
+#include <cstdint>
 
 namespace gubg { namespace file { 
 
