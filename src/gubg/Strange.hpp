@@ -1,7 +1,9 @@
 #ifndef HEADER_gubg_Strange_hpp_ALREADY_INCLUDED
 #define HEADER_gubg_Strange_hpp_ALREADY_INCLUDED
 
-#include "gubg/parse/numbers/Integer.hpp"
+#include <gubg/ix/Range.hpp>
+#include <gubg/parse/numbers/Integer.hpp>
+
 #include <cstdlib>
 #include <cassert>
 #include <ostream>
@@ -106,6 +108,7 @@ namespace gubg {
         bool pop_string(std::string &, size_t nr);
         bool pop_if(const std::string &);
 
+        bool pop_line(Strange &line, Strange &end);
         bool pop_line(Strange &line);
         bool pop_line(std::string &line);
 
@@ -140,6 +143,7 @@ namespace gubg {
                 ftor(part);
         }
 
+        ix::Range ix_range() const;
         Position position() const;
 
     private:

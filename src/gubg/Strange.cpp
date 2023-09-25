@@ -1,30 +1,38 @@
-#include "gubg/Strange.hpp"
-#include "gubg/debug.hpp"
+#include <gubg/Strange.hpp>
+
+#include <gubg/debug.hpp>
+
 #include <cassert>
 
-namespace gubg { 
+namespace gubg {
 
-    Strange::Strange():
-        s_(0), l_(0)
+    Strange::Strange()
+        : s_(0), l_(0)
     {
     }
-    Strange::Strange(const std::string &str): data_(new std::string(str)), s_(data_->data()), l_(data_->size())
+    Strange::Strange(const std::string &str)
+        : data_(new std::string(str)), s_(data_->data()), l_(data_->size())
     {
     }
-    Strange::Strange(const char *cstr): data_(new std::string(cstr)), s_(data_->data()), l_(data_->size())
+    Strange::Strange(const char *cstr)
+        : data_(new std::string(cstr)), s_(data_->data()), l_(data_->size())
     {
     }
-    Strange::Strange(const char *buffer, size_t len): data_(new std::string(buffer, len)), s_(data_->data()), l_(data_->size())
+    Strange::Strange(const char *buffer, size_t len)
+        : data_(new std::string(buffer, len)), s_(data_->data()), l_(data_->size())
     {
     }
-    Strange::Strange(std::string &&dying): data_(new std::string(dying)), s_(data_->data()), l_(data_->size())
+    Strange::Strange(std::string &&dying)
+        : data_(new std::string(dying)), s_(data_->data()), l_(data_->size())
     {
     }
 
-    Strange::Strange(const Strange &rhs): data_(rhs.data_), s_(rhs.s_), l_(rhs.l_)
+    Strange::Strange(const Strange &rhs)
+        : data_(rhs.data_), s_(rhs.s_), l_(rhs.l_)
     {
     }
-    Strange::Strange(Strange &&dying): data_(std::move(dying.data_)), s_(dying.s_), l_(dying.l_)
+    Strange::Strange(Strange &&dying)
+        : data_(std::move(dying.data_)), s_(dying.s_), l_(dying.l_)
     {
     }
 
@@ -77,7 +85,7 @@ namespace gubg {
     char Strange::back() const
     {
         assert(s_ && l_);
-        return s_[l_-1];
+        return s_[l_ - 1];
     }
     void Strange::clear()
     {
@@ -159,7 +167,7 @@ namespace gubg {
                 {
                     res.data_ = data_;
                     res.s_ = sp.s_;
-                    res.l_ = s_-res.s_;
+                    res.l_ = s_ - res.s_;
                     pop_front();
                     return true;
                 }
@@ -192,48 +200,48 @@ namespace gubg {
         res = s.str();
         return !res.empty();
     }
-    //Does not pop ch
+    // Does not pop ch
     bool Strange::pop_to(Strange &res, const char ch)
     {
         assert(invariants_());
         if (empty())
             return false;
-        char *ptr = (char*)std::memchr(s_, ch, l_);
+        char *ptr = (char *)std::memchr(s_, ch, l_);
         if (!ptr)
             return false;
         res.data_ = data_;
         res.s_ = s_;
-        res.l_ = ptr-s_;
+        res.l_ = ptr - s_;
         forward_(res.l_);
         return true;
     }
-    //Does not pop str
+    // Does not pop str
     bool Strange::pop_to(Strange &res, const std::string &str)
     {
         assert(invariants_());
         if (str.empty())
             return false;
-        //We will iteratively search for ch, and try to match the rest of str
+        // We will iteratively search for ch, and try to match the rest of str
         const char ch = str[0];
         const size_t s = str.size();
         const Strange sp = *this;
-        while (char *ptr = (char*)std::memchr(s_, ch, l_))
+        while (char *ptr = (char *)std::memchr(s_, ch, l_))
         {
-            const size_t l = ptr-s_;
+            const size_t l = ptr - s_;
             forward_(l);
             if (size() < s)
                 break;
             if (0 == std::memcmp(str.data(), s_, s))
             {
-                //We found a match at this location
+                // We found a match at this location
                 res.data_ = data_;
                 res.s_ = sp.s_;
-                res.l_ = s_-res.s_;
+                res.l_ = s_ - res.s_;
                 return true;
             }
             else
             {
-                //No full match was found, we forward to the next character and try again
+                // No full match was found, we forward to the next character and try again
                 forward_(1);
             }
         }
@@ -268,18 +276,18 @@ namespace gubg {
     bool Strange::diff_to(const Strange &strange)
     {
         if (empty())
-            //Already at the end
+            // Already at the end
             return false;
         if (strange.empty())
-            //If strange is empty, we cannot trust its s_. We assume strange ran to its end and will return everything in res.
+            // If strange is empty, we cannot trust its s_. We assume strange ran to its end and will return everything in res.
             return true;
         if (strange.s_ < s_)
-            //Not really expected
+            // Not really expected
             return false;
         l_ = (strange.s_ - s_);
         return true;
     }
-    //Pops ch too, set inclusive to true if you want ch to be included in res
+    // Pops ch too, set inclusive to true if you want ch to be included in res
     bool Strange::pop_until(Strange &res, const char ch, bool inclusive)
     {
         assert(invariants_());
@@ -291,7 +299,7 @@ namespace gubg {
                 res.data_ = data_;
                 res.s_ = s_;
                 res.l_ = i + (inclusive ? 1 : 0);
-                forward_(i+1);
+                forward_(i + 1);
                 return true;
             }
 
@@ -312,20 +320,20 @@ namespace gubg {
             return true;
         const size_t s = str.size();
         if (size() < s)
-            //We are to small to match str
+            // We are to small to match str
             return false;
         const auto ch = str.front();
-        const auto l2check = l_-s+1;
+        const auto l2check = l_ - s + 1;
         for (size_t i = 0; i < l2check; ++i)
             if (s_[i] == ch)
             {
-                //Pontential match, check the rest of str
-                if (!std::memcmp(str.data(), s_+i, s))
+                // Pontential match, check the rest of str
+                if (!std::memcmp(str.data(), s_ + i, s))
                 {
                     res.data_ = data_;
                     res.s_ = s_;
                     res.l_ = i + (inclusive ? s : 0);
-                    forward_(i+s);
+                    forward_(i + s);
                     return true;
                 }
             }
@@ -350,7 +358,7 @@ namespace gubg {
                 res.data_ = data_;
                 res.s_ = s_;
                 res.l_ = i + (inclusive ? 1 : 0);
-                forward_(i+1);
+                forward_(i + 1);
                 return true;
             }
 
@@ -385,7 +393,7 @@ namespace gubg {
         if (e == s_)
             return false;
         res = d;
-        forward_(e-s_);
+        forward_(e - s_);
         return true;
     }
     bool Strange::pop_float(float &res)
@@ -398,7 +406,7 @@ namespace gubg {
         if (e == s_)
             return false;
         res = d;
-        forward_(e-s_);
+        forward_(e - s_);
         return true;
     }
 
@@ -428,7 +436,7 @@ namespace gubg {
         assert(invariants_());
         if (empty())
             return false;
-        if (s_[l_-1] != ch)
+        if (s_[l_ - 1] != ch)
             return false;
         shrink_(1);
         return true;
@@ -480,7 +488,7 @@ namespace gubg {
         return true;
     }
 
-    bool Strange::pop_line(Strange &line)
+    bool Strange::pop_line(Strange &line, Strange &end)
     {
         S(nullptr);
         assert(invariants_());
@@ -490,8 +498,13 @@ namespace gubg {
         if (empty())
             return false;
 
-        //We start looking for 0xa because that is the most likely indicator of an end-of-line
-        //0xd can occur on its own, but that is old-mac style, which is not used anymore
+        line.data_ = data_;
+        line.s_ = s_;
+
+        end.data_ = data_;
+
+        // We start looking for 0xa because that is the most likely indicator of an end-of-line
+        // 0xd can occur on its own, but that is old-mac style, which is not used anymore
         const char *ptr = (const char *)std::memchr(s_, '\x0a', l_);
         if (!ptr)
         {
@@ -500,43 +513,52 @@ namespace gubg {
             if (!ptr)
             {
                 L("old-mac wasn't found either, we return everything we got, this is the last line");
-                line = *this;
-                forward_(l_);
-                return true;
+                line.l_ = l_;
+                end.l_ = 0;
             }
-            L("An old-mac end-of-line was found");
-            line.data_ = data_;
-            line.s_ = s_;
-            line.l_ = ptr-s_;
-            forward_(line.l_+1);
-            return true;
+            else
+            {
+                L("An old-mac end-of-line was found");
+                line.l_ = ptr - s_;
+                end.l_ = 1;
+            }
         }
-        L("0xa was found, we still need to determine if it is a unix or dos style end-of-line");
-        if (ptr == s_)
+        else
         {
-            L("This is an empty line, it does not make sense to check for 0xd");
-            line.data_ = data_;
-            line.s_ = s_;
-            line.l_ = 0;
-            forward_(1);
-            return true;
+            L("0xa was found, we still need to determine if it is a unix or dos style end-of-line");
+            if (ptr == s_)
+            {
+                L("This is an empty line, it does not make sense to check for 0xd");
+                line.l_ = 0;
+                end.l_ = 1;
+            }
+            else
+            {
+                L("We have to check for 0xd");
+                if (ptr[-1] == '\x0d')
+                {
+                    L("This line is dos-style terminated");
+                    line.l_ = ptr - s_ - 1;
+                    end.l_ = 2;
+                }
+                else
+                {
+                    L("No 0xd was found before ptr so we have a unix-style terminated line");
+                    line.l_ = ptr - s_;
+                    end.l_ = 1;
+                }
+            }
         }
-        L("We have to check for 0xd");
-        if (ptr[-1] == '\x0d')
-        {
-            L("This line is dos-style terminated");
-            line.data_ = data_;
-            line.s_ = s_;
-            line.l_ = ptr-s_-1;
-            forward_(line.l_+2);
-            return true;
-        }
-        L("No 0xd was found before ptr so we have a unix-style terminated line");
-        line.data_ = data_;
-        line.s_ = s_;
-        line.l_ = ptr-s_;
-        forward_(line.l_+1);
+
+        end.s_ = s_ + line.l_;
+        forward_(line.l_ + end.l_);
+
         return true;
+    }
+    bool Strange::pop_line(Strange &line)
+    {
+        Strange end;
+        return pop_line(line, end);
     }
     bool Strange::pop_line(std::string &line)
     {
@@ -546,7 +568,7 @@ namespace gubg {
         return b;
     }
 
-    template <typename T>
+    template<typename T>
     bool Strange::pop_lsb_(T &v)
     {
         assert(invariants_());
@@ -555,23 +577,23 @@ namespace gubg {
         v = 0;
         for (unsigned int i = 0; i < sizeof(v); ++i)
         {
-            T tmp = *(const T *)(s_+i);
-            tmp <<= i*8;
+            T tmp = *(const T *)(s_ + i);
+            tmp <<= i * 8;
             v |= tmp;
         }
         forward_(sizeof(v));
         return true;
     }
-    bool Strange::pop_lsb(std::uint8_t &v)  { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::uint8_t &v) { return pop_lsb_(v); }
     bool Strange::pop_lsb(std::uint16_t &v) { return pop_lsb_(v); }
     bool Strange::pop_lsb(std::uint32_t &v) { return pop_lsb_(v); }
     bool Strange::pop_lsb(std::uint64_t &v) { return pop_lsb_(v); }
-    bool Strange::pop_lsb(std::int8_t &v)   { return pop_lsb_(v); }
-    bool Strange::pop_lsb(std::int16_t &v)  { return pop_lsb_(v); }
-    bool Strange::pop_lsb(std::int32_t &v)  { return pop_lsb_(v); }
-    bool Strange::pop_lsb(std::int64_t &v)  { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::int8_t &v) { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::int16_t &v) { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::int32_t &v) { return pop_lsb_(v); }
+    bool Strange::pop_lsb(std::int64_t &v) { return pop_lsb_(v); }
 
-    template <typename T>
+    template<typename T>
     bool Strange::pop_msb_(T &v)
     {
         assert(invariants_());
@@ -581,19 +603,19 @@ namespace gubg {
         for (unsigned int i = 0; i < sizeof(v); ++i)
         {
             v <<= 8;
-            v |= *(std::uint8_t*)(s_+i);
+            v |= *(std::uint8_t *)(s_ + i);
         }
         forward_(sizeof(v));
         return true;
     }
-    bool Strange::pop_msb(std::uint8_t &v)  { return pop_msb_(v); }
+    bool Strange::pop_msb(std::uint8_t &v) { return pop_msb_(v); }
     bool Strange::pop_msb(std::uint16_t &v) { return pop_msb_(v); }
     bool Strange::pop_msb(std::uint32_t &v) { return pop_msb_(v); }
     bool Strange::pop_msb(std::uint64_t &v) { return pop_msb_(v); }
-    bool Strange::pop_msb(std::int8_t &v)   { return pop_msb_(v); }
-    bool Strange::pop_msb(std::int16_t &v)  { return pop_msb_(v); }
-    bool Strange::pop_msb(std::int32_t &v)  { return pop_msb_(v); }
-    bool Strange::pop_msb(std::int64_t &v)  { return pop_msb_(v); }
+    bool Strange::pop_msb(std::int8_t &v) { return pop_msb_(v); }
+    bool Strange::pop_msb(std::int16_t &v) { return pop_msb_(v); }
+    bool Strange::pop_msb(std::int32_t &v) { return pop_msb_(v); }
+    bool Strange::pop_msb(std::int64_t &v) { return pop_msb_(v); }
 
     bool Strange::pop_count(size_t nr)
     {
@@ -624,6 +646,13 @@ namespace gubg {
         return true;
     }
 
+    ix::Range Strange::ix_range() const
+    {
+        if (!data_)
+            return ix::Range();
+        return ix::Range(s_ - data_->data(), size());
+    }
+
     Strange::Position Strange::position() const
     {
         Position pos;
@@ -644,7 +673,7 @@ namespace gubg {
         return pos;
     }
 
-    //Privates
+    // Privates
     bool Strange::invariants_() const
     {
         if (!s_ && l_)
@@ -663,4 +692,4 @@ namespace gubg {
         l_ -= nr;
     }
 
-} 
+} // namespace gubg
