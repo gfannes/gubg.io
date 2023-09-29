@@ -75,12 +75,19 @@ TEST_CASE("gubg::Strange creation from std::string == abc tests", "[ut][Strange]
     }
     SECTION("front()")
     {
-        REQUIRE('a' == r.front());
+        REQUIRE(r.front() == 'a');
     }
     SECTION("back()")
     {
-        REQUIRE('c' == r.back());
+        REQUIRE(r.back() == 'c');
     }
+    SECTION("operator[]()")
+    {
+        REQUIRE(r[0] == 'a');
+        REQUIRE(r[1] == 'b');
+        REQUIRE(r[2] == 'c');
+    }
+
     SECTION("clear()")
     {
         REQUIRE(!r.empty());
@@ -401,6 +408,30 @@ TEST_CASE("gubg::Strange creation from std::string == abc tests", "[ut][Strange]
             REQUIRE(r.pop_line(line));
             REQUIRE(line.str() == "def");
         }
+    }
+
+    SECTION("pop_count()")
+    {
+        SECTION("nothing")
+        {
+            REQUIRE(!r.pop_count(4));
+            REQUIRE(r.pop_count(2));
+        }
+        SECTION("Strange")
+        {
+            Strange popped;
+            REQUIRE(!r.pop_count(popped, 4));
+            REQUIRE(r.pop_count(popped, 2));
+            REQUIRE(popped.str() == "ab");
+        }
+        SECTION("std::string")
+        {
+            std::string popped;
+            REQUIRE(!r.pop_count(popped, 4));
+            REQUIRE(r.pop_count(popped, 2));
+            REQUIRE(popped == "ab");
+        }
+        REQUIRE(r.str() == "c");
     }
 }
 TEST_CASE("gubg::Strange number tests", "[ut][Strange]")

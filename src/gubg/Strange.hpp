@@ -53,6 +53,8 @@ namespace gubg {
         std::string str() const;
         char front() const;
         char back() const;
+        char operator[](std::size_t ix) const;
+
         void clear();
 
         bool contains(char ch) const;
@@ -132,6 +134,7 @@ namespace gubg {
 
         bool pop_count(size_t nr);
         bool pop_count(Strange &, size_t nr);
+        bool pop_count(std::string &, size_t nr);
 
         bool pop_raw(char *dst, size_t nr);
 

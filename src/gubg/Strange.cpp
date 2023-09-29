@@ -87,6 +87,12 @@ namespace gubg {
         assert(s_ && l_);
         return s_[l_ - 1];
     }
+    char Strange::operator[](std::size_t ix) const
+    {
+        assert(s_ && ix < l_);
+        return s_[ix];
+    }
+
     void Strange::clear()
     {
         s_ = 0;
@@ -631,6 +637,15 @@ namespace gubg {
         res.data_ = data_;
         res.s_ = s_;
         res.l_ = nr;
+        forward_(nr);
+        return true;
+    }
+    bool Strange::pop_count(std::string &str, size_t nr)
+    {
+        if (l_ < nr)
+            return false;
+        str.resize(nr);
+        std::copy(s_, s_+nr, str.data());
         forward_(nr);
         return true;
     }
