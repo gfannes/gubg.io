@@ -8,6 +8,9 @@ namespace :io do
 			Gubg.git_clone('https://github.com/ikalnytskyi', 'termcolor') do
                 sh "git pull --rebase"
             end
+			Gubg.git_clone('https://github.com/nlohmann', 'json') do
+                sh "git pull --rebase"
+            end
         end
     end
 

@@ -24,12 +24,17 @@ root.book("gubg/io", fun(b){
             rcp.remove("test/src", "**/Descriptor*")
         }
         rcp.depends_on("func")
+        rcp.depends_on("nlohmann/json")
         rcp.depends_on("catch/func")
     })
 })
 
 root.recipe("termcolor", fun(rcp){
     rcp.add("extern/termcolor/include", "termcolor/*.hpp")
+})
+
+root.recipe("nlohmann/json", fun(rcp){
+    rcp.add("extern/json/single_include", "nlohmann/*.hpp")
 })
 
 root.recipe("sedes", TargetType.Executable, fun(rcp){
