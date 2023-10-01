@@ -1,20 +1,46 @@
-#include <gubg/Logger.hpp>
 #include <fstream>
+#include <gubg/Logger.hpp>
 #include <iostream>
 
-namespace gubg { 
-	std::ofstream devnull;
+namespace gubg {
+    std::ofstream devnull;
 
-	std::ostream &Logger::os(int level)
-	{
-		return (this->level >= level ? std::cout : devnull);
-	}
-	std::ostream &Logger::error()
-	{
-		return std::cout << "Error: ";
-	}
-	std::ostream &Logger::warning()
-	{
-		return std::cout << "Warning: ";
-	}
-} 
+    Logger::Logger()
+        : Logger(Config{})
+    {
+    }
+    Logger::Logger(const Config &config)
+    {
+        if (config.cout)
+            buffer_.ostreams_.push_back(std::cout);
+        if (!config.filename.empty())
+        {
+            fo_.open(config.filename);
+            if (fo_.is_open())
+                buffer_.ostreams_.push_back(fo_);
+        }
+    }
+
+    std::ostream &Logger::os(int level)
+    {
+        return (this->level >= level ? ostream_ : devnull);
+    }
+    std::ostream &Logger::error()
+    {
+        return ostream_ << "Error: ";
+    }
+    std::ostream &Logger::warning()
+    {
+        return ostream_ << "Warning: ";
+    }
+
+    // Privates
+    int Logger::Buffer::sync()
+    {
+        for (const auto &ref : ostreams_)
+            ref.get() << str();
+        str("");
+        return 0;
+    }
+
+} // namespace gubg
