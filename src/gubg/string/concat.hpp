@@ -4,6 +4,7 @@
 #include <gubg/hr.hpp>
 
 #include <string>
+#include <sstream>
 
 namespace gubg { namespace string {
 
@@ -13,7 +14,10 @@ namespace gubg { namespace string {
         template<typename Arg, typename... Rest>
         void concat(std::string &str, Arg arg, Rest... rest)
         {
-            str += hr(arg);
+            thread_local std::ostringstream oss;
+            oss.str();
+            oss << arg;
+            str += oss.str();
             concat(str, rest...);
         }
     } // namespace my
