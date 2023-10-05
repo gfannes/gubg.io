@@ -70,6 +70,7 @@ namespace gubg {
 
         //Does not pop ch or str
         bool pop_to(Strange &res, const char ch);
+        bool pop_to(const char ch);
         bool pop_to(Strange &res, const std::string &str);
         bool pop_to_any(Strange &res, const std::string &str);
         bool pop_to_any(std::string &res, const std::string &str);
@@ -78,11 +79,13 @@ namespace gubg {
         bool pop_until(std::string &res, const char ch, bool inclusive = false);
         bool pop_until(Strange &res, const std::string &str, bool inclusive = false);
         bool pop_until(std::string &res, const std::string &str, bool inclusive = false);
+        bool pop_until(const char ch);
         bool pop_until_any(Strange &res, const std::string &str, bool inclusive = false);
         bool pop_until_any(std::string &res, const std::string &str, bool inclusive = false);
 
         bool pop_bracket(Strange &res, const std::string &oc);
         bool pop_bracket(std::string &res, const std::string &oc);
+        bool pop_bracket(const std::string &oc);
 
         //this and strange are assumed to be related and have the same end
         bool diff_to(const Strange &strange);

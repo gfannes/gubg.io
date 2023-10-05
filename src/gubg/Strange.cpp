@@ -190,6 +190,11 @@ namespace gubg {
         strange.pop_all(res);
         return true;
     }
+    bool Strange::pop_bracket(const std::string &oc)
+    {
+        Strange tmp;
+        return pop_bracket(tmp, oc);
+    }
 
     bool Strange::pop_all(Strange &res)
     {
@@ -219,6 +224,17 @@ namespace gubg {
         res.s_ = s_;
         res.l_ = ptr - s_;
         forward_(res.l_);
+        return true;
+    }
+    bool Strange::pop_to(const char ch)
+    {
+        assert(invariants_());
+        if (empty())
+            return false;
+        char *ptr = (char *)std::memchr(s_, ch, l_);
+        if (!ptr)
+            return false;
+        forward_(ptr - s_);
         return true;
     }
     // Does not pop str
@@ -352,6 +368,20 @@ namespace gubg {
             return false;
         res = s.str();
         return true;
+    }
+    bool Strange::pop_until(const char ch)
+    {
+        assert(invariants_());
+        if (empty())
+            return false;
+        for (size_t i = 0; i < l_; ++i)
+            if (s_[i] == ch)
+            {
+                forward_(i + 1);
+                return true;
+            }
+
+        return false;
     }
     bool Strange::pop_until_any(Strange &res, const std::string &str, bool inclusive)
     {
@@ -645,7 +675,7 @@ namespace gubg {
         if (l_ < nr)
             return false;
         str.resize(nr);
-        std::copy(s_, s_+nr, str.data());
+        std::copy(s_, s_ + nr, str.data());
         forward_(nr);
         return true;
     }

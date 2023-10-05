@@ -3,19 +3,25 @@
 
 #include <gubg/hr.hpp>
 
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace gubg { namespace string {
 
     namespace my {
         inline void concat(std::string &str) {}
 
+        inline std::ostringstream &oss_meyers()
+        {
+            thread_local std::ostringstream oss;
+            oss.str("");
+            return oss;
+        }
+
         template<typename Arg, typename... Rest>
         void concat(std::string &str, Arg arg, Rest... rest)
         {
-            thread_local std::ostringstream oss;
-            oss.str();
+            auto &oss = oss_meyers();
             oss << arg;
             str += oss.str();
             concat(str, rest...);
