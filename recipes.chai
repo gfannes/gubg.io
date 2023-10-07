@@ -25,6 +25,8 @@ root.book("gubg/io", fun(b){
         }
         rcp.depends_on("func")
         rcp.depends_on("nlohmann/json")
+        rcp.depends_on("httplib")
+        rcp.depends_on("cppcodec")
         rcp.depends_on("catch/func")
     })
 })
@@ -35,6 +37,16 @@ root.recipe("termcolor", fun(rcp){
 
 root.recipe("nlohmann/json", fun(rcp){
     rcp.add("extern/json/single_include", "nlohmann/*.hpp")
+})
+
+root.recipe("httplib", fun(rcp){
+    rcp.add("extern/cpp-httplib", "httplib.h")
+    rcp.library("ssl")
+    rcp.library("crypto")
+})
+
+root.recipe("cppcodec", fun(rcp){
+    rcp.add("extern/cppcodec", "cppcodec/**.hpp")
 })
 
 root.recipe("sedes", TargetType.Executable, fun(rcp){
