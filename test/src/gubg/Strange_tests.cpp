@@ -303,7 +303,25 @@ TEST_CASE("gubg::Strange creation from std::string == abc tests", "[ut][Strange]
         REQUIRE(r.pop_if('a'));
         REQUIRE(r.pop_if('b'));
         REQUIRE(r.pop_if('c'));
-        REQUIRE(!r.pop_if('e'));
+        REQUIRE(!r.pop_if('d'));
+    }
+    SECTION("starts_with")
+    {
+        SECTION("char")
+        {
+            REQUIRE(!r.starts_with('b'));
+            REQUIRE(r.starts_with('a'));
+            REQUIRE(!r.starts_with('b'));
+            REQUIRE(r.starts_with('a'));
+        }
+        SECTION("std::string")
+        {
+            REQUIRE(!r.starts_with("b"));
+            REQUIRE(!r.starts_with("abcd"));
+            REQUIRE(r.starts_with("ab"));
+            REQUIRE(r.starts_with("a"));
+            REQUIRE(r.starts_with("abc"));
+        }
     }
     SECTION("pop_if_any")
     {

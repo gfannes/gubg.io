@@ -110,6 +110,9 @@ namespace gubg {
         bool pop_back();
         bool pop_char(char &ch);
 
+        bool starts_with(const char ch) const;
+        bool starts_with(const std::string &) const;
+
         bool pop_string(std::string &, size_t nr);
         bool pop_if(const std::string &);
 

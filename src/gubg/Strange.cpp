@@ -524,6 +524,26 @@ namespace gubg {
         return true;
     }
 
+    bool Strange::starts_with(const char ch) const
+    {
+        assert(invariants_());
+        if (empty())
+            return false;
+        if (*s_ != ch)
+            return false;
+        return true;
+    }
+    bool Strange::starts_with(const std::string &str) const
+    {
+        assert(invariants_());
+        const auto s = str.size();
+        if (l_ < s)
+            return false;
+        if (std::memcmp(str.data(), s_, s))
+            return false;
+        return true;
+    }
+
     bool Strange::pop_line(Strange &line, Strange &end)
     {
         S(nullptr);
