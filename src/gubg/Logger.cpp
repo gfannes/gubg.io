@@ -1,6 +1,8 @@
-#include <fstream>
 #include <gubg/Logger.hpp>
+
+#include <fstream>
 #include <iostream>
+#include <functional>
 
 namespace gubg {
     std::ofstream devnull;
@@ -12,12 +14,12 @@ namespace gubg {
     Logger::Logger(const Config &config)
     {
         if (config.cout)
-            buffer_.ostreams_.push_back(std::cout);
+            buffer_.ostreams_.emplace_back(std::cout);
         if (!config.filename.empty())
         {
             fo_.open(config.filename);
             if (fo_.is_open())
-                buffer_.ostreams_.push_back(fo_);
+                buffer_.ostreams_.emplace_back(fo_);
         }
     }
 
