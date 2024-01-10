@@ -40,7 +40,7 @@ namespace gubg {
     int Logger::Buffer::sync()
     {
         for (const auto &ref : ostreams_)
-            ref.get() << str();
+            ref.get() << str() << std::flush;
         str("");
         return 0;
     }
