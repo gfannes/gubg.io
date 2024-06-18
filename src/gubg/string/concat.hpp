@@ -1,5 +1,5 @@
-#ifndef HEADER_gubg_string_concat_hpp_ALREAD_INCLUDED
-#define HEADER_gubg_string_concat_hpp_ALREAD_INCLUDED
+#ifndef HEADER_gubg_string_concat_hpp_ALREADY_INCLUDED
+#define HEADER_gubg_string_concat_hpp_ALREADY_INCLUDED
 
 #include <gubg/hr.hpp>
 
