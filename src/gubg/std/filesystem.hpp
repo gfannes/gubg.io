@@ -47,11 +47,15 @@ namespace std {
 #include <filesystem>
 #endif
 
-#if __clang__ && __clang_major__ <= 13
-#define gubg_inject_std_hash_for_path 1
-#endif
-#if __GNUC__ && __GNUC__ <= 11 && __GNUC_MINOR__ <= 3
-#define gubg_inject_std_hash_for_path 1
+#if __clang__
+    #if __clang_major__ <= 13
+    #define gubg_inject_std_hash_for_path 1
+    #endif
+#elif __GNUC__
+    // clang++ also defines __GNUC__, hence the #elif
+    #if __GNUC__ <= 11 && __GNUC_MINOR__ <= 3
+    #define gubg_inject_std_hash_for_path 1
+    #endif
 #endif
 
 #if gubg_inject_std_hash_for_path
