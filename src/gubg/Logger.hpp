@@ -3,10 +3,9 @@
 
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <ostream>
 #include <sstream>
-
-#include <vector>
 
 namespace gubg {
 
@@ -21,9 +20,15 @@ namespace gubg {
         Logger();
         Logger(const Config &);
 
-        int level = 0;
+        Logger(const Logger &) = delete;
+        Logger &operator=(const Logger &) = delete;
 
-        std::ostream &os(int level);
+        ~Logger();
+
+        int level = 0;
+        bool to_file(std::optional<std::string_view> filename);
+
+        std::ostream &os(std::optional<int> level);
         std::ostream &error();
         std::ostream &warning();
 
@@ -31,10 +36,12 @@ namespace gubg {
         class Buffer : public std::stringbuf
         {
         public:
-            std::vector<std::reference_wrapper<std::ostream>> ostreams_;
+            bool cout = false;
+            std::optional<std::ofstream> fo;
+
             int sync() override;
         };
-        std::ofstream fo_;
+
         Buffer buffer_;
         std::ostream ostream_{&buffer_};
     };

@@ -2,30 +2,69 @@
 
 #include <fstream>
 #include <iostream>
-#include <functional>
+#include <streambuf>
+
+// Implementation of `devnull`
+namespace {
+    class NullBuffer : public std::streambuf
+    {
+    protected:
+        int_type overflow(int_type ch) override
+        {
+            return traits_type::not_eof(ch);
+        }
+        std::streamsize xsputn(const char *, std::streamsize n) override
+        {
+            return n;
+        }
+    };
+
+    NullBuffer null_buffer;
+    std::ostream devnull(&null_buffer);
+} // namespace
 
 namespace gubg {
-    std::ofstream devnull;
-
     Logger::Logger()
         : Logger(Config{})
     {
     }
     Logger::Logger(const Config &config)
     {
-        if (config.cout)
-            buffer_.ostreams_.emplace_back(std::cout);
+        buffer_.cout = config.cout;
         if (!config.filename.empty())
-        {
-            fo_.open(config.filename);
-            if (fo_.is_open())
-                buffer_.ostreams_.emplace_back(fo_);
-        }
+            to_file(config.filename);
     }
 
-    std::ostream &Logger::os(int level)
+    Logger::~Logger()
     {
-        return (this->level >= level ? ostream_ : devnull);
+        ostream_.flush();
+    }
+
+    bool Logger::to_file(std::optional<std::string_view> filename)
+    {
+        ostream_.flush();
+
+        if (buffer_.fo)
+            buffer_.fo.reset();
+
+        if (filename)
+        {
+            buffer_.fo.emplace();
+            buffer_.fo->open(std::string(*filename));
+            if (!buffer_.fo->is_open())
+            {
+                buffer_.fo.reset();
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    std::ostream &Logger::os(std::optional<int> level)
+    {
+        const bool do_log = this->level >= level.value_or(this->level);
+        return do_log ? ostream_ : devnull;
     }
     std::ostream &Logger::error()
     {
@@ -39,8 +78,13 @@ namespace gubg {
     // Privates
     int Logger::Buffer::sync()
     {
-        for (const auto &ref : ostreams_)
-            ref.get() << str() << std::flush;
+        if (cout || fo)
+        {
+            if (cout)
+                std::cout << str() << std::flush;
+            if (fo)
+                *fo << str() << std::flush;
+        }
         str("");
         return 0;
     }
